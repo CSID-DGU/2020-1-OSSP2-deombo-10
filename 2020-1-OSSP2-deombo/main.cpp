@@ -3,6 +3,8 @@
 #include <string>
 #include <sstream>
 
+Mix_Music *songName;//테스트용
+Mix_Chunk *soundEffect;//테스트를 위한 soundEffect
 SDL_Surface *screen;//화면
 SDL_Surface *background;//배경화면
 SDL_Surface *background2;
@@ -984,6 +986,8 @@ bool init()
 {//고칠 것: if문 추가해서 init했을 때 실패하면 false반환하게끔
   SDL_Init(SDL_INIT_EVERYTHING);//SDL initialize
   TTF_Init();
+  Mix_OpenAudio(22050,MIX_DEFAULT_FORMAT,2,4096);//오디오를 스테레오로 하여서 연다
+  
   screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SDL_SWSURFACE | SDL_DOUBLEBUF |SDL_RESIZABLE);
   //SDL_RESIZABLE 추가하여 윈도우 크기 조절을 가능하게 함
   SDL_WM_SetCaption("MSG", NULL);
@@ -1016,6 +1020,11 @@ bool load_files()
   font2 = TTF_OpenFont("assets/Starjout.ttf", 84);//제목 폰트
   font3 = TTF_OpenFont("assets/Starjout.ttf",24);
   sapoint = load_image("assets/sapoint1.png");
+
+  songName=Mix_LoadMUS("assets/Audio/514241__tyops__dramatic-urban-beat.mp3");
+  soundEffect=Mix_LoadWAV("assets/Audio/341249__sharesynth__select02.wav");
+
+ 
   for(int i = 0 ; i < 4; i++)
   {
     string str = "assets/E_";
@@ -1057,7 +1066,11 @@ bool SDL_free()
     SDL_FreeSurface(enemy[i]);
   for(int i = 0; i < 11; i++)
     SDL_FreeSurface(boom[i]);
-
+  
+  Mix_FreeMusic(songName);
+  Mix_FreeChunk(soundEffect);
+  Mix_CloseAudio();
+  
   SDL_Quit();//init한 SDL 변수들 닫아주는겅 일걸,위의 freesurface랑 차이 모름
 
   return true;
@@ -1068,6 +1081,8 @@ void menu()   // 처음 시작 메뉴
   textColor = {204, 255, 204};  // 안내 폰트 색깔
   textColor2 = {255, 255, 255}; // 제목 폰트 색깔
 	bool quit = false;
+  Mix_PlayMusic(songName,-1);
+  Mix_VolumeMusic(128);
 	while (quit == false)
 	{
 		if (SDL_PollEvent(&event))
@@ -1083,6 +1098,7 @@ void menu()   // 처음 시작 메뉴
 
 			if (event.type == SDL_KEYDOWN)
 			{
+        Mix_PlayChannel(-1,soundEffect,0);
 				switch (event.key.keysym.sym)
 				{
 				case SDLK_SPACE:  // space 키가 눌리면 게임 배경 가져오고 게임 시작
@@ -1310,6 +1326,7 @@ void menu3()   // 비행기 고르는 메뉴
 {
   int selecty=210;
 	bool quit = false;
+  Mix_HaltMusic();
 	while (quit == false)
 	{
 		if (SDL_PollEvent(&event))
