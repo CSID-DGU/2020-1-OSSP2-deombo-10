@@ -3,8 +3,15 @@
 #include <string>
 #include <sstream>
 
-Mix_Music *songName;//테스트용
-Mix_Chunk *soundEffect;//테스트를 위한 soundEffect
+Mix_Music *menu_music;//메뉴
+Mix_Music *stage_music;//스테이지 음악
+
+Mix_Chunk *game_over_sound;//게임오버 사운드
+Mix_Chunk *selection_sound;//메뉴 선택음
+Mix_Chunk *bullet_sound;//총 사운드
+Mix_Chunk *explosion_sound1;//플레이어 폭팔음
+Mix_Chunk *explosion_sound2;//적 폭팔음
+
 SDL_Surface *screen;//화면
 SDL_Surface *background;//배경화면
 SDL_Surface *background2;
@@ -59,7 +66,7 @@ int mode;
 
 void sprite_surface(SDL_Surface* source, SDL_Rect tmp, SDL_Surface* destination, int w, int h, int step,int mode);
 bool init();//변수들 초기화 함수
-bool load_files();//이미지, 폰트 초기화 함수
+bool load_files();//이미지, 폰트,오디오 초기화 함수
 bool SDL_free();// sdl 변수들 free 함수
 void menu();
 void menu2();
@@ -77,6 +84,8 @@ int main(){
  //_special special_one;
   init();//초기화 함수
   load_files();//이미지,폰트,bgm 로드하는 함수
+  Mix_VolumeMusic(128);
+  Mix_PlayMusic(menu_music,-1);
   menu();
   if(EXIT == 1)
   {
@@ -125,8 +134,11 @@ int main(){
   Item I;
   Item2 I2;
   Item I3;
-
+  if(Mix_PlayingMusic())
+    Mix_HaltMusic();
+  Mix_PlayMusic(stage_music,-1);//스테이지 음악 실행
   while(true){
+ 
     if(flag_sa < 10) flag_sa++;
     if(flag_sa2 <10) flag_sa2++;
     vector<special> t;
@@ -815,7 +827,7 @@ int main(){
       {
         if((*B_it).b.count <  11)
         {
-          (*B_it).boom_apply_surface(boom,screen,NULL);
+          (*B_it).boom_apply_surface(boom,screen,NULL,explosion_sound2);
           B_tmp.push_back(*B_it);
         }
         else
@@ -1020,10 +1032,15 @@ bool load_files()
   font2 = TTF_OpenFont("assets/Starjout.ttf", 84);//제목 폰트
   font3 = TTF_OpenFont("assets/Starjout.ttf",24);
   sapoint = load_image("assets/sapoint1.png");
-
-  songName=Mix_LoadMUS("assets/Audio/514241__tyops__dramatic-urban-beat.mp3");
-  soundEffect=Mix_LoadWAV("assets/Audio/341249__sharesynth__select02.wav");
-
+  //오디오 로드
+  menu_music=Mix_LoadMUS("assets/Audio/menu_music.wav");
+  stage_music=Mix_LoadMUS("assets/Audio/battle_music.wav");
+  
+  game_over_sound=Mix_LoadWAV("assets/Audio/gameover.wav");
+  selection_sound=Mix_LoadWAV("assets/Audio/selection.wav");
+  bullet_sound=Mix_LoadWAV("assets/Audio/laser_shot.wav");
+  explosion_sound1=Mix_LoadWAV("assets/Audio/explosion1.aiff");
+  explosion_sound2=Mix_LoadWAV("assets/Audio/explosion2.wav");
  
   for(int i = 0 ; i < 4; i++)
   {
@@ -1053,6 +1070,9 @@ bool load_files()
   SDL_SetColorKey(bullet_basic, SDL_SRCCOLORKEY, SDL_MapRGB(bullet_basic->format,255,255,255));
   SDL_SetColorKey(arrow, SDL_SRCCOLORKEY,SDL_MapRGB(arrow->format,0,0,0));
   SDL_SetColorKey(sapoint, SDL_SRCCOLORKEY,SDL_MapRGB(sapoint->format,255,255,255));
+
+  Mix_VolumeChunk(explosion_sound2,50);
+
   return true;
 }
 
@@ -1067,8 +1087,14 @@ bool SDL_free()
   for(int i = 0; i < 11; i++)
     SDL_FreeSurface(boom[i]);
   
-  Mix_FreeMusic(songName);
-  Mix_FreeChunk(soundEffect);
+  Mix_FreeMusic(menu_music);
+  Mix_FreeMusic(stage_music);
+  Mix_FreeChunk(game_over_sound);
+  Mix_FreeChunk(selection_sound);
+  Mix_FreeChunk(explosion_sound1);
+  Mix_FreeChunk(explosion_sound2);
+  Mix_FreeChunk(bullet_sound);
+
   Mix_CloseAudio();
   
   SDL_Quit();//init한 SDL 변수들 닫아주는겅 일걸,위의 freesurface랑 차이 모름
@@ -1081,8 +1107,7 @@ void menu()   // 처음 시작 메뉴
   textColor = {204, 255, 204};  // 안내 폰트 색깔
   textColor2 = {255, 255, 255}; // 제목 폰트 색깔
 	bool quit = false;
-  Mix_PlayMusic(songName,-1);
-  Mix_VolumeMusic(128);
+
 	while (quit == false)
 	{
 		if (SDL_PollEvent(&event))
@@ -1098,7 +1123,7 @@ void menu()   // 처음 시작 메뉴
 
 			if (event.type == SDL_KEYDOWN)
 			{
-        Mix_PlayChannel(-1,soundEffect,0);
+        Mix_PlayChannel(-1,selection_sound,0);
 				switch (event.key.keysym.sym)
 				{
 				case SDLK_SPACE:  // space 키가 눌리면 게임 배경 가져오고 게임 시작
@@ -1169,6 +1194,7 @@ void menu2()   // 비행기 고르는 메뉴
 
 			if (event.type == SDL_KEYDOWN)
 			{
+        Mix_PlayChannel(-1,selection_sound,0);
 				switch (event.key.keysym.sym)
 				{
 
@@ -1326,7 +1352,7 @@ void menu3()   // 비행기 고르는 메뉴
 {
   int selecty=210;
 	bool quit = false;
-  Mix_HaltMusic();
+  
 	while (quit == false)
 	{
 		if (SDL_PollEvent(&event))
@@ -1346,6 +1372,7 @@ void menu3()   // 비행기 고르는 메뉴
 
 			if (event.type == SDL_KEYDOWN)
 			{
+        Mix_PlayChannel(-1,selection_sound,0);
 				switch (event.key.keysym.sym)
 				{
 
@@ -1398,6 +1425,8 @@ void menu3()   // 비행기 고르는 메뉴
 
 void game_over()  // 사용자 죽었을 시 나타나는 게임오버 창
 {
+  if(Mix_PlayingMusic())
+    Mix_HaltMusic();
   font = TTF_OpenFont("assets/Terminus.ttf", 24);//작은 안내문 폰트
 	bool quit = false;
   background = load_image("assets/background.png");
@@ -1407,14 +1436,15 @@ void game_over()  // 사용자 죽었을 시 나타나는 게임오버 창
   apply_surface((640 - message->w) / 2, 280, message, screen, NULL);
   apply_surface((640 - message2->w) / 2, 100, message2, screen, NULL);
   SDL_Flip(screen);
-
+  Mix_PlayChannel(-1,game_over_sound,0);
 	while (quit == false)
 	{
 		if (SDL_PollEvent(&event))
 		{
-
+      
 			if (event.type == SDL_KEYDOWN)
 			{
+        Mix_PlayChannel(-1,selection_sound,0);
 				switch (event.key.keysym.sym)
 				{
 				case SDLK_ESCAPE://esc 키가 눌리면 종료

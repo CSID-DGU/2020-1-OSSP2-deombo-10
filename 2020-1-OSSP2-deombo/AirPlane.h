@@ -19,8 +19,9 @@ public:
   {
     b.SDL_b = boss;
   }
-  void boom_apply_surface(SDL_Surface* boom[], SDL_Surface* destination, SDL_Rect* clip )
+  void boom_apply_surface(SDL_Surface* boom[], SDL_Surface* destination, SDL_Rect* clip,Mix_Chunk *sound)
   {//적 비행기가 격추됬을 때의 좌표에 폭발 스프라이트 이미지 출력
+      Mix_PlayChannel(-1,sound,0);//폭팔 사운드 출력
     	SDL_BlitSurface( boom[b.count++], clip, destination, &(b.SDL_b));
   };
 
