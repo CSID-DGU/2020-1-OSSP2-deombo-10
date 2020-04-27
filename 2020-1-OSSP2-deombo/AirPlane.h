@@ -176,6 +176,7 @@ public:
 class AirPlane
 {
 private:
+  Mix_Chunk* shooting_sound;
   SDL_Rect offset;
   int pos_x,pos_y;// 비행기 x,y 좌표
 
