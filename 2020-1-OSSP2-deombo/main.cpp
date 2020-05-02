@@ -486,16 +486,16 @@ int main(){
            }
         }
     }
-    if(keystates[SDLK_KP8])
+    if(keystates[SDLK_UP])
         A.control_plane(0,-4);
 
-      if(keystates[SDLK_KP5])
+      if(keystates[SDLK_DOWN])
         A.control_plane(0, 4);
 
-      if(keystates[SDLK_KP4])
+      if(keystates[SDLK_LEFT])
         A.control_plane(-4, 0);
 
-      if(keystates[SDLK_KP6])
+      if(keystates[SDLK_RIGHT])
         A.control_plane(4, 0);
       if(mode == 2 && dead2 != true)
       {
@@ -1290,7 +1290,7 @@ void menu2()   // 비행기 고르는 메뉴
         }
 
 
-        case SDLK_KP4:  // space 키가 눌리면 게임 배경 가져오고 게임 시작
+        case SDLK_LEFT:  // space 키가 눌리면 게임 배경 가져오고 게임 시작
         {
           if (selectx == 25)
           {}
@@ -1300,7 +1300,7 @@ void menu2()   // 비행기 고르는 메뉴
           }
           break;
         }
-        case SDLK_KP6:  // space 키가 눌리면 게임 배경 가져오고 게임 시작
+        case SDLK_RIGHT:  // space 키가 눌리면 게임 배경 가져오고 게임 시작
         {
           if(selectx == 525)
           {}
@@ -1386,7 +1386,7 @@ void menu3()   // 비행기 고르는 메뉴
 
           break;
         }
-        case SDLK_KP8:  // space 키가 눌리면 게임 배경 가져오고 게임 시작
+        case SDLK_UP:  // space 키가 눌리면 게임 배경 가져오고 게임 시작
         {
           if (selecty == 210)
           {}
@@ -1396,7 +1396,7 @@ void menu3()   // 비행기 고르는 메뉴
           }
           break;
         }
-        case SDLK_KP5:  // space 키가 눌리면 게임 배경 가져오고 게임 시작
+        case SDLK_DOWN:  // space 키가 눌리면 게임 배경 가져오고 게임 시작
         {
           if(selecty == 300)
           {}
