@@ -102,10 +102,16 @@ Item3::~Item3()
     SDL_FreeSurface(item);
 }
 
-AirPlane::AirPlane()
+AirPlane::AirPlane(Mix_Chunk* shooting,Mix_Chunk* get,Mix_Chunk* hit)
 {
   pos_x = SCREEN_WIDTH / 2;//처음 시작 위치 지정
   pos_y = SCREEN_HEIGHT / 2;//처음 시작 위치 지정
+  
+  //플레이어 사운드 설정
+  shooting_sound=shooting;
+  get_sound=get;
+  hit_sound=hit;
+
 
   life = 3;
   SA_count = 3;
@@ -118,6 +124,7 @@ AirPlane::~AirPlane()
 
 void AirPlane::shooting(_bullets &player_bullets)
 {
+  Mix_PlayChannel(-1,shooting_sound,0);//총알 발사음 출력
   player_bullets.add_blt( 0, -10,pos_x,pos_y - 15);
 }
 
@@ -209,7 +216,10 @@ bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C)
   }
   A.blt = tmp;
 
-  if(flag ==true) return flag;
+  if(flag ==true) {
+    Mix_PlayChannel(-1,hit_sound,0);//피격음 출력
+    return flag;
+  }
 
   for(iter = B.blt.begin(); iter != B.blt.end(); iter++)
   {
@@ -223,7 +233,10 @@ bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C)
   }
   B.blt = tmp2;
 
-  if(flag == true) return flag;
+  if(flag == true) {
+    Mix_PlayChannel(-1,hit_sound,0);//피격음 출력
+    return flag;
+  }
 
   for(iter = C.blt.begin(); iter != C.blt.end(); iter++)
   {
@@ -236,6 +249,10 @@ bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C)
     }
   }
   C.blt = tmp3;
+  if(flag == true) {
+    Mix_PlayChannel(-1,hit_sound,0);//피격음 출력
+    return flag;
+  }
   return flag;
 }
 
@@ -254,7 +271,8 @@ bool AirPlane::Got_item(vector<items> I)
       break;
     }
   }
-
+  if(flag)
+    Mix_PlayChannel(-1,get_sound,0);//아이템 획득 음 출력
   return flag;
 }
 

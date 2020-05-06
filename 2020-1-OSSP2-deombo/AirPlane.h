@@ -127,6 +127,7 @@ public:
 private:
     int pos_x1;
     SDL_Surface *sa1;
+    
 };
 
 
@@ -176,12 +177,16 @@ public:
 class AirPlane
 {
 private:
-  Mix_Chunk* shooting_sound;
+
+  Mix_Chunk* shooting_sound;//총알 발사 사운드
+  Mix_Chunk* get_sound;//아이템 획득 사운드
+  Mix_Chunk* hit_sound;//피격음
+  
   SDL_Rect offset;
   int pos_x,pos_y;// 비행기 x,y 좌표
 
 public:
-  AirPlane();
+  AirPlane(Mix_Chunk* shooting,Mix_Chunk* get,Mix_Chunk* hit);//생성자를 통해 클래스의 사운드 청크를 지정한다.
   ~AirPlane();
   bool Got_shot(_bullets &A,_bullets &B,_bullets &C);
   bool Got_item(vector<items> I);

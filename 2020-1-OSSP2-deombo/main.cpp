@@ -8,9 +8,12 @@ Mix_Music *stage_music;//스테이지 음악
 
 Mix_Chunk *game_over_sound;//게임오버 사운드
 Mix_Chunk *selection_sound;//메뉴 선택음
-Mix_Chunk *bullet_sound;//총 사운드
-Mix_Chunk *explosion_sound1;//플레이어 폭팔음
-Mix_Chunk *explosion_sound2;//적 폭팔음
+Mix_Chunk *bullet_sound;//총알 발사음
+Mix_Chunk *hit_sound;//플레이어 피격음
+Mix_Chunk *explosion_sound1;//적 폭팔음
+Mix_Chunk *explosion_sound2;//보스 폭팔음
+Mix_Chunk *special_sound;//특수기 효과음
+Mix_Chunk *item_sound;//아이템 획득음
 
 SDL_Surface *screen;//화면
 SDL_Surface *background;//배경화면
@@ -125,9 +128,9 @@ int main(){
   vector<Enemy_standard_2> E2;// 2nd standard enemy
   vector<special> sa_1;
 
-  AirPlane A;//사용자 비행기
-  AirPlane A2;
-  AirPlane A3;
+  AirPlane A(bullet_sound,item_sound,hit_sound);//사용자 비행기
+  AirPlane A2(bullet_sound,item_sound,hit_sound);
+  AirPlane A3(bullet_sound,item_sound,hit_sound);
   Mini_Boss tmp3;
   Boss tmp4;
   Item I;
@@ -378,7 +381,9 @@ int main(){
 
     if(keystates[SDLK_p] && flag_sa == 10 && dead != true)    /// SHOULD HAVE FLAG TO AVOID SPECIAL ABILITY IS USED NUMEROUS TIMES BY PRESSING ONCE.
     {
+
         if(A.SA_count >0){
+           Mix_PlayChannel(-1,special_sound,0);
            A.SA_count --; //// Put image for SA
            flag_sa = 0;
            switch (SA){
@@ -507,7 +512,9 @@ int main(){
           }
           if(mode == 2 && keystates[SDLK_g])    /// SHOULD HAVE FLAG TO AVOID SPECIAL ABILITY IS USED NUMEROUS TIMES BY PRESSING ONCE.
           {
+             
               if(A2.SA_count >0 && flag_sa2 == 10){
+                Mix_PlayChannel(-1,special_sound,0);
                  A2.SA_count --; //// Put image for SA
                  flag_sa2= 0;
                  switch (SA2){
@@ -630,7 +637,9 @@ int main(){
 
           if(mode ==2&&keystates[SDLK_g])    /// SHOULD HAVE FLAG TO AVOID SPECIAL ABILITY IS USED NUMEROUS TIMES BY PRESSING ONCE.
           {
+             
               if(A2.SA_count >0&& flag_sa2==10){
+                 Mix_PlayChannel(-1,special_sound,0);
                  A2.SA_count --; //// Put image for SA
                  switch (SA2){
                  case 0:
@@ -826,7 +835,7 @@ int main(){
       {
         if((*B_it).b.count <  11)
         {
-          (*B_it).boom_apply_surface(boom,screen,NULL,explosion_sound2);
+          (*B_it).boom_apply_surface(boom,screen,NULL,explosion_sound1);
           B_tmp.push_back(*B_it);
         }
         else
@@ -1032,15 +1041,18 @@ bool load_files()
   font3 = TTF_OpenFont("assets/Starjout.ttf",24);
   sapoint = load_image("assets/sapoint1.png");
   //오디오 로드
-  menu_music=Mix_LoadMUS("assets/Audio/menu_music.wav");
+  menu_music=Mix_LoadMUS("assets/Audio/menu_music.mp3");
   stage_music=Mix_LoadMUS("assets/Audio/battle_music.wav");
   
   game_over_sound=Mix_LoadWAV("assets/Audio/gameover.wav");
   selection_sound=Mix_LoadWAV("assets/Audio/selection.wav");
   bullet_sound=Mix_LoadWAV("assets/Audio/laser_shot.wav");
+  hit_sound=Mix_LoadWAV("assets/Audio/hit.wav");
   explosion_sound1=Mix_LoadWAV("assets/Audio/explosion1.aiff");
   explosion_sound2=Mix_LoadWAV("assets/Audio/explosion2.wav");
- 
+  special_sound=Mix_LoadWAV("assets/Audio/special.wav");
+  item_sound=Mix_LoadWAV("assets/Audio/get_item.wav");
+
   for(int i = 0 ; i < 4; i++)
   {
     string str = "assets/E_";
@@ -1070,8 +1082,7 @@ bool load_files()
   SDL_SetColorKey(arrow, SDL_SRCCOLORKEY,SDL_MapRGB(arrow->format,0,0,0));
   SDL_SetColorKey(sapoint, SDL_SRCCOLORKEY,SDL_MapRGB(sapoint->format,255,255,255));
 
-  Mix_VolumeChunk(explosion_sound2,50);
-
+  
   return true;
 }
 
@@ -1090,10 +1101,12 @@ bool SDL_free()
   Mix_FreeMusic(stage_music);
   Mix_FreeChunk(game_over_sound);
   Mix_FreeChunk(selection_sound);
+  Mix_FreeChunk(hit_sound);
   Mix_FreeChunk(explosion_sound1);
-  Mix_FreeChunk(explosion_sound2);
   Mix_FreeChunk(bullet_sound);
-
+  Mix_FreeChunk(explosion_sound2);
+  Mix_FreeChunk(special_sound);
+  Mix_FreeChunk(item_sound);
   Mix_CloseAudio();
   
   SDL_Quit();//init한 SDL 변수들 닫아주는겅 일걸,위의 freesurface랑 차이 모름
@@ -1148,7 +1161,7 @@ void menu()   // 처음 시작 메뉴
 	}
 }
 
-void menu2()   // 비행기 고르는 메뉴
+void menu2()   // 싱글 플레이인지 멀티 플레이인지 고르는 메뉴
 {
   int selectx = 25;
   int selectx2 = 525;
