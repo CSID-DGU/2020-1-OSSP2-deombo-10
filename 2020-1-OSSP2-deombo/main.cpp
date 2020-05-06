@@ -84,8 +84,7 @@ int main(){
  //_special special_one;
   init();//초기화 함수
   load_files();//이미지,폰트,bgm 로드하는 함수
-  Mix_VolumeMusic(128);
-  Mix_PlayMusic(menu_music,-1);
+ 
   menu();
   if(EXIT == 1)
   {
@@ -1107,7 +1106,8 @@ void menu()   // 처음 시작 메뉴
   textColor = {204, 255, 204};  // 안내 폰트 색깔
   textColor2 = {255, 255, 255}; // 제목 폰트 색깔
 	bool quit = false;
-
+  Mix_PlayMusic(menu_music,-1);
+  Mix_VolumeMusic(128);
 	while (quit == false)
 	{
 		if (SDL_PollEvent(&event))
@@ -1119,7 +1119,7 @@ void menu()   // 처음 시작 메뉴
       apply_surface((640 - message->w) / 2, 280, message, screen, NULL);
       apply_surface((640 - message2->w) / 2, 100, message2, screen, NULL);
 			SDL_Flip(screen);
-
+     
 
 			if (event.type == SDL_KEYDOWN)
 			{

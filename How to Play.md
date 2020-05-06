@@ -1,3 +1,5 @@
+how to install
+
 1. Press "space bar" at first title menu to move on, esc to quit
 
 2. Use 8(up), 4(left), 5(down), 6(right) to control and "o" key to select (Select mode)
