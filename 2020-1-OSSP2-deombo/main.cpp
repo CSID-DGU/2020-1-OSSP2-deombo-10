@@ -120,6 +120,7 @@ int main(){
   vector<Enemy_standard>::iterator it;
   vector<BOOM>::iterator B_it;
   vector<special>::iterator it_sa;
+  vector<SDL_Rect>::iterator CB_it;
 
   vector<BOOM> Boss_B;//보스 폭발
   vector<BOOM> Boss_B4;//보스 폭발
@@ -127,6 +128,7 @@ int main(){
   vector<Enemy_standard> E;//기본1형 비행기
   vector<Enemy_standard_2> E2;// 2nd standard enemy
   vector<special> sa_1;
+  list<SDL_Rect> CB;//충돌 판정을 위한 리스트
 
   AirPlane A(bullet_sound,item_sound,hit_sound);//사용자 비행기
   AirPlane A2(bullet_sound,item_sound,hit_sound);
@@ -193,13 +195,13 @@ int main(){
       mini_bullets.control_bullet();
 
 
-    if(dead != true && A.Got_shot(enemy_bullets,boss_bullets,mini_bullets) && A.invisible_mode == 0)      //사용자 피격 판정
+    if(dead != true &&(A.Got_shot(enemy_bullets,boss_bullets,mini_bullets)||A.detect_collision(CB))&& A.invisible_mode == 0)      //사용자 피격 판정
     {
       A.life--;
       A.invisible_mode = 1;
     }
 
-    if(dead2 != true && mode == 2 && A2.Got_shot(enemy_bullets,boss_bullets,mini_bullets) && A2.invisible_mode == 0)      //사용자 피격 판정
+    if(dead2 != true && mode == 2 &&(A2.Got_shot(enemy_bullets,boss_bullets,mini_bullets)||A2.detect_collision(CB) )&& A2.invisible_mode == 0)      //사용자 피격 판정
     {
       A2.life--;
       A2.invisible_mode = 1;
@@ -336,26 +338,29 @@ int main(){
     }
 
     keystates = SDL_GetKeyState(NULL);
-
+    if(!CB.empty())
+      CB.clear();
+  
     if(keystates[SDLK_ESCAPE])
       break;
     if(E.size() > 0)//적 비행기 이동 및 발사
     {
       for(it = E.begin(); it != E.end(); it++)
       {
-        (*it).control_plane(enemy_bullets);
+        CB.push_back((*it).control_plane(enemy_bullets));
+        //충돌 판정을 위해 offset을 list에 저장
       }
     }
     if(E2.size() >0){
       for(it2 = E2.begin(); it2 != E2.end(); it2++)
       {
-        (*it2).control_plane(enemy_bullets);
+         CB.push_back((*it2).control_plane(enemy_bullets));
       }
     }
 
-    if(tmp3.amount == 1 && score >= 500)tmp3.control_plane(mini_bullets); // have to add the condition when the mini boss appear
+    if(tmp3.amount == 1 && score >= 500)CB.push_back(tmp3.control_plane(mini_bullets)); // have to add the condition when the mini boss appear
 
-    if(tmp4.amount == 1 && score >= 5000)tmp4.control_plane(boss_bullets); // have to add the condition when the mini boss appear
+    if(tmp4.amount == 1 && score >= 5000)CB.push_back(tmp4.control_plane(boss_bullets)); // have to add the condition when the mini boss appear
 
     if(sa_1.size() >0)
     {
@@ -621,7 +626,7 @@ int main(){
                  }
               }
           }
-
+          
           if(keystates[SDLK_w])
             A2.control_plane(0,-0);
 

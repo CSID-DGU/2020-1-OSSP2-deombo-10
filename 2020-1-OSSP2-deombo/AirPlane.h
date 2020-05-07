@@ -190,6 +190,7 @@ public:
   ~AirPlane();
   bool Got_shot(_bullets &A,_bullets &B,_bullets &C);
   bool Got_item(vector<items> I);
+  bool detect_collision(list<SDL_Rect> C);
   void shooting(_bullets &A);
   void increaseLife();
   void increaseSA();
@@ -224,7 +225,7 @@ public:
   bool eliminate ( int y);
   void shooting(_bullets &A);
   void enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip);
-  void control_plane(_bullets &A);
+  SDL_Rect  control_plane(_bullets &A);
   SDL_Rect Get_plane();
 };
 
@@ -246,7 +247,7 @@ private:
     bool eliminate ( int y);
     void shooting(_bullets &A);
     void enemy_apply_surface(SDL_Surface* source[], SDL_Surface* destination, SDL_Rect* clip);
-    void control_plane(_bullets &enemey);
+    SDL_Rect  control_plane(_bullets &enemey);
     SDL_Rect Get_plane();
 };
 
@@ -267,7 +268,7 @@ public:
   bool Got_shot(_bullets &A, int &x);
   void shooting(_bullets &A);
   void enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip);
-  void control_plane(_bullets &A);
+  SDL_Rect  control_plane(_bullets &A);
   void loss_life(int& score);
   SDL_Rect Get_plane();
 
@@ -291,7 +292,7 @@ public:
   bool Got_shot(_bullets &A,  int &x);
   void shooting(_bullets &A);
   void enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip);
-  void control_plane(_bullets &A);
+  SDL_Rect  control_plane(_bullets &A);
   void loss_life(int& score);
   SDL_Rect Get_plane();
   int amount = 1;

@@ -2,11 +2,8 @@
 
 bool intersects(SDL_Rect a, SDL_Rect b)
 {
-	if((a.x + a.w < b.x || a.y+ a.h < b.y) || (b.x+b.w < a.x || b.y+b.h < a.y))
+	if(a.x + a.w <= b.x || a.y+ a.h <= b.y || b.x+b.w <= a.x || b.y+b.h <= a.y)
 		return false;
-	/*std::cout << "x " << a.x << "/y " << a.y << "/w " << a.w << "/h " << a.h << std::endl;
-	std::cout << "x " << b.x << "/y " << b.y << "/w " << b.w << "/h " << b.h << std::endl;
-	std::cout << temp << std::endl;*/
 	return true;
 }
 

@@ -102,14 +102,14 @@ Item3::~Item3()
     SDL_FreeSurface(item);
 }
 
-AirPlane::AirPlane(Mix_Chunk* shooting,Mix_Chunk* get,Mix_Chunk* hit)
+AirPlane::AirPlane(Mix_Chunk* shooting,Mix_Chunk* got,Mix_Chunk* hit)
 {
   pos_x = SCREEN_WIDTH / 2;//처음 시작 위치 지정
   pos_y = SCREEN_HEIGHT / 2;//처음 시작 위치 지정
   
   //플레이어 사운드 설정
   shooting_sound=shooting;
-  get_sound=get;
+  get_sound=got;
   hit_sound=hit;
 
 
@@ -211,16 +211,11 @@ bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C)
       tmp.push_back(*iter);
     else//맞았을때
     {
+      Mix_PlayChannel(-1,hit_sound,0);//피격음 출력
       flag = true;
     }
   }
   A.blt = tmp;
-
-  if(flag ==true) {
-    Mix_PlayChannel(-1,hit_sound,0);//피격음 출력
-    return flag;
-  }
-
   for(iter = B.blt.begin(); iter != B.blt.end(); iter++)
   {
     if((pos_x + 18 < (*iter).bullet_pos.x || pos_y + 20 < (*iter).bullet_pos.y + 5) ||
@@ -228,15 +223,12 @@ bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C)
       tmp2.push_back(*iter);
     else//맞았을때
     {
+      Mix_PlayChannel(-1,hit_sound,0);//피격음 출력
       flag = true;
     }
   }
   B.blt = tmp2;
 
-  if(flag == true) {
-    Mix_PlayChannel(-1,hit_sound,0);//피격음 출력
-    return flag;
-  }
 
   for(iter = C.blt.begin(); iter != C.blt.end(); iter++)
   {
@@ -245,14 +237,16 @@ bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C)
       tmp3.push_back(*iter);
     else//맞았을때
     {
+      Mix_PlayChannel(-1,hit_sound,0);//피격음 출력
       flag = true;
     }
   }
   C.blt = tmp3;
+  /*
   if(flag == true) {
     Mix_PlayChannel(-1,hit_sound,0);//피격음 출력
     return flag;
-  }
+  }*/
   return flag;
 }
 
@@ -275,7 +269,23 @@ bool AirPlane::Got_item(vector<items> I)
     Mix_PlayChannel(-1,get_sound,0);//아이템 획득 음 출력
   return flag;
 }
+bool AirPlane::detect_collision(list<SDL_Rect> C)
+{
+  list<SDL_Rect>::iterator iter;
+  bool flag = false;
 
+  for(iter = C.begin(); iter != C.end();iter++)
+  {
+    if(intersects((*iter),this->offset))//충돌시
+    {
+      flag = true;
+      Mix_PlayChannel(-1,hit_sound,0);//피격음 출력
+      break;
+    }
+  
+  }
+  return flag;
+}
 void AirPlane::increaseLife()
 {
   life++;
@@ -317,6 +327,8 @@ Enemy_standard_2::Enemy_standard_2(int mode)
   pos_y = y;//처음 시작 위치 지정
   life = 1;
   count = 0;
+  offset.w =ENEMY_WIDTH;
+  offset.h=ENEMY_HEIGHT;
 }
 
 Enemy_standard_2::~Enemy_standard_2()
@@ -358,13 +370,13 @@ void Enemy_standard_2::shooting(_bullets &A)
 
 void Enemy_standard_2::enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip )
 {
-  SDL_Rect offset;
+  
   offset.x = pos_x;
   offset.y = pos_y;
   SDL_BlitSurface(enemy, clip, destination, &offset );
 }
 
-void Enemy_standard_2::control_plane(_bullets &A)
+SDL_Rect Enemy_standard_2::control_plane(_bullets &A)
 {
   if(first_exe==true){
     pos = rand()%75+75;
@@ -386,6 +398,7 @@ void Enemy_standard_2::control_plane(_bullets &A)
       }
   }
   count++;
+  return this->offset;
 }
 
 SDL_Rect Enemy_standard_2::Get_plane()
@@ -407,6 +420,9 @@ Enemy_standard::Enemy_standard(int mode)
     pos_x = y;
   pos_y = -ENEMY_HEIGHT;//처음 시작 위치 지정
   life = 1;
+
+  offset.w =ENEMY_WIDTH;
+  offset.h=ENEMY_HEIGHT;
 }
 
 Enemy_standard::~Enemy_standard()
@@ -429,6 +445,7 @@ bool Enemy_standard::Got_shot(_bullets &A)
     {
       flag = true;
     }
+     
   }
 
   A.blt = tmp;
@@ -449,13 +466,13 @@ void Enemy_standard::shooting(_bullets &A)
 void Enemy_standard::enemy_apply_surface(SDL_Surface* source[], SDL_Surface* destination, SDL_Rect* clip )
 {
   int i = count % 4;
-  SDL_Rect offset;
+  //SDL_Rect offset;
   offset.x = pos_x;
   offset.y = pos_y;
   SDL_BlitSurface(source[i], clip, destination, &offset );
 }
 
-void Enemy_standard::control_plane(_bullets &enemy)
+SDL_Rect Enemy_standard::control_plane(_bullets &enemy)
 {//y= 3일 때 속도가 적당.
   if(first_exe == true){
     pos = rand()%75+75;
@@ -474,6 +491,7 @@ void Enemy_standard::control_plane(_bullets &enemy)
       }
   }
   ++count;
+  return this->offset;
 }
 
 SDL_Rect Enemy_standard::Get_plane()
@@ -491,6 +509,8 @@ Mini_Boss::Mini_Boss(){
     pos_y = -MINI_BOSS_HEIGHT;//처음 시작 위치 지정
     life = 30;//has to be changed later (at least 70)
     count = 0;
+    offset.w =MINI_BOSS_WIDTH;
+    offset.h=MINI_BOSS_HEIGHT;
 }
 
 Mini_Boss::~Mini_Boss(){
@@ -538,12 +558,12 @@ void Mini_Boss::shooting(_bullets &A){
 };
 
 void Mini_Boss::enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip){
-    SDL_Rect offset;
+    //SDL_Rect offset;
     offset.y = pos_y;
     offset.x = pos_x;
     SDL_BlitSurface(mini_boss, clip, destination, &offset );
 };
-void Mini_Boss::control_plane(_bullets &A){
+SDL_Rect Mini_Boss::control_plane(_bullets &A){
     if(cont_shoot>=1 && cont_shoot <= 30) {this->cont_shoot ++; if(cont_shoot%6==0)this->shooting(A);} // TO make gap between each bullets in one cycle
     if(cont_shoot > 30) {if(cont_shoot>=50)cont_shoot = 0;else cont_shoot++;} // To make gap between each cycles
     if(count % 30 == 0 ) {this->shooting(A); this->cont_shoot ++;}
@@ -562,6 +582,7 @@ void Mini_Boss::control_plane(_bullets &A){
         }
     }
     count++;
+    return this->offset;
 };
 
 SDL_Rect Mini_Boss::Get_plane()
@@ -589,6 +610,8 @@ Boss::Boss(){
     SDL_SetColorKey(mini_boss, SDL_SRCCOLORKEY,SDL_MapRGB(mini_boss->format,255,255,255));
     pos_y = -MINI_BOSS_HEIGHT;//처음 시작 위치 지정
     life = 60;//has to be changed later (at least 70)
+    offset.w =BOSS_WIDTH;
+    offset.h=BOSS_HEIGHT;
 }
 
 Boss::~Boss(){
@@ -662,12 +685,12 @@ void Boss::shooting(_bullets &A){
     //A.add_blt( -10, 0,pos_x + 35,pos_y + 50);
 };
 void Boss::enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip){
-    SDL_Rect offset;
+    //SDL_Rect offset;
     offset.y = pos_y;
     offset.x = pos_x;
     SDL_BlitSurface(mini_boss, clip, destination, &offset );
 };
-void Boss::control_plane(_bullets &A){
+SDL_Rect Boss::control_plane(_bullets &A){
     if(cont_shoot>=1 && cont_shoot <15) {this->cont_shoot ++; if(cont_shoot%3==0)this->shooting(A);}
     if(cont_shoot >=15) cont_shoot = 0;
     if(count % 30 == 0 ) {this->shooting(A); this->cont_shoot ++;}
@@ -686,6 +709,7 @@ void Boss::control_plane(_bullets &A){
         }
     }
     count++;
+    return this->offset;
 };
 
 SDL_Rect Boss::Get_plane()
