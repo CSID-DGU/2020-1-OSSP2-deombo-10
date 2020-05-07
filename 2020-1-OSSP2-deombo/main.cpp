@@ -128,13 +128,15 @@ int main(){
   vector<Enemy_standard> E;//기본1형 비행기
   vector<Enemy_standard_2> E2;// 2nd standard enemy
   vector<special> sa_1;
-  list<SDL_Rect> CB;//충돌 판정을 위한 리스트
+  list<SDL_Rect> CB;//충돌 박스를 저장할 리스트
 
+  //생성자에 사운드를 저장
   AirPlane A(bullet_sound,item_sound,hit_sound);//사용자 비행기
   AirPlane A2(bullet_sound,item_sound,hit_sound);
   AirPlane A3(bullet_sound,item_sound,hit_sound);
-  Mini_Boss tmp3;
-  Boss tmp4;
+  Mini_Boss tmp3(hit_sound);
+  Boss tmp4(hit_sound);
+  
   Item I;
   Item2 I2;
   Item I3;
@@ -271,7 +273,7 @@ int main(){
         BOOM tmp(tmp3.Get_plane());
         tmp.three = boom_mode;
         Boss_B.push_back(tmp);
-        tmp3.loss_life(score);
+        tmp3.loss_life(score,explosion_sound2);
         if(I2.itm.size() == 0 && tmp3.life == 0)
         {
           I2.add_itm(tmp3.pos_x, tmp3.pos_y, tmp3.pos_x, tmp3.pos_y + 20);
@@ -292,7 +294,7 @@ int main(){
       BOOM tmp(tmp4.Get_plane());
       tmp.three = boom_mode;
       Boss_B4.push_back(tmp);
-      tmp4.loss_life(score);
+      tmp4.loss_life(score,explosion_sound2);
     }
 
     if(A.Got_item(I.itm))
@@ -384,11 +386,12 @@ int main(){
         }
       }
 
-    if(keystates[SDLK_p] && flag_sa == 10 && dead != true)    /// SHOULD HAVE FLAG TO AVOID SPECIAL ABILITY IS USED NUMEROUS TIMES BY PRESSING ONCE.
+    if(keystates[SDLK_p] && flag_sa == 10 && dead != true)    /// SHOULD HAVE FLAG TO A ABILITY IS USED NUMEROUS TIMES BY PRESSING ONCE.
     {
 
         if(A.SA_count >0){
-           Mix_PlayChannel(-1,special_sound,0);
+           Mix_PauseMusic();//스테이지 음악을 PAUSE 하고
+           Mix_PlayChannel(-1,special_sound,0);//효과음 출력
            A.SA_count --; //// Put image for SA
            flag_sa = 0;
            switch (SA){
@@ -519,7 +522,8 @@ int main(){
           {
              
               if(A2.SA_count >0 && flag_sa2 == 10){
-                Mix_PlayChannel(-1,special_sound,0);
+                 Mix_PauseMusic();
+                 Mix_PlayChannel(-1,special_sound,0);
                  A2.SA_count --; //// Put image for SA
                  flag_sa2= 0;
                  switch (SA2){
@@ -644,6 +648,7 @@ int main(){
           {
              
               if(A2.SA_count >0&& flag_sa2==10){
+                 Mix_PauseMusic();
                  Mix_PlayChannel(-1,special_sound,0);
                  A2.SA_count --; //// Put image for SA
                  switch (SA2){
@@ -1057,6 +1062,8 @@ bool load_files()
   explosion_sound2=Mix_LoadWAV("assets/Audio/explosion2.wav");
   special_sound=Mix_LoadWAV("assets/Audio/special.wav");
   item_sound=Mix_LoadWAV("assets/Audio/get_item.wav");
+  
+  Mix_VolumeChunk(explosion_sound1,60);
 
   for(int i = 0 ; i < 4; i++)
   {
@@ -1444,7 +1451,8 @@ void menu3()   // 비행기 고르는 메뉴
 void game_over()  // 사용자 죽었을 시 나타나는 게임오버 창
 {
   if(Mix_PlayingMusic())
-    Mix_HaltMusic();
+    Mix_HaltMusic();//음악 정지
+  Mix_HaltChannel(-1);//모든 사운드 채널 정지
   font = TTF_OpenFont("assets/Terminus.ttf", 24);//작은 안내문 폰트
 	bool quit = false;
   background = load_image("assets/background.png");

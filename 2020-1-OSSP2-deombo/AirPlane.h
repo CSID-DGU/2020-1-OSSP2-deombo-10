@@ -118,6 +118,12 @@ public:
   void control_bullet()
   {
     pos_y1 -= 4;
+    if(pos_y1==0)
+    {
+      if(Mix_PausedMusic)//정지되어 있는 음악이 있으면
+        Mix_ResumeMusic();//음악을 다시 재생
+      Mix_HaltChannel(-1);
+    }
   };
 
   int pos(){
@@ -127,7 +133,7 @@ public:
 private:
     int pos_x1;
     SDL_Surface *sa1;
-    
+    Mix_Chunk* special_sound;//특수기 효과음
 };
 
 
@@ -256,6 +262,9 @@ class Mini_Boss
 public:
   SDL_Surface *mini_boss;
   SDL_Rect offset;
+  Mix_Chunk* hit_sound;//피격음
+  
+
   int pos_x, pos_y;
   int count = 0;
   int direction = 0;
@@ -263,13 +272,13 @@ public:
   int life;
 
 public:
-  Mini_Boss();
+  Mini_Boss(Mix_Chunk* sound);
   ~Mini_Boss();
   bool Got_shot(_bullets &A, int &x);
   void shooting(_bullets &A);
   void enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip);
   SDL_Rect  control_plane(_bullets &A);
-  void loss_life(int& score);
+  void loss_life(int& score,Mix_Chunk* sound);
   SDL_Rect Get_plane();
 
   int amount = 1;
@@ -280,6 +289,8 @@ class Boss
 private:
   SDL_Surface *mini_boss;
   SDL_Rect offset;
+  Mix_Chunk* hit_sound;//피격음
+
   int pos_x, pos_y;
   int life;
   int count = 0;
@@ -287,13 +298,13 @@ private:
   int cont_shoot = 0;
 
 public:
-  Boss();
+  Boss(Mix_Chunk* sound);
   ~Boss();
   bool Got_shot(_bullets &A,  int &x);
   void shooting(_bullets &A);
   void enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip);
   SDL_Rect  control_plane(_bullets &A);
-  void loss_life(int& score);
+  void loss_life(int& score,Mix_Chunk* sound);
   SDL_Rect Get_plane();
   int amount = 1;
 };

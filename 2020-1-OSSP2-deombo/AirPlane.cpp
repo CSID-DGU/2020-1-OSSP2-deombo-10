@@ -406,7 +406,7 @@ SDL_Rect Enemy_standard_2::Get_plane()
   offset.x = pos_x;
   offset.y = pos_y;
 
-  return offset;
+  return offset;//오프셋(충돌 박스)를 리턴함
 }
 
 Enemy_standard::Enemy_standard(int mode)
@@ -466,7 +466,6 @@ void Enemy_standard::shooting(_bullets &A)
 void Enemy_standard::enemy_apply_surface(SDL_Surface* source[], SDL_Surface* destination, SDL_Rect* clip )
 {
   int i = count % 4;
-  //SDL_Rect offset;
   offset.x = pos_x;
   offset.y = pos_y;
   SDL_BlitSurface(source[i], clip, destination, &offset );
@@ -501,7 +500,7 @@ SDL_Rect Enemy_standard::Get_plane()
   return offset;
 }
 
-Mini_Boss::Mini_Boss(){
+Mini_Boss::Mini_Boss(Mix_Chunk* sound){
     mini_boss = load_image("assets/boss2.png");// 비행기 이미지
     //Setcolorkey는 네모난 그림에서 비행기로 쓸 그림 빼고 나머지 흰 바탕들만 투명하게 바꾸는거
     SDL_SetColorKey(mini_boss, SDL_SRCCOLORKEY,SDL_MapRGB(mini_boss->format,0,0,0));
@@ -511,6 +510,8 @@ Mini_Boss::Mini_Boss(){
     count = 0;
     offset.w =MINI_BOSS_WIDTH;
     offset.h=MINI_BOSS_HEIGHT;
+    hit_sound=sound;
+    
 }
 
 Mini_Boss::~Mini_Boss(){
@@ -531,6 +532,7 @@ bool Mini_Boss::Got_shot(_bullets &A, int &x){
         tmp.push_back(*iter);
       else//맞았을때
       {
+        Mix_PlayChannel(-1,hit_sound,0);//사운드 출력
         if((*iter).bullet_pos.x <= pos_x + MINI_BOSS_WIDTH / 5)
           x = 0;
         else if((*iter).bullet_pos.x <= pos_x + (MINI_BOSS_WIDTH / 5) * 2)
@@ -593,17 +595,18 @@ SDL_Rect Mini_Boss::Get_plane()
   return offset;
 }
 
-void Mini_Boss::loss_life(int& score)
+void Mini_Boss::loss_life(int& score,Mix_Chunk* sound)
 {
     this->life--;
     score +=50;
     if( this->life == 0) {
+      Mix_PlayChannel(-1,sound,0);//보스 사망시 폭팔음 출력
       this->~Mini_Boss();
       score+=1000;
    }
 }
 
-Boss::Boss(){
+Boss::Boss(Mix_Chunk* sound){
     mini_boss = load_image("assets/boss4.png");// 비행기 이미지
     //Setcolorkey는 네모난 그림에서 비행기로 쓸 그림 빼고 나머지 흰 바탕들만 투명하게 바꾸는거
     pos_x = 280;// 처음 시작 위치 지정
@@ -612,6 +615,7 @@ Boss::Boss(){
     life = 60;//has to be changed later (at least 70)
     offset.w =BOSS_WIDTH;
     offset.h=BOSS_HEIGHT;
+    hit_sound=sound;
 }
 
 Boss::~Boss(){
@@ -632,6 +636,7 @@ bool Boss::Got_shot(_bullets &A, int &x){
         tmp.push_back(*iter);
       else//맞았을때
       {
+        Mix_PlayChannel(-1,hit_sound,0);//사운드 출력
         if((*iter).bullet_pos.x <= pos_x + BOSS_WIDTH / 5)
           x = 0;
         else if((*iter).bullet_pos.x <= pos_x + (BOSS_WIDTH / 5) * 2)
@@ -719,11 +724,12 @@ SDL_Rect Boss::Get_plane()
 
   return offset;
 }
-void Boss::loss_life(int& score)
+void Boss::loss_life(int& score,Mix_Chunk* sound)
 {
     this->life--;
     score += 50;
     if( this->life == 0) {
+      Mix_PlayChannel(-1,sound,0);
       this->~Boss();
       score+=3000;
   }
