@@ -14,6 +14,9 @@ const int MINI_BOSS_HEIGHT = 82;
 const int ENEMY_WIDTH = 32;//기본형 적 비행기 사이즈
 const int ENEMY_HEIGHT = 32;
 
+const int OBSTACLE_WIDTH = 32;//Obstacle size
+const int OBSTACLE_HEIGHT = 32;
+
 const int BULLET_WIDTH = 27;//총알 사이즈
 const int BULLET_HEIGHT = 16;
 
