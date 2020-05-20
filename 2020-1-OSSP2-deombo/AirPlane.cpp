@@ -544,14 +544,16 @@ bool Obstacle::Got_shot(_bullets &A)
 
   for(iter = A.blt.begin(); iter != A.blt.end(); iter++)
   {
+    /*
       if((pos_x + 22 < (*iter).bullet_pos.x + 3 || pos_y + 32 < (*iter).bullet_pos.y) ||
       ((*iter).bullet_pos.x + 13 < pos_x + 10 || (*iter).bullet_pos.y + 32 < pos_y))//안 맞았을 때
       tmp.push_back(*iter);
+     
     else//맞았을때
     {
       flag = true;
     }
-     
+    */
   }
 
   A.blt = tmp;
