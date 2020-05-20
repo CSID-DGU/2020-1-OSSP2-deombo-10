@@ -51,6 +51,7 @@ SDL_Surface *enemy2;
 
 SDL_Rect screen_rect;
 SDL_Rect buffer_rect;
+SDL_Surface *obstacle;  //obstacle image
 
 SDL_Event event;
 TTF_Font *font;
@@ -134,6 +135,9 @@ int main(){
     SDL_free();
     return 0;
   }
+  menu3();
+  menu2();  //select airplane and start
+
   Continue = 0;
   srand(time(NULL));
 
@@ -184,6 +188,7 @@ int main(){
   if(Mix_PlayingMusic())
     Mix_HaltMusic();
   Mix_PlayMusic(stage_music,-1);//스테이지 음악 실행
+
   while(true){
  
     if(flag_sa < 10) flag_sa++;
