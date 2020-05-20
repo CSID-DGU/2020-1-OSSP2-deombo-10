@@ -24,7 +24,6 @@ public:
       Mix_PlayChannel(-1,sound,0);//폭팔 사운드 출력
     	SDL_BlitSurface( boom[b.count++], clip, destination, &(b.SDL_b));
   };
-
 };
 
 typedef struct bullets
@@ -34,11 +33,11 @@ public:
   {
     move_x = x;
     move_y = y;
-    bullet_pos.x = ply_x;
-    bullet_pos.y = ply_y;
+    offset.x = ply_x;
+    offset.y = ply_y;
   }
   int move_x, move_y;//총알들의 방향성
-  SDL_Rect bullet_pos;//총알들의 위치
+  SDL_Rect offset;//총알들의 위치
 }bullets;
 
 typedef struct items
@@ -48,12 +47,12 @@ public:
   {
     move_x = x;
     move_y = y;
-    item_pos.x = ply_x;
-    item_pos.y = ply_y;
+    offset.x = ply_x;
+    offset.y = ply_y;
   }
 
   int move_x, move_y;                     // item의 방향성
-  SDL_Rect item_pos;                      // item의 위치
+  SDL_Rect offset;                      // item의 위치
 }items;
 
 class Item
@@ -139,18 +138,25 @@ private:
 
 class _bullets
 {
+  
 public:
   void add_blt(int x, int y, int ply_x, int ply_y)//x,y는 총알 방향성, ply_x,y는 총알의 현재 위치
   {
     bullets tmp(x,y,ply_x,ply_y);
     blt.push_back(tmp);
   }
-
+  void set_offNmove(int x, int y,int w,int h){
+    for(vector<bullets>::iterator iter = blt.begin(); iter != blt.end(); iter++)
+      {
+        iter->offset.w =w; iter->offset.h=h;
+        iter->offset.x =x; iter->offset.y=y;   
+      }
+  }
   void bullet_apply_surface(SDL_Surface *bullet,SDL_Surface* destination, SDL_Rect* clip)//총알들 그리기
   {
     for(vector<bullets>::iterator iter = blt.begin(); iter!= blt.end(); iter++)
     {
-      SDL_BlitSurface( bullet, clip, destination, &(*iter).bullet_pos);
+      SDL_BlitSurface( bullet, clip, destination, &(*iter).offset);
     }
   }
 
@@ -159,9 +165,10 @@ public:
     vector<bullets> temp;
     for(vector<bullets>::iterator iter = blt.begin(); iter != blt.end(); iter++)
     {
-      bullets tmp((*iter).move_x,(*iter).move_y,(*iter).bullet_pos.x + (*iter).move_x,(*iter).bullet_pos.y + (*iter).move_y);
-      if( -1 < tmp.bullet_pos.x && tmp.bullet_pos.x< SCREEN_WIDTH && 0 <= tmp.bullet_pos.y  && tmp.bullet_pos.y < SCREEN_HEIGHT)
+      bullets tmp((*iter).move_x,(*iter).move_y,(*iter).offset.x + (*iter).move_x,(*iter).offset.y + (*iter).move_y);
+      if( -1 < tmp.offset.x && tmp.offset.x< SCREEN_WIDTH && 0 <= tmp.offset.y  && tmp.offset.y < SCREEN_HEIGHT){
         temp.push_back(tmp);
+      }
     }
 
     blt = temp;
@@ -171,12 +178,12 @@ public:
       vector<bullets> temp;
       for(vector<bullets>::iterator iter = blt.begin(); iter != blt.end(); iter++)
       {
-          bullets tmp((*iter).move_x,(*iter).move_y,(*iter).bullet_pos.x + (*iter).move_x,(*iter).bullet_pos.y + (*iter).move_y);
-          if(spc.pos_y1>tmp.bullet_pos.y+30||spc.pos_y1+180 < tmp.bullet_pos.y)temp.push_back(tmp);
+          bullets tmp((*iter).move_x,(*iter).move_y,(*iter).offset.x + (*iter).move_x,(*iter).offset.y + (*iter).move_y);
+          if(spc.pos_y1>tmp.offset.y+30||spc.pos_y1+180 < tmp.offset.y)temp.push_back(tmp);
       }
       blt = temp;
   }
-
+ 
   vector<bullets> blt;
 };
 
@@ -197,6 +204,7 @@ public:
   bool Got_shot(_bullets &A,_bullets &B,_bullets &C);
   bool Got_item(vector<items> I);
   bool detect_collision(list<SDL_Rect> C);
+   bool detect_collision(SDL_Rect C);
   void shooting(_bullets &A);
   void increaseLife();
   void increaseSA();
@@ -205,6 +213,9 @@ public:
   void control_plane(int x, int y);
   void invisible(SDL_Surface *plane);
   SDL_Rect Get_plane();//plane 변수 getter
+  void set_offset(int w,int h){offset.w=w,offset.h=h;}
+  void set_pos(int x, int y){pos_x=x;pos_y=y;}
+
 
   int invisible_mode;
   int life;
@@ -233,6 +244,8 @@ public:
   void enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip);
   SDL_Rect  control_plane(_bullets &A);
   SDL_Rect Get_plane();
+  void set_offset(int w,int h){offset.w=w,offset.h=h;}
+  void set_pos(int x, int y){pos_x=x;pos_y=y;}
 };
 
 
@@ -255,6 +268,8 @@ private:
     void enemy_apply_surface(SDL_Surface* source[], SDL_Surface* destination, SDL_Rect* clip);
     SDL_Rect  control_plane(_bullets &enemey);
     SDL_Rect Get_plane();
+    void set_offset(int w,int h){offset.w=w,offset.h=h;}
+    void set_pos(int x, int y){pos_x=x;pos_y=y;}
 };
 
 class Mini_Boss
@@ -281,6 +296,9 @@ public:
   void loss_life(int& score,Mix_Chunk* sound);
   SDL_Rect Get_plane();
 
+  void set_offset(int w,int h){offset.w=w,offset.h=h;}
+  void set_pos(int x, int y){pos_x=x;pos_y=y;}
+
   int amount = 1;
 };
 
@@ -306,5 +324,9 @@ public:
   SDL_Rect  control_plane(_bullets &A);
   void loss_life(int& score,Mix_Chunk* sound);
   SDL_Rect Get_plane();
+
+  void set_offset(int w,int h){offset.w=w,offset.h=h;}
+  void set_pos(int x, int y){pos_x=x;pos_y=y;}
+
   int amount = 1;
 };

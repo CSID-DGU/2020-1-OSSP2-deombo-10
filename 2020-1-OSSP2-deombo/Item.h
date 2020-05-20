@@ -21,12 +21,12 @@ public:
   {
     move_x = x;
     move_y = y;
-    item_pos.x = ply_x;
-    item_pos.y = ply_y;
+    offset.x = ply_x;
+    offset.y = ply_y;
   }
 
   int move_x, move_y;                     // item의 방향성
-  SDL_Rect item_pos;                      // item의 위치
+  SDL_Rect offset;                      // item의 위치
 }items;
 
 class Item

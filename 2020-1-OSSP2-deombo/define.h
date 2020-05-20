@@ -1,3 +1,4 @@
+
 const int SCREEN_WIDTH = 640;//스크린 너비
 const int SCREEN_HEIGHT = 480;//스크린 높이
 const int SCREEN_BPP = 32;//스크린 화질 결정하는 변수

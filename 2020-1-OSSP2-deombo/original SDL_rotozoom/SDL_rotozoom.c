@@ -1,163 +1,3 @@
-#include "helpers.h"
-#include <cmath>
-#ifdef WIN32
-#include <windows.h>
-#endif
-bool intersects(SDL_Rect a, SDL_Rect b)
-{
-	if(a.x + a.w <= b.x || a.y+ a.h <= b.y || b.x+b.w <= a.x || b.y+b.h <= a.y)
-		return false;
-	return true;
-}
-
-void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination, SDL_Rect* clip = NULL )
-{
-	SDL_Rect offset;
-	offset.x = x;
-	offset.y = y;
-	SDL_BlitSurface( source, clip, destination, &offset );
-}
-
-SDL_Surface *load_image( std::string filename )
-{
-
-    SDL_Surface* loadedImage = NULL;
-    SDL_Surface* optimizedImage = NULL;
-    loadedImage = IMG_Load( filename.c_str() );
-
-    if( loadedImage != NULL )
-    {
-        optimizedImage = SDL_DisplayFormat( loadedImage );
-        SDL_FreeSurface( loadedImage );
-        if( optimizedImage != NULL )
-        {
-            SDL_SetColorKey( optimizedImage, SDL_SRCCOLORKEY, SDL_MapRGB( optimizedImage->format, 0, 0xFF, 0xFF ) );
-        }
-    }
-
-    return optimizedImage;
-}
-void DrawPixel(SDL_Surface *screen, Sint16 x, Sint16 y, Uint32 color)
-{
-    //Uint32 color = SDL_MapRGB(screen->format, color);
-
-    if ( SDL_MUSTLOCK(screen) ) {
-        if ( SDL_LockSurface(screen) < 0 ) {
-            return;
-        }
-    }
-    switch (screen->format->BytesPerPixel) {
-        case 1: { /* Assuming 8-bpp */
-
-            Uint8 *bufp;
-
-            bufp = (Uint8 *)screen->pixels + y*screen->pitch + x;
-            *bufp = color;
-        }
-        break;
-
-        case 2: { /* Probably 15-bpp or 16-bpp */
-            Uint16 *bufp;
-
-            bufp = (Uint16 *)screen->pixels + y*screen->pitch/2 + x;
-            *bufp = color;
-        }
-        break;
-
-        case 3: { /* Slow 24-bpp mode, usually not used */
-
-            Uint8 *bufp;
-
-            bufp = (Uint8 *)screen->pixels + y*screen->pitch + x;
-            //*(bufp+screen->format->Rshift/8) = R;
-            //*(bufp+screen->format->Gshift/8) = G;
-            //*(bufp+screen->format->Bshift/8) = B;
-        }
-        break;
-
-        case 4: { /* Probably 32-bpp */
-
-            Uint32 *bufp;
-
-            bufp = (Uint32 *)screen->pixels + y*screen->pitch/4 + x;
-            *bufp = color;
-        }
-        break;
-    }
-    if ( SDL_MUSTLOCK(screen) ) {
-        SDL_UnlockSurface(screen);
-    }
-    SDL_UpdateRect(screen, x, y, 1, 1);
-}
-Uint32 ReadPixel(SDL_Surface *surface, int x, int y)
-{
-    int bpp = surface->format->BytesPerPixel;
-    /* Here p is the address to the pixel we want to retrieve */
-    Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
-
-switch (bpp)
-{
-    case 1:
-        return *p;
-        break;
-
-    case 2:
-        return *(Uint16 *)p;
-        break;
-
-    case 3:
-        if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
-            return p[0] << 16 | p[1] << 8 | p[2];
-        else
-            return p[0] | p[1] << 8 | p[2] << 16;
-            break;
-
-        case 4:
-            return *(Uint32 *)p;
-            break;
-
-        default:
-            return 0;       /* shouldn't happen, but avoids warnings */
-      }
-}
-
-
-
-SDL_Surface *SDL_ScaleSurface(SDL_Surface *Surface, Uint16 Width, Uint16 Height)
-{
-	//First, we have to check if the Surface's width and height are valid
-    if(!Surface || !Width || !Height)
-        return 0;
-     
-	//Now we need to create a surface that suits our needs
-    SDL_Surface *_ret = SDL_CreateRGBSurface(Surface->flags, Width, Height, Surface->format->BitsPerPixel,
-        Surface->format->Rmask, Surface->format->Gmask, Surface->format->Bmask, Surface->format->Amask);
- /*
-	Now comes the math part. We need to calculate the scaling (or stretching) factor 
-	to be applied when we copy the surface's pixels. It's not as hard as it seems, 
-	we just divide the width the caller wants by the width of the surface, 
-	what have we calculated then? If you calculate the scaling factor for the widths,
-	you'll get the number of pixels you need for each individual source pixel, 
-	in other words, each pixel you read from the source surface has to be drawn SCALING_FACTOR_X
-	times over the width in order to stretch it (the same goes for the height).
-*/
-    double    _stretch_factor_x = (static_cast<double>(Width)  / static_cast<double>(Surface->w)),
-        _stretch_factor_y = (static_cast<double>(Height) / static_cast<double>(Surface->h));
-/*
- 	Now we need to do the actual drawing. This might look overwhelming,
- 	but it's not as hard as it seems. We're just going to make 2 for-loops to run across
-  	all the pixels on the source surface, and then 2 more loops for drawing 
-  	STRETCHING_FACTOR pixels for each pixel that gets read from the source surface.
-*/
-    for(Sint32 y = 0; y < Surface->h; y++)
-        for(Sint32 x = 0; x < Surface->w; x++)
-            for(Sint32 o_y = 0; o_y < _stretch_factor_y; ++o_y)
-                for(Sint32 o_x = 0; o_x < _stretch_factor_x; ++o_x)
-                    DrawPixel(_ret, static_cast<Sint32>(_stretch_factor_x * x) + o_x, 
-                        static_cast<Sint32>(_stretch_factor_y * y) + o_y, ReadPixel(Surface, x, y));
- 
-    return _ret;
-}
 /*  
 
 SDL_rotozoom.c: rotozoomer, zoomer and shrinker for 32bit or 8bit surfaces
@@ -187,7 +27,14 @@ Andreas Schiffler -- aschiffler at ferzkopp dot net
 
 */
 
+#ifdef WIN32
+#include <windows.h>
+#endif
 
+#include <stdlib.h>
+#include <string.h>
+
+#include "SDL_rotozoom.h"
 
 /* ---- Internally used structures */
 
@@ -436,6 +283,134 @@ Assumes dst surface was allocated with the correct dimensions.
 
 \return 0 for success or -1 for error.
 */
+int _zoomSurfaceRGBA(SDL_Surface * src, SDL_Surface * dst, int flipx, int flipy, int smooth)
+{
+	int x, y, sx, sy, ssx, ssy, *sax, *say, *csax, *csay, *salast, csx, csy, ex, ey, cx, cy, sstep, sstepx, sstepy;
+	tColorRGBA *c00, *c01, *c10, *c11;
+	tColorRGBA *sp, *csp, *dp;
+	int spixelgap, spixelw, spixelh, dgap, t1, t2;
+
+	/*
+	* Allocate memory for row/column increments 
+	*/
+	if ((sax = (int *) malloc((dst->w + 1) * sizeof(Uint32))) == NULL) {
+		return (-1);
+	}
+	if ((say = (int *) malloc((dst->h + 1) * sizeof(Uint32))) == NULL) {
+		free(sax);
+		return (-1);
+	}
+
+	/*
+	* Precalculate row increments 
+	*/
+	spixelw = (src->w - 1);
+	spixelh = (src->h - 1);
+	if (smooth) {
+		sx = (int) (65536.0 * (float) spixelw / (float) (dst->w - 1));
+		sy = (int) (65536.0 * (float) spixelh / (float) (dst->h - 1));
+	} else {
+		sx = (int) (65536.0 * (float) (src->w) / (float) (dst->w));
+		sy = (int) (65536.0 * (float) (src->h) / (float) (dst->h));
+	}
+
+	/* Maximum scaled source size */
+	ssx = (src->w << 16) - 1;
+	ssy = (src->h << 16) - 1;
+
+	/* Precalculate horizontal row increments */
+	csx = 0;
+	csax = sax;
+	for (x = 0; x <= dst->w; x++) {
+		*csax = csx;
+		csax++;
+		csx += sx;
+
+		/* Guard from overflows */
+		if (csx > ssx) { 
+			csx = ssx; 
+		}
+	}
+
+	/* Precalculate vertical row increments */
+	csy = 0;
+	csay = say;
+	for (y = 0; y <= dst->h; y++) {
+		*csay = csy;
+		csay++;
+		csy += sy;
+
+		/* Guard from overflows */
+		if (csy > ssy) {
+			csy = ssy;
+		}
+	}
+
+	sp = (tColorRGBA *) src->pixels;
+	dp = (tColorRGBA *) dst->pixels;
+	dgap = dst->pitch - dst->w * 4;
+	spixelgap = src->pitch/4;
+
+	if (flipx) sp += spixelw;
+	if (flipy) sp += (spixelgap * spixelh);
+
+	/*
+	* Switch between interpolating and non-interpolating code 
+	*/
+	if (smooth) {
+
+		/*
+		* Interpolating Zoom 
+		*/
+		csay = say;
+		for (y = 0; y < dst->h; y++) {
+			csp = sp;
+			csax = sax;
+			for (x = 0; x < dst->w; x++) {
+				/*
+				* Setup color source pointers 
+				*/
+				ex = (*csax & 0xffff);
+				ey = (*csay & 0xffff);
+				cx = (*csax >> 16);
+				cy = (*csay >> 16);
+				sstepx = cx < spixelw;
+				sstepy = cy < spixelh;
+				c00 = sp;
+				c01 = sp;
+				c10 = sp;
+				if (sstepy) {
+					if (flipy) {
+						c10 -= spixelgap;
+					} else {
+						c10 += spixelgap;
+					}
+				}
+				c11 = c10;
+				if (sstepx) {
+					if (flipx) {
+						c01--;
+						c11--;
+					} else {
+						c01++;
+						c11++;
+					}
+				}
+
+				/*
+				* Draw and interpolate colors 
+				*/
+				t1 = ((((c01->r - c00->r) * ex) >> 16) + c00->r) & 0xff;
+				t2 = ((((c11->r - c10->r) * ex) >> 16) + c10->r) & 0xff;
+				dp->r = (((t2 - t1) * ey) >> 16) + t1;
+				t1 = ((((c01->g - c00->g) * ex) >> 16) + c00->g) & 0xff;
+				t2 = ((((c11->g - c10->g) * ex) >> 16) + c10->g) & 0xff;
+				dp->g = (((t2 - t1) * ey) >> 16) + t1;
+				t1 = ((((c01->b - c00->b) * ex) >> 16) + c00->b) & 0xff;
+				t2 = ((((c11->b - c10->b) * ex) >> 16) + c10->b) & 0xff;
+				dp->b = (((t2 - t1) * ey) >> 16) + t1;
+				t1 = ((((c01->a - c00->a) * ex) >> 16) + c00->a) & 0xff;
+				t2 = ((((c11->a - c10->a) * ex) >> 16) + c10->a) & 0xff;
 int _zoomSurfaceRGBA(SDL_Surface * src, SDL_Surface * dst, int flipx, int flipy, int smooth)
 {
 	int x, y, sx, sy, ssx, ssy, *sax, *say, *csax, *csay, *salast, csx, csy, ex, ey, cx, cy, sstep, sstepx, sstepy;

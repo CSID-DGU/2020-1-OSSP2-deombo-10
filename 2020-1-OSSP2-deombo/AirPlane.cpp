@@ -10,9 +10,10 @@ void Item::add_itm(int x, int y, int ply_x, int ply_y)
 
 void Item::item_apply_surface(SDL_Surface *item, SDL_Surface* destination, SDL_Rect* clip)  // item들 그리기
 {
+  
   for(vector<items>::iterator iter = itm.begin(); iter!= itm.end(); iter++)
   {
-    SDL_BlitSurface( item, clip, destination, &(*iter).item_pos);
+    SDL_BlitSurface( item, clip, destination, &(*iter).offset);
   }
 }
 
@@ -21,8 +22,8 @@ void Item::control_item()
   vector<items> temp;
   for(vector<items>::iterator iter = itm.begin(); iter != itm.end(); iter++)
   {
-    items tmp((*iter).move_x,(*iter).move_y,(*iter).item_pos.x,(*iter).item_pos.y + 2);
-    if( 0 < tmp.item_pos.x + 9 && tmp.item_pos.x< SCREEN_WIDTH && -5 <= tmp.item_pos.y  && tmp.item_pos.y < SCREEN_HEIGHT)
+    items tmp((*iter).move_x,(*iter).move_y,(*iter).offset.x,(*iter).offset.y + 2);
+    if( 0 < tmp.offset.x + 9 && tmp.offset.x< SCREEN_WIDTH && -5 <= tmp.offset.y  && tmp.offset.y < SCREEN_HEIGHT)
       temp.push_back(tmp);
   }
 
@@ -46,7 +47,7 @@ void Item2::item_apply_surface(SDL_Surface *item, SDL_Surface* destination, SDL_
 {
   for(vector<items>::iterator iter = itm.begin(); iter!= itm.end(); iter++)
   {
-    SDL_BlitSurface( item, clip, destination, &(*iter).item_pos);
+    SDL_BlitSurface( item, clip, destination, &(*iter).offset);
   }
 }
 
@@ -55,8 +56,8 @@ void Item2::control_item()
   vector<items> temp;
   for(vector<items>::iterator iter = itm.begin(); iter != itm.end(); iter++)
   {
-    items tmp((*iter).move_x,(*iter).move_y,(*iter).item_pos.x,(*iter).item_pos.y + 2);
-    if( 0 < tmp.item_pos.x + 9 && tmp.item_pos.x< SCREEN_WIDTH && -5 <= tmp.item_pos.y  && tmp.item_pos.y < SCREEN_HEIGHT)
+    items tmp((*iter).move_x,(*iter).move_y,(*iter).offset.x,(*iter).offset.y + 2);
+    if( 0 < tmp.offset.x + 9 && tmp.offset.x< SCREEN_WIDTH && -5 <= tmp.offset.y  && tmp.offset.y < SCREEN_HEIGHT)
       temp.push_back(tmp);
   }
 
@@ -80,7 +81,7 @@ void Item3::item_apply_surface(SDL_Surface *item, SDL_Surface* destination, SDL_
 {
   for(vector<items>::iterator iter = itm.begin(); iter!= itm.end(); iter++)
   {
-    SDL_BlitSurface( item, clip, destination, &(*iter).item_pos);
+    SDL_BlitSurface( item, clip, destination, &(*iter).offset);
   }
 }
 
@@ -89,8 +90,8 @@ void Item3::control_item()
   vector<items> temp;
   for(vector<items>::iterator iter = itm.begin(); iter != itm.end(); iter++)
   {
-    items tmp((*iter).move_x,(*iter).move_y,(*iter).item_pos.x,(*iter).item_pos.y + 2);
-    if( 0 < tmp.item_pos.x + 9 && tmp.item_pos.x< SCREEN_WIDTH && -5 <= tmp.item_pos.y  && tmp.item_pos.y < SCREEN_HEIGHT)
+    items tmp((*iter).move_x,(*iter).move_y,(*iter).offset.x,(*iter).offset.y + 2);
+    if( 0 < tmp.offset.x + 9 && tmp.offset.x< SCREEN_WIDTH && -5 <= tmp.offset.y  && tmp.offset.y < SCREEN_HEIGHT)
       temp.push_back(tmp);
   }
 
@@ -206,8 +207,8 @@ bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C)
 
   for(iter = A.blt.begin(); iter != A.blt.end(); iter++)
   {
-    if((pos_x + 18 < (*iter).bullet_pos.x || pos_y + 20 < (*iter).bullet_pos.y + 5) ||
-    ((*iter).bullet_pos.x + 15 < pos_x + 9 || (*iter).bullet_pos.y + 10 < pos_y + 10))//안 맞았을 때
+    if((pos_x + 18 < (*iter).offset.x || pos_y + 20 < (*iter).offset.y + 5) ||
+    ((*iter).offset.x + 15 < pos_x + 9 || (*iter).offset.y + 10 < pos_y + 10))//안 맞았을 때
       tmp.push_back(*iter);
     else//맞았을때
     {
@@ -218,8 +219,8 @@ bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C)
   A.blt = tmp;
   for(iter = B.blt.begin(); iter != B.blt.end(); iter++)
   {
-    if((pos_x + 18 < (*iter).bullet_pos.x || pos_y + 20 < (*iter).bullet_pos.y + 5) ||
-    ((*iter).bullet_pos.x + 15 < pos_x + 9 || (*iter).bullet_pos.y + 10 < pos_y + 10))//안 맞았을 때
+    if((pos_x + 18 < (*iter).offset.x || pos_y + 20 < (*iter).offset.y + 5) ||
+    ((*iter).offset.x + 15 < pos_x + 9 || (*iter).offset.y + 10 < pos_y + 10))//안 맞았을 때
       tmp2.push_back(*iter);
     else//맞았을때
     {
@@ -232,8 +233,8 @@ bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C)
 
   for(iter = C.blt.begin(); iter != C.blt.end(); iter++)
   {
-    if((pos_x + 18 < (*iter).bullet_pos.x || pos_y + 20 < (*iter).bullet_pos.y + 5) ||
-    ((*iter).bullet_pos.x + 15 < pos_x + 9 || (*iter).bullet_pos.y + 10 < pos_y + 10))//안 맞았을 때
+    if((pos_x + 18 < (*iter).offset.x || pos_y + 20 < (*iter).offset.y + 5) ||
+    ((*iter).offset.x + 15 < pos_x + 9 || (*iter).offset.y + 10 < pos_y + 10))//안 맞았을 때
       tmp3.push_back(*iter);
     else//맞았을때
     {
@@ -257,8 +258,8 @@ bool AirPlane::Got_item(vector<items> I)
 
   for(iter = I.begin(); iter != I.end(); iter++)
   {
-    if((pos_x + 18 < (*iter).item_pos.x + 9 || pos_y + 20 < (*iter).item_pos.y + 5) ||
-    ((*iter).item_pos.x + 18 < pos_x + 9 || (*iter).item_pos.y + 10 < pos_y + 10));//안 맞았을 때
+    if((pos_x + 18 < (*iter).offset.x + 9 || pos_y + 20 < (*iter).offset.y + 5) ||
+    ((*iter).offset.x + 18 < pos_x + 9 || (*iter).offset.y + 10 < pos_y + 10));//안 맞았을 때
     else                                                                           //맞았을때
     {
       flag = true;
@@ -285,6 +286,15 @@ bool AirPlane::detect_collision(list<SDL_Rect> C)
   
   }
   return flag;
+}
+bool AirPlane::detect_collision(SDL_Rect C)
+{
+  if(intersects(C,this->offset))//충돌시
+  {
+      Mix_PlayChannel(-1,hit_sound,0);//피격음 출력
+      return true;
+  }
+  return false;
 }
 void AirPlane::increaseLife()
 {
@@ -344,8 +354,8 @@ bool Enemy_standard_2::Got_shot(_bullets &A)
 
   for(iter = A.blt.begin(); iter != A.blt.end(); iter++)
   {
-    if((pos_x + 25 < (*iter).bullet_pos.x + 3 || pos_y + 32 < (*iter).bullet_pos.y) ||
-    ((*iter).bullet_pos.x + 13 < pos_x + 10 || (*iter).bullet_pos.y + 32 < pos_y))//안 맞았을 때
+    if((pos_x + 25 < (*iter).offset.x + 3 || pos_y + 32 < (*iter).offset.y) ||
+    ((*iter).offset.x + 13 < pos_x + 10 || (*iter).offset.y + 32 < pos_y))//안 맞았을 때
       tmp.push_back(*iter);
     else//맞았을때
     {
@@ -438,8 +448,8 @@ bool Enemy_standard::Got_shot(_bullets &A)
 
   for(iter = A.blt.begin(); iter != A.blt.end(); iter++)
   {
-      if((pos_x + 22 < (*iter).bullet_pos.x + 3 || pos_y + 32 < (*iter).bullet_pos.y) ||
-      ((*iter).bullet_pos.x + 13 < pos_x + 10 || (*iter).bullet_pos.y + 32 < pos_y))//안 맞았을 때
+      if((pos_x + 22 < (*iter).offset.x + 3 || pos_y + 32 < (*iter).offset.y) ||
+      ((*iter).offset.x + 13 < pos_x + 10 || (*iter).offset.y + 32 < pos_y))//안 맞았을 때
       tmp.push_back(*iter);
     else//맞았을때
     {
@@ -527,19 +537,19 @@ bool Mini_Boss::Got_shot(_bullets &A, int &x){
 
     for(iter = A.blt.begin(); iter != A.blt.end(); iter++)
     {
-      if((pos_x + 240 < (*iter).bullet_pos.x + 9 || pos_y + 82 < (*iter).bullet_pos.y + 5) ||
-      ((*iter).bullet_pos.x + 9 < pos_x + 9 || (*iter).bullet_pos.y + 5 < pos_y + 10))//안 맞았을 때
+      if((pos_x + 240 < (*iter).offset.x + 9 || pos_y + 82 < (*iter).offset.y + 5) ||
+      ((*iter).offset.x + 9 < pos_x + 9 || (*iter).offset.y + 5 < pos_y + 10))//안 맞았을 때
         tmp.push_back(*iter);
       else//맞았을때
       {
         Mix_PlayChannel(-1,hit_sound,0);//사운드 출력
-        if((*iter).bullet_pos.x <= pos_x + MINI_BOSS_WIDTH / 5)
+        if((*iter).offset.x <= pos_x + MINI_BOSS_WIDTH / 5)
           x = 0;
-        else if((*iter).bullet_pos.x <= pos_x + (MINI_BOSS_WIDTH / 5) * 2)
+        else if((*iter).offset.x <= pos_x + (MINI_BOSS_WIDTH / 5) * 2)
           x = 1;
-        else if((*iter).bullet_pos.x <= pos_x + (MINI_BOSS_WIDTH / 5) * 3)
+        else if((*iter).offset.x <= pos_x + (MINI_BOSS_WIDTH / 5) * 3)
           x = 2;
-        else if((*iter).bullet_pos.x <= pos_x + (MINI_BOSS_WIDTH / 5) * 4)
+        else if((*iter).offset.x <= pos_x + (MINI_BOSS_WIDTH / 5) * 4)
           x = 3;
         else
           x = 4;
@@ -631,19 +641,19 @@ bool Boss::Got_shot(_bullets &A, int &x){
 
     for(iter = A.blt.begin(); iter != A.blt.end(); iter++)
     {
-      if((pos_x + 135 < (*iter).bullet_pos.x + 9 || pos_y + 85 < (*iter).bullet_pos.y + 5) ||
-      ((*iter).bullet_pos.x + 9 < pos_x + 9 || (*iter).bullet_pos.y + 5 < pos_y + 10))//안 맞았을 때
+      if((pos_x + 135 < (*iter).offset.x + 9 || pos_y + 85 < (*iter).offset.y + 5) ||
+      ((*iter).offset.x + 9 < pos_x + 9 || (*iter).offset.y + 5 < pos_y + 10))//안 맞았을 때
         tmp.push_back(*iter);
       else//맞았을때
       {
         Mix_PlayChannel(-1,hit_sound,0);//사운드 출력
-        if((*iter).bullet_pos.x <= pos_x + BOSS_WIDTH / 5)
+        if((*iter).offset.x <= pos_x + BOSS_WIDTH / 5)
           x = 0;
-        else if((*iter).bullet_pos.x <= pos_x + (BOSS_WIDTH / 5) * 2)
+        else if((*iter).offset.x <= pos_x + (BOSS_WIDTH / 5) * 2)
           x = 1;
-        else if((*iter).bullet_pos.x <= pos_x + (BOSS_WIDTH / 5) * 3)
+        else if((*iter).offset.x <= pos_x + (BOSS_WIDTH / 5) * 3)
           x = 2;
-        else if((*iter).bullet_pos.x <= pos_x + (BOSS_WIDTH / 5) * 4)
+        else if((*iter).offset.x <= pos_x + (BOSS_WIDTH / 5) * 4)
           x = 3;
         else
           x = 4;

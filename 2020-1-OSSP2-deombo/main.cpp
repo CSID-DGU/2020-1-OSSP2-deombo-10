@@ -15,7 +15,8 @@ Mix_Chunk *explosion_sound2;//보스 폭팔음
 Mix_Chunk *special_sound;//특수기 효과음
 Mix_Chunk *item_sound;//아이템 획득음
 
-SDL_Surface *screen;//화면
+SDL_Surface *screen;//실제 출력되는 화면
+SDL_Surface *buffer;//화면에 그리기 전에 버퍼
 SDL_Surface *background;//배경화면
 SDL_Surface *background2;
 SDL_Surface *background3;
@@ -24,7 +25,7 @@ SDL_Surface *life;
 SDL_Surface *sapoint;
 SDL_Surface *bullet;//총알 이미지
 SDL_Surface *bullet_basic;
-SDL_Surface *bullet_mini;
+SDL_Surface *bullet_mini;//화면에 그리기 전에 버퍼
 SDL_Surface *bullet_boss;
 SDL_Surface *message;
 SDL_Surface *message2;
@@ -46,8 +47,10 @@ SDL_Surface *frame2;
 SDL_Surface *arrow;
 SDL_Surface *pick1;
 SDL_Surface *pick2;
-
 SDL_Surface *enemy2;
+
+SDL_Rect screen_rect;
+SDL_Rect buffer_rect;
 
 SDL_Event event;
 TTF_Font *font;
@@ -67,17 +70,42 @@ int SA;
 int SA2;
 int mode;
 
+
+
+
 void sprite_surface(SDL_Surface* source, SDL_Rect tmp, SDL_Surface* destination, int w, int h, int step,int mode);
 bool init();//변수들 초기화 함수
 bool load_files();//이미지, 폰트,오디오 초기화 함수
 bool SDL_free();// sdl 변수들 free 함수
-void menu();
-void menu2();
-void menu3();
-void game_over();
-void stage_clear();
+bool menu();
+bool menu2();
+bool menu3();
+bool game_over();
+bool stage_clear();
 void special_ability(int SA);
+void handle_resize(SDL_ResizeEvent &event){//화면의 크기가 resize 되면 이 함수가 호출됨
+  
 
+  SDL_FreeSurface(screen);//기존 screen을 free 해준다음.
+  screen = SDL_SetVideoMode(event.w, event.h, SCREEN_BPP, SDL_SWSURFACE | SDL_DOUBLEBUF |SDL_RESIZABLE);
+  //재조정된 크기에 맞춰 다시 screen을 만든다.
+  buffer_rect.w=event.w;//버퍼 rect의 width과 height을 조정해준다.
+  buffer_rect.h=event.h;
+  
+}
+
+void show_screen(){//SDL_flip을 직접적으로  호출하지 않고 show_screen을 통해 스케일링 된 화면을 flip해줌
+  SDL_Surface* temp;
+  
+  double scale_x=(double)buffer_rect.w/SCREEN_WIDTH;
+  double scale_y=(double)buffer_rect.h/SCREEN_HEIGHT;
+  temp=zoomSurface(buffer,scale_x,scale_y,0);//버퍼로부터 확대한 Surface를 temp에 저장
+
+  SDL_BlitSurface(temp,&buffer_rect,screen,&buffer_rect);//이 temp를 screen에 그림
+
+  SDL_Flip(screen);//Filp을 통해 화면에 screen을 출력
+  SDL_FreeSurface(temp);//temp를 반드시 free 해줘야 한다!!!
+}
 int main(){
   loop:
  _bullets enemy_bullets;
@@ -87,15 +115,25 @@ int main(){
  //_special special_one;
   init();//초기화 함수
   load_files();//이미지,폰트,bgm 로드하는 함수
- 
-  menu();
-  if(EXIT == 1)
+  bool run=true;
+  run=menu();
+  if(EXIT == 1||!run)
   {
+    SDL_free();
     return 0;
   }
-  menu3();
-  menu2();
-
+  run=menu3();
+  if(!run)
+  {
+    SDL_free();
+    return 0;
+  }
+  run=menu2();
+  if(!run)
+  {
+    SDL_free();
+    return 0;
+  }
   Continue = 0;
   srand(time(NULL));
 
@@ -120,7 +158,7 @@ int main(){
   vector<Enemy_standard>::iterator it;
   vector<BOOM>::iterator B_it;
   vector<special>::iterator it_sa;
-  vector<SDL_Rect>::iterator CB_it;
+  list<SDL_Rect>::iterator CB_it;
 
   vector<BOOM> Boss_B;//보스 폭발
   vector<BOOM> Boss_B4;//보스 폭발
@@ -129,6 +167,8 @@ int main(){
   vector<Enemy_standard_2> E2;// 2nd standard enemy
   vector<special> sa_1;
   list<SDL_Rect> CB;//충돌 박스를 저장할 리스트
+
+  
 
   //생성자에 사운드를 저장
   AirPlane A(bullet_sound,item_sound,hit_sound);//사용자 비행기
@@ -140,6 +180,7 @@ int main(){
   Item I;
   Item2 I2;
   Item I3;
+  
   if(Mix_PlayingMusic())
     Mix_HaltMusic();
   Mix_PlayMusic(stage_music,-1);//스테이지 음악 실행
@@ -203,7 +244,7 @@ int main(){
       A.invisible_mode = 1;
     }
 
-    if(dead2 != true && mode == 2 &&(A2.Got_shot(enemy_bullets,boss_bullets,mini_bullets)||A2.detect_collision(CB) )&& A2.invisible_mode == 0)      //사용자 피격 판정
+    if(dead2 != true && mode == 2 &&(A2.Got_shot(enemy_bullets,boss_bullets,mini_bullets)||A2.detect_collision(CB))&& A2.invisible_mode == 0)      //사용자 피격 판정
     {
       A2.life--;
       A2.invisible_mode = 1;
@@ -337,6 +378,8 @@ int main(){
     if(SDL_PollEvent(&event)){
       if(event.type == SDL_QUIT)//버튼 누르면 꺼저야 되는데 안 꺼짐 수정 사항
 			   break;
+      if(event.type==SDL_VIDEORESIZE)
+        handle_resize(event.resize);
     }
 
     keystates = SDL_GetKeyState(NULL);
@@ -364,6 +407,7 @@ int main(){
 
     if(tmp4.amount == 1 && score >= 5000)CB.push_back(tmp4.control_plane(boss_bullets)); // have to add the condition when the mini boss appear
 
+    
     if(sa_1.size() >0)
     {
         for(it_sa = sa_1.begin(); it_sa != sa_1.end(); it_sa++){
@@ -780,62 +824,62 @@ int main(){
         background_count = 0;
 
     //이미지 그리는 부분
-    apply_surface(0, -480 + background_count, background2,screen,NULL);//백그라운드 그리는거
-    apply_surface(0, 0 + background_count, background,screen,NULL);//백그라운드 그리는거
-    enemy_bullets.bullet_apply_surface(bullet_basic, screen,NULL);//적 총알들
-    boss_bullets.bullet_apply_surface(bullet_boss, screen, NULL);
-    mini_bullets.bullet_apply_surface(bullet_mini, screen, NULL);
-    player_bullets.bullet_apply_surface(bullet, screen, NULL);//사용자 총알들
+    apply_surface(0, -480 + background_count, background2,buffer,NULL);//백그라운드 그리는거
+    apply_surface(0, 0 + background_count, background,buffer,NULL);//백그라운드 그리는거
+    enemy_bullets.bullet_apply_surface(bullet_basic, buffer,NULL);//적 총알들
+    boss_bullets.bullet_apply_surface(bullet_boss, buffer, NULL);
+    mini_bullets.bullet_apply_surface(bullet_mini, buffer, NULL);
+    player_bullets.bullet_apply_surface(bullet, buffer, NULL);//사용자 총알들
     if(dead != true)
     {
-      A.plane_apply_surface(plane_1p, screen, NULL); //사용자 비행기
+      A.plane_apply_surface(plane_1p, buffer, NULL); //사용자 비행기
     }
     else if (dead == true) {
       A.~AirPlane();
     }
 
-    if(mode == 2 && dead2 != true)  A2.plane_apply_surface(plane_2p, screen,NULL); //사용자 비행기
+    if(mode == 2 && dead2 != true)  A2.plane_apply_surface(plane_2p, buffer,NULL); //사용자 비행기
 
     if(flag == 1)
     {
-      I.item_apply_surface(I.item, screen, NULL);
+      I.item_apply_surface(I.item, buffer, NULL);
     }
 
     if(flag2 == 1)
     {
-      I2.item_apply_surface(I2.item, screen, NULL);
+      I2.item_apply_surface(I2.item, buffer, NULL);
     }
 
     if(flag3 == 1)
     {
-      I3.item_apply_surface(I3.item, screen, NULL);
+      I3.item_apply_surface(I3.item, buffer, NULL);
     }
 
     if( E.size() > 0)//적 비행기
     {
       for( it = E.begin(); it != E.end(); it++)
       {
-        (*it).enemy_apply_surface(enemy, screen, NULL);
+        (*it).enemy_apply_surface(enemy, buffer, NULL);
       }
     }
     if( E2.size() > 0)
     {
       for( it2 = E2.begin(); it2 != E2.end(); it2++)
       {
-        (*it2).enemy_apply_surface(screen, NULL);
+        (*it2).enemy_apply_surface(buffer, NULL);
       }
     }
 
     if(sa_1.size() >0)
     {
         for(it_sa = sa_1.begin(); it_sa != sa_1.end(); it_sa++){
-            (*it_sa).apply_surface(screen, NULL);
+            (*it_sa).apply_surface(buffer, NULL);
         }
     }
 
-    if(tmp3.amount ==1 && score >= 500) tmp3.enemy_apply_surface(screen, NULL); // have to add the condition when the mini boss appear
+    if(tmp3.amount ==1 && score >= 500) tmp3.enemy_apply_surface(buffer, NULL); // have to add the condition when the mini boss appear
 
-    if(tmp4.amount == 1 && score>= 5000) tmp4.enemy_apply_surface(screen, NULL); // have to add the condition when the mini boss appear
+    if(tmp4.amount == 1 && score>= 5000) tmp4.enemy_apply_surface(buffer, NULL); // have to add the condition when the mini boss appear
 
     if( B.size() > 0)//폭발
     {
@@ -845,7 +889,7 @@ int main(){
       {
         if((*B_it).b.count <  11)
         {
-          (*B_it).boom_apply_surface(boom,screen,NULL,explosion_sound1);
+          (*B_it).boom_apply_surface(boom,buffer,NULL,explosion_sound1);
           B_tmp.push_back(*B_it);
         }
         else
@@ -864,7 +908,7 @@ int main(){
       {
         if((*B_it).b.count <  8)
         {
-          sprite_surface(screen,tmp3.Get_plane(), explosion, 8, 1, (*B_it).b.count, (*B_it).three);
+          sprite_surface(buffer,tmp3.Get_plane(), explosion, 8, 1, (*B_it).b.count, (*B_it).three);
           (*B_it).b.count++;
           B_tmp.push_back(*B_it);
         }
@@ -885,7 +929,7 @@ int main(){
       {
         if((*B_it).b.count <  8)
         {
-          sprite_surface(screen, tmp4.Get_plane(), explosion, 8, 1, (*B_it).b.count,(*B_it).three);
+          sprite_surface(buffer, tmp4.Get_plane(), explosion, 8, 1, (*B_it).b.count,(*B_it).three);
           (*B_it).b.count++;
           B_tmp.push_back(*B_it);
         }
@@ -909,14 +953,14 @@ int main(){
     }
 
     if(A.life == 1)//생명력 1
-      apply_surface(550, 10, life, screen,NULL);
+      apply_surface(550, 10, life, buffer,NULL);
     else if(A.life == 2)
     {
-      apply_surface(550, 10, life, screen,NULL); apply_surface(580, 10, life, screen,NULL);
+      apply_surface(550, 10, life, buffer,NULL); apply_surface(580, 10, life, buffer,NULL);
     }
     else if(A.life == 3)
     {
-      apply_surface(550, 10, life, screen,NULL); apply_surface(580, 10, life, screen,NULL); apply_surface(610, 10, life, screen,NULL);
+      apply_surface(550, 10, life, buffer,NULL); apply_surface(580, 10, life, buffer,NULL); apply_surface(610, 10, life, buffer,NULL);
     }
 
 
@@ -942,52 +986,52 @@ int main(){
       }
 
       if(A2.life == 1)//생명력 1
-        apply_surface(550, 30, life, screen,NULL);
+        apply_surface(550, 30, life, buffer,NULL);
       else if(A2.life == 2)
       {
-        apply_surface(550, 30, life, screen,NULL); apply_surface(580, 30, life, screen,NULL);
+        apply_surface(550, 30, life, buffer,NULL); apply_surface(580, 30, life, buffer,NULL);
       }
       else if(A2.life == 3)
       {
-        apply_surface(550, 30, life, screen,NULL); apply_surface(580, 30, life, screen,NULL); apply_surface(610, 30, life, screen,NULL);
+        apply_surface(550, 30, life, buffer,NULL); apply_surface(580, 30, life, buffer,NULL); apply_surface(610, 30, life, buffer,NULL);
       }
     }
 
     if (mode == 1) {
       if(A.SA_count == 1)//생명력 1
-        apply_surface(550, 450, sapoint, screen,NULL);
+        apply_surface(550, 450, sapoint, buffer,NULL);
         else if(A.SA_count == 2)
         {
-          apply_surface(550, 450, sapoint, screen,NULL); apply_surface(580, 450, sapoint, screen,NULL);
+          apply_surface(550, 450, sapoint, buffer,NULL); apply_surface(580, 450, sapoint, buffer,NULL);
         }
         else if(A.SA_count == 3)
         {
-          apply_surface(550, 450, sapoint, screen ,NULL); apply_surface(580, 450, sapoint, screen,NULL); apply_surface(610, 450, sapoint, screen,NULL);
+          apply_surface(550, 450, sapoint, buffer ,NULL); apply_surface(580, 450, sapoint, buffer,NULL); apply_surface(610, 450, sapoint, buffer,NULL);
         }
       }
 
     if (mode == 2)
     {
       if(A.SA_count == 1)//생명력 1
-        apply_surface(550, 430, sapoint, screen,NULL);
+        apply_surface(550, 430, sapoint, buffer,NULL);
       else if(A.SA_count == 2)
       {
-        apply_surface(550, 430, sapoint, screen,NULL); apply_surface(580, 430, sapoint, screen,NULL);
+        apply_surface(550, 430, sapoint, buffer,NULL); apply_surface(580, 430, sapoint, buffer,NULL);
       }
       else if(A.SA_count == 3)
       {
-        apply_surface(550, 430, sapoint, screen ,NULL); apply_surface(580, 430, sapoint, screen,NULL); apply_surface(610, 430, sapoint, screen,NULL);
+        apply_surface(550, 430, sapoint, buffer ,NULL); apply_surface(580, 430, sapoint, buffer,NULL); apply_surface(610, 430, sapoint, buffer,NULL);
       }
 
       if(A2.SA_count == 1)//생명력 1
-        apply_surface(550, 450, sapoint, screen,NULL);
+        apply_surface(550, 450, sapoint, buffer,NULL);
       else if(A2.SA_count == 2)
       {
-        apply_surface(550, 450, sapoint, screen,NULL); apply_surface(580, 450, sapoint, screen,NULL);
+        apply_surface(550, 450, sapoint, buffer,NULL); apply_surface(580, 450, sapoint, buffer,NULL);
       }
       else if(A2.SA_count == 3)
       {
-        apply_surface(550, 450, sapoint, screen ,NULL); apply_surface(580, 450, sapoint, screen,NULL); apply_surface(610, 450, sapoint, screen,NULL);
+        apply_surface(550, 450, sapoint, buffer ,NULL); apply_surface(580, 450, sapoint, buffer,NULL); apply_surface(610, 450, sapoint, buffer,NULL);
       }
     }
 
@@ -995,15 +1039,18 @@ int main(){
     ostringstream sc;
     sc<< score;
     message5 = TTF_RenderText_Solid(font3, sc.str().c_str(), textColor);
-    apply_surface(0, 0, message5, screen, NULL);
+    apply_surface(0, 0, message5, buffer, NULL);
 
     //fps 계산
     delay = 1000/40 - (SDL_GetTicks() - start_time);
     if(delay > 0)
       SDL_Delay(delay);
-
-      SDL_Flip(screen);
+   
+      show_screen();
+      //SDL_Flip(buffer);
       count ++;
+  
+    
   }
   SDL_free();
   return 0;
@@ -1017,17 +1064,36 @@ bool init()
   SDL_Init(SDL_INIT_EVERYTHING);//SDL initialize
   TTF_Init();
   Mix_OpenAudio(22050,MIX_DEFAULT_FORMAT,2,4096);//오디오를 스테레오로 하여서 연다
-  
+
   screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SDL_SWSURFACE | SDL_DOUBLEBUF |SDL_RESIZABLE);
+  buffer=SDL_CreateRGBSurface( SDL_SWSURFACE,SCREEN_WIDTH, SCREEN_HEIGHT,
+                              screen->format->BitsPerPixel,screen->format->Rmask,
+                              screen->format->Gmask,screen->format->Bmask,
+                              screen->format->Amask);
+  buffer_rect.x=0;
+  buffer_rect.y=0;
+  buffer_rect.w=SCREEN_WIDTH;
+  buffer_rect.h=SCREEN_HEIGHT;
+  
+  screen_rect.x=0;
+  screen_rect.y=0;
+  screen_rect.w=SCREEN_WIDTH;
+  screen_rect.h=SCREEN_HEIGHT;
   //SDL_RESIZABLE 추가하여 윈도우 크기 조절을 가능하게 함
-  SDL_WM_SetCaption("MSG", NULL);
-  return true;
+  SDL_WM_SetCaption("deombo", NULL);
+  if(screen==NULL)
+  {
+    return false;
+  }
+  else
+    return true;
 }
 //return true;
 
 bool load_files()
 {//고칠 것: if문 추가해서 init했을 때 실패하면 false반환하게끔
   explosion = load_image("assets/explosion.png");
+
   life = load_image("assets/life.gif");                   //life
   background = load_image("assets/background.png");//배경화면
   background2 = load_image("assets/background2.png");//배경화면
@@ -1046,10 +1112,12 @@ bool load_files()
   frame = load_image("assets/blueframe.png");
   frame2 = load_image("assets/redframe.png");
   arrow = load_image("assets/arrow.png");
-  font = TTF_OpenFont("assets/Terminus.ttf", 24);//작은 안내문 폰트
+  sapoint = load_image("assets/sapoint1.png");
+
+  font = TTF_OpenFont("assets/Terminus.ttf", 18);//작은 안내문 폰트
   font2 = TTF_OpenFont("assets/Starjout.ttf", 84);//제목 폰트
   font3 = TTF_OpenFont("assets/Starjout.ttf",24);
-  sapoint = load_image("assets/sapoint1.png");
+
   //오디오 로드
   menu_music=Mix_LoadMUS("assets/Audio/menu_music.mp3");
   stage_music=Mix_LoadMUS("assets/Audio/battle_music.wav");
@@ -1093,7 +1161,7 @@ bool load_files()
   SDL_SetColorKey(bullet_basic, SDL_SRCCOLORKEY, SDL_MapRGB(bullet_basic->format,255,255,255));
   SDL_SetColorKey(arrow, SDL_SRCCOLORKEY,SDL_MapRGB(arrow->format,0,0,0));
   SDL_SetColorKey(sapoint, SDL_SRCCOLORKEY,SDL_MapRGB(sapoint->format,255,255,255));
-
+  
   
   return true;
 }
@@ -1103,7 +1171,7 @@ bool SDL_free()
   SDL_FreeSurface(plane);
   SDL_FreeSurface(bullet);
   SDL_FreeSurface(background);
-  SDL_FreeSurface(screen);
+  SDL_FreeSurface(buffer);
   for(int i =0 ; i < 4; i++)
     SDL_FreeSurface(enemy[i]);
   for(int i = 0; i < 11; i++)
@@ -1126,25 +1194,29 @@ bool SDL_free()
   return true;
 }
 
-void menu()   // 처음 시작 메뉴
+bool menu()   // 처음 시작 메뉴
 {
   textColor = {204, 255, 204};  // 안내 폰트 색깔
   textColor2 = {255, 255, 255}; // 제목 폰트 색깔
-	bool quit = false;
+  bool quit = false;
   Mix_PlayMusic(menu_music,-1);
   Mix_VolumeMusic(128);
 	while (quit == false)
 	{
-		if (SDL_PollEvent(&event))
+	
+    message = TTF_RenderText_Solid(font, "Press space to start, s key to key setting, esc key to quit", textColor); // space키는 시작 esc키는 종료
+    message2 = TTF_RenderText_Solid(font2, "Starwars", textColor2);  // 제목
+    background = load_image("assets/menu3.jpg");  // 배경
+		apply_surface(0, 0, background, buffer, NULL);
+    apply_surface((640 - message->w) / 2, 280, message, buffer, NULL);
+    apply_surface((640 - message2->w) / 2, 100, message2, buffer, NULL);
+    
+    show_screen();
+			//SDL_Flip(buffer);
+    if (SDL_PollEvent(&event))
 		{
-      message = TTF_RenderText_Solid(font, "Press space to start, esc key to quit", textColor); // space키는 시작 esc키는 종료
-      message2 = TTF_RenderText_Solid(font2, "Starwars", textColor2);  // 제목
-      background = load_image("assets/menu3.jpg");  // 배경
-			apply_surface(0, 0, background, screen, NULL);
-      apply_surface((640 - message->w) / 2, 280, message, screen, NULL);
-      apply_surface((640 - message2->w) / 2, 100, message2, screen, NULL);
-			SDL_Flip(screen);
-     
+      if(event.type==SDL_VIDEORESIZE)
+        handle_resize(event.resize);
 
 			if (event.type == SDL_KEYDOWN)
 			{
@@ -1163,17 +1235,25 @@ void menu()   // 처음 시작 메뉴
           quit = true;
           break;
         }
+         case SDLK_s:  // s 키 누르면 키 세팅에 들어감
+        {
+          EXIT = 1;
+          quit = true;
+          break;
+        }
 				}
 			}
 			else if (event.type == SDL_QUIT)
 			{
 				quit = true;
+        return false;
 			}
 		}
 	}
+  return true;
 }
 
-void menu2()   // 싱글 플레이인지 멀티 플레이인지 고르는 메뉴
+bool menu2()   // 싱글 플레이인지 멀티 플레이인지 고르는 메뉴
 {
   int selectx = 25;
   int selectx2 = 525;
@@ -1191,32 +1271,34 @@ void menu2()   // 싱글 플레이인지 멀티 플레이인지 고르는 메뉴
       message3 = TTF_RenderText_Solid(font3, "2P", textColor);
       message4 = TTF_RenderText_Solid(font3, "1p              2p", textColor);
       background = load_image("assets/background.png");  // 배경
-			apply_surface(0, 0, background, screen, NULL);
-      apply_surface((640 - message->w) / 2, 90, message, screen, NULL);
-      apply_surface(selectx, 220, frame, screen, NULL);
-      apply_surface(selectx+30, 180, message2, screen, NULL);
+			apply_surface(0, 0, background, buffer, NULL);
+      apply_surface((640 - message->w) / 2, 90, message, buffer, NULL);
+      apply_surface(selectx, 220, frame, buffer, NULL);
+      apply_surface(selectx+30, 180, message2, buffer, NULL);
       if(mode == 2)
       {
-        apply_surface(selectx2, 220, frame2, screen, NULL);
-        apply_surface(selectx2+30, 315, message3, screen, NULL);
-        apply_surface(200, 430, message4, screen, NULL);
-        apply_surface(202, 400, pick1, screen, NULL);
+        apply_surface(selectx2, 220, frame2, buffer, NULL);
+        apply_surface(selectx2+30, 315, message3, buffer, NULL);
+        apply_surface(200, 430, message4, buffer, NULL);
+        apply_surface(202, 400, pick1, buffer, NULL);
         SDL_SetColorKey(pick1, SDL_SRCCOLORKEY,SDL_MapRGB(pick1->format,0,0,0));
-        apply_surface(387, 400, pick2, screen, NULL);
+        apply_surface(387, 400, pick2, buffer, NULL);
         SDL_SetColorKey(pick2, SDL_SRCCOLORKEY,SDL_MapRGB(pick2->format,0,0,0));
       }
       SDL_SetColorKey(plane, SDL_SRCCOLORKEY,SDL_MapRGB(plane->format,255,255,255));
-      apply_surface(57, 255, plane, screen, NULL);
+      apply_surface(57, 255, plane, buffer, NULL);
       SDL_SetColorKey(plane2, SDL_SRCCOLORKEY,SDL_MapRGB(plane->format,0,0,0));
-      apply_surface(182, 255, plane2, screen, NULL);
+      apply_surface(182, 255, plane2, buffer, NULL);
       SDL_SetColorKey(plane3, SDL_SRCCOLORKEY,SDL_MapRGB(plane->format,0,0,0));
-      apply_surface(307, 255, plane3, screen, NULL);
+      apply_surface(307, 255, plane3, buffer, NULL);
       SDL_SetColorKey(plane4, SDL_SRCCOLORKEY,SDL_MapRGB(plane->format,0,0,0));
-      apply_surface(432, 255, plane4, screen, NULL);
+      apply_surface(432, 255, plane4, buffer, NULL);
       SDL_SetColorKey(plane5, SDL_SRCCOLORKEY,SDL_MapRGB(plane->format,0,0,0));
-      apply_surface(557, 255, plane5, screen, NULL);
-			SDL_Flip(screen);
-
+      apply_surface(557, 255, plane5, buffer, NULL);
+      show_screen();
+			//SDL_Flip(buffer);
+      if(event.type==SDL_VIDEORESIZE)
+        handle_resize(event.resize);
 			if (event.type == SDL_KEYDOWN)
 			{
         Mix_PlayChannel(-1,selection_sound,0);
@@ -1315,7 +1397,7 @@ void menu2()   // 싱글 플레이인지 멀티 플레이인지 고르는 메뉴
         }
 
 
-        case SDLK_LEFT:  // space 키가 눌리면 게임 배경 가져오고 게임 시작
+        case SDLK_LEFT:  
         {
           if (selectx == 25)
           {}
@@ -1325,7 +1407,7 @@ void menu2()   // 싱글 플레이인지 멀티 플레이인지 고르는 메뉴
           }
           break;
         }
-        case SDLK_RIGHT:  // space 키가 눌리면 게임 배경 가져오고 게임 시작
+        case SDLK_RIGHT:  
         {
           if(selectx == 525)
           {}
@@ -1335,7 +1417,7 @@ void menu2()   // 싱글 플레이인지 멀티 플레이인지 고르는 메뉴
           }
           break;
         }
-        case SDLK_a:  // space 키가 눌리면 게임 배경 가져오고 게임 시작
+        case SDLK_a: 
         {
           if (selectx2 == 25)
           {}
@@ -1345,7 +1427,7 @@ void menu2()   // 싱글 플레이인지 멀티 플레이인지 고르는 메뉴
           }
           break;
         }
-        case SDLK_d:  // space 키가 눌리면 게임 배경 가져오고 게임 시작
+        case SDLK_d:  
         {
           if(selectx2 == 525)
           {}
@@ -1368,33 +1450,38 @@ void menu2()   // 싱글 플레이인지 멀티 플레이인지 고르는 메뉴
 			else if (event.type == SDL_QUIT)
 			{
 				quit = true;
+        return false;
 			}
 		}
 	}
+  return true;
 }
 
-void menu3()   // 비행기 고르는 메뉴
+bool menu3()   // 비행기 고르는 메뉴
 {
   int selecty=210;
 	bool quit = false;
   
 	while (quit == false)
 	{
-		if (SDL_PollEvent(&event))
-		{
+		
       font = TTF_OpenFont("assets/Terminus.ttf", 36);//작은 안내문 폰트
       message = TTF_RenderText_Solid(font, "Choose the game mode", textColor); // space키는 시작 esc키는 종료
       message2 = TTF_RenderText_Solid(font3, "Single play", textColor);
       message3 = TTF_RenderText_Solid(font3, "Multi play", textColor);
       background = load_image("assets/background.png");  // 배경
-			apply_surface(0, 0, background, screen, NULL);
-      apply_surface((640 - message->w) / 2, 100, message, screen, NULL);
-      apply_surface((640 - message2->w) / 2, 210, message2, screen, NULL);
-      apply_surface((640 - message3->w) / 2, 300, message3, screen, NULL);
-      apply_surface(170, selecty-20, arrow, screen, NULL);
+			apply_surface(0, 0, background, buffer, NULL);
+      apply_surface((640 - message->w) / 2, 100, message, buffer, NULL);
+      apply_surface((640 - message2->w) / 2, 210, message2, buffer, NULL);
+      apply_surface((640 - message3->w) / 2, 300, message3, buffer, NULL);
+      apply_surface(170, selecty-20, arrow, buffer, NULL);
 
-			SDL_Flip(screen);
-
+      show_screen();
+			//SDL_Flip(buffer);
+    if (SDL_PollEvent(&event))
+		{
+      if(event.type==SDL_VIDEORESIZE)
+        handle_resize(event.resize);
 			if (event.type == SDL_KEYDOWN)
 			{
         Mix_PlayChannel(-1,selection_sound,0);
@@ -1443,12 +1530,14 @@ void menu3()   // 비행기 고르는 메뉴
 			else if (event.type == SDL_QUIT)
 			{
 				quit = true;
+        return false;
 			}
 		}
 	}
+  return true;
 }
 
-void game_over()  // 사용자 죽었을 시 나타나는 게임오버 창
+bool game_over()  // 사용자 죽었을 시 나타나는 게임오버 창
 {
   if(Mix_PlayingMusic())
     Mix_HaltMusic();//음악 정지
@@ -1457,17 +1546,19 @@ void game_over()  // 사용자 죽었을 시 나타나는 게임오버 창
 	bool quit = false;
   background = load_image("assets/background.png");
   message2 = TTF_RenderText_Solid(font2, "Game over", textColor2);
-  apply_surface(0, 0, background, screen, NULL);
+  apply_surface(0, 0, background, buffer, NULL);
   message = TTF_RenderText_Solid(font, "Press space to restart, esc key to quit", textColor);
-  apply_surface((640 - message->w) / 2, 280, message, screen, NULL);
-  apply_surface((640 - message2->w) / 2, 100, message2, screen, NULL);
-  SDL_Flip(screen);
+  apply_surface((640 - message->w) / 2, 280, message, buffer, NULL);
+  apply_surface((640 - message2->w) / 2, 100, message2, buffer, NULL);
+  show_screen();
+	//SDL_Flip(buffer);
   Mix_PlayChannel(-1,game_over_sound,0);
 	while (quit == false)
 	{
 		if (SDL_PollEvent(&event))
 		{
-      
+      if(event.type==SDL_VIDEORESIZE)
+        handle_resize(event.resize);
 			if (event.type == SDL_KEYDOWN)
 			{
         Mix_PlayChannel(-1,selection_sound,0);
@@ -1491,26 +1582,29 @@ void game_over()  // 사용자 죽었을 시 나타나는 게임오버 창
 			else if (event.type == SDL_QUIT)
 			{
 				quit = true;
+        return false;
 			}
 		}
 	}
+  return true;
 }
 
-void stage_clear()  // 나중에 bosscounter == 0 되면 stage clear 되도록 창 띄우기
+bool stage_clear()  // 나중에 bosscounter == 0 되면 stage clear 되도록 창 띄우기
 {
 	bool quit = false;
 
   message = TTF_RenderText_Solid(font, "Stage Clear!", textColor);
   background = load_image("assets/background.png");
-  apply_surface(0, 0, background, screen, NULL);
-  apply_surface((640 - message->w) / 2, 480/2 - message->h, message, screen, NULL);
-  SDL_Flip(screen);
-
+  apply_surface(0, 0, background, buffer, NULL);
+  apply_surface((640 - message->w) / 2, 480/2 - message->h, message, buffer, NULL);
+	show_screen();
+  //SDL_Flip(buffer);
 	while (quit == false)
 	{
 		if (SDL_PollEvent(&event))
 		{
-
+      if(event.type==SDL_VIDEORESIZE)
+        handle_resize(event.resize);
 			if (event.type == SDL_KEYDOWN)
 			{
 				switch (event.key.keysym.sym)
@@ -1527,12 +1621,14 @@ void stage_clear()  // 나중에 bosscounter == 0 되면 stage clear 되도록 �
 			else if (event.type == SDL_QUIT)
 			{
 				quit = true;
+        return false;
 			}
 		}
 	}
+  return true;
 }
 
-void sprite_surface( SDL_Surface *screen, SDL_Rect tmp, SDL_Surface* surface, int w, int h, int step , int mode1)
+void sprite_surface( SDL_Surface *buffer, SDL_Rect tmp, SDL_Surface* surface, int w, int h, int step , int mode1)
 {
 	SDL_Rect rectDst, rectSrc;
   if(mode1 == 0)
@@ -1570,5 +1666,5 @@ void sprite_surface( SDL_Surface *screen, SDL_Rect tmp, SDL_Surface* surface, in
   rectSrc.y = (step / w) * surface->h/h;
   rectSrc.w = surface->w/w;                   //분할된 이미지 선택
   rectSrc.h = surface->h/h;
-  SDL_BlitSurface(surface, &rectSrc, screen, &rectDst);
+  SDL_BlitSurface(surface, &rectSrc, buffer, &rectDst);
 }

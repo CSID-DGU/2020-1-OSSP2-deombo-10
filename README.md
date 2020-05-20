@@ -1,6 +1,8 @@
 # 2020-1-OSSP2-deombo-10
 ************변경사항************
 적들의 충돌 판정을 추가했습니다. 이제 적한테 닿으면 데미지를 받습니다. 사운드 안나오는 문제도 해결했습니다.
+특수기 사운드 효과를 수정했습니다. 이제 특수기를 쓰면 스테이지 음악을 중지시키고 효과음만 나오게 만들었습니다.
+보스 피격음과 보스 사망시 폭팔음을 추가했습니다.
 ********************************
 
 Starwars
@@ -24,6 +26,8 @@ sudo apt-get install libsdl-ttf2.0-dev
 
 sudo apt-get install libsdl-mixer1.2-dev
 
+sudo apt-get install libsdl-gfx1.2-dev
+
     Install g++
 
 
@@ -41,3 +45,8 @@ g++ -o main main.cpp helpers.h helpers.cpp AirPlane.cpp AirPlane.h define.h -lSD
 
 ./main
 
+
+scale surface 함수에 대한 레퍼런스
+http://www.sdltutorials.com/sdl-scale-surface
+http://cse.csusb.edu/tongyu/courses/cs420/notes/sdl.php
+https://stackoverflow.com/questions/53033971/how-to-get-the-color-of-a-specific-pixel-from-sdl-surface
