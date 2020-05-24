@@ -14,6 +14,7 @@ Mix_Chunk *explosion_sound1;//적 폭팔음
 Mix_Chunk *explosion_sound2;//보스 폭팔음
 Mix_Chunk *special_sound;//특수기 효과음
 Mix_Chunk *item_sound;//아이템 획득음
+Mix_Chunk *stage_clear_sound;//스테이지 클리어 사운드
 
 SDL_Surface *screen;//실제 출력되는 화면
 SDL_Surface *buffer;//화면에 그리기 전에 버퍼
@@ -108,14 +109,16 @@ void show_screen(){//SDL_flip을 직접적으로  호출하지 않고 show_scree
   SDL_FreeSurface(temp);//temp를 반드시 free 해줘야 한다!!!
 }
 int main(){
-  loop:
- _bullets enemy_bullets;
- _bullets player_bullets;
- _bullets boss_bullets;
- _bullets mini_bullets;
+ 
+ loop://gameover 시 재시작을 했을 때 돌아오는 부분
+  _bullets enemy_bullets;
+  _bullets player_bullets;
+  _bullets boss_bullets;
+  _bullets mini_bullets;
  //_special special_one;
   init();//초기화 함수
   load_files();//이미지,폰트,bgm 로드하는 함수
+  
   bool run=true;
   run=menu();
   if(EXIT == 1||!run)
@@ -135,8 +138,8 @@ int main(){
     SDL_free();
     return 0;
   }
-  menu3();
-  menu2();  //select airplane and start
+  //menu3();
+  //menu2();  //select airplane and start
 
   Continue = 0;
   srand(time(NULL));
@@ -440,6 +443,7 @@ int main(){
 
         if(A.SA_count >0){
            Mix_PauseMusic();//스테이지 음악을 PAUSE 하고
+           Mix_VolumeChunk(special_sound,MIX_MAX_VOLUME);
            Mix_PlayChannel(-1,special_sound,0);//효과음 출력
            A.SA_count --; //// Put image for SA
            flag_sa = 0;
@@ -572,6 +576,7 @@ int main(){
              
               if(A2.SA_count >0 && flag_sa2 == 10){
                  Mix_PauseMusic();
+                 Mix_VolumeChunk(special_sound,MIX_MAX_VOLUME);
                  Mix_PlayChannel(-1,special_sound,0);
                  A2.SA_count --; //// Put image for SA
                  flag_sa2= 0;
@@ -698,7 +703,9 @@ int main(){
              
               if(A2.SA_count >0&& flag_sa2==10){
                  Mix_PauseMusic();
+                 Mix_VolumeChunk(special_sound,MIX_MAX_VOLUME);
                  Mix_PlayChannel(-1,special_sound,0);
+                 
                  A2.SA_count --; //// Put image for SA
                  switch (SA2){
                  case 0:
@@ -952,6 +959,7 @@ int main(){
       game_over();
       if (Continue == 1)
       {
+        SDL_free();
         goto loop;
       }
       break;
@@ -976,6 +984,7 @@ int main(){
         game_over();
         if (Continue == 1)
         {
+          SDL_free();
           goto loop;
         }
         break;
@@ -1135,7 +1144,7 @@ bool load_files()
   explosion_sound2=Mix_LoadWAV("assets/Audio/explosion2.wav");
   special_sound=Mix_LoadWAV("assets/Audio/special.wav");
   item_sound=Mix_LoadWAV("assets/Audio/get_item.wav");
-  
+  stage_clear_sound=Mix_LoadWAV("assets/Audio/clear.wav");
   Mix_VolumeChunk(explosion_sound1,60);
 
   for(int i = 0 ; i < 4; i++)
@@ -1192,6 +1201,7 @@ bool SDL_free()
   Mix_FreeChunk(explosion_sound2);
   Mix_FreeChunk(special_sound);
   Mix_FreeChunk(item_sound);
+  Mix_FreeChunk(stage_clear_sound);
   Mix_CloseAudio();
   
   SDL_Quit();//init한 SDL 변수들 닫아주는겅 일걸,위의 freesurface랑 차이 모름
@@ -1597,7 +1607,9 @@ bool game_over()  // 사용자 죽었을 시 나타나는 게임오버 창
 bool stage_clear()  // 나중에 bosscounter == 0 되면 stage clear 되도록 창 띄우기
 {
 	bool quit = false;
+  Mix_HaltChannel(-1);
 
+  Mix_PlayChannel(-1,stage_clear_sound,0);
   message = TTF_RenderText_Solid(font, "Stage Clear!", textColor);
   background = load_image("assets/background.png");
   apply_surface(0, 0, background, buffer, NULL);
