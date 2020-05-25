@@ -56,3 +56,8 @@ http://www.sdltutorials.com/sdl-scale-surface
 http://cse.csusb.edu/tongyu/courses/cs420/notes/sdl.php
 
 https://stackoverflow.com/questions/53033971/how-to-get-the-color-of-a-specific-pixel-from-sdl-surface
+
+obstacle.png source
+The molten rock planet PNG was designed by 千图网, and originated from 千图网 and downloaded from pngtree.com.
+https://kor.pngtree.com/freepng/cartoon-lava-rock-planet-is-a-commercial-element_4074202.html
+
