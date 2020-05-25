@@ -1248,13 +1248,7 @@ bool menu()   // 처음 시작 메뉴
         {
           EXIT = 1;
           quit = true;
-          break;
-        }
-         case SDLK_s:  // s 키 누르면 키 세팅에 들어감
-        {
-          EXIT = 1;
-          quit = true;
-          break;
+          return false;
         }
 				}
 			}
@@ -1458,7 +1452,7 @@ bool menu2()   // 싱글 플레이인지 멀티 플레이인지 고르는 메뉴
         {
           EXIT = 1;
           quit = true;
-          break;
+          return false;
         }
 				}
 			}
@@ -1538,7 +1532,7 @@ bool menu3()   // 비행기 고르는 메뉴
         {
           EXIT = 1;
           quit = true;
-          break;
+          return false;
         }
 				}
 			}
@@ -1582,7 +1576,7 @@ bool game_over()  // 사용자 죽었을 시 나타나는 게임오버 창
 				case SDLK_ESCAPE://esc 키가 눌리면 종료
         {
           quit = true;
-          break;
+          return false;
         }
         case SDLK_SPACE:
         {
@@ -1629,7 +1623,7 @@ bool stage_clear()  // 나중에 bosscounter == 0 되면 stage clear 되도록 �
 				case SDLK_ESCAPE://esc 키가 눌리면 종료
         {
           quit = true;
-          break;
+          return false;
         }
 				default:
 					break;
