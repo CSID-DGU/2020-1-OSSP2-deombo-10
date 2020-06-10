@@ -136,6 +136,36 @@ private:
     Mix_Chunk* special_sound;//특수기 효과음
 };
 
+class Obstacle
+{
+public:
+    Obstacle(int x) {
+        pos_x1=x;
+        obs = load_image("assets/obstacle.png");
+        SDL_SetColorKey(obs, SDL_SRCCOLORKEY, SDL_MapRGB(obs->format,255,255,255));
+  };
+  void apply_surface(SDL_Surface * destination, SDL_Rect* clip) //draw obstacle
+  {
+      SDL_Rect offset;
+      offset.x = pos_x1;
+      offset.y = pos_y1;
+      SDL_BlitSurface(obs, clip, destination, &offset);
+  };
+
+  void control_bullet()
+  {
+    pos_y1 += 4;
+  };
+
+  int pos(){
+      return pos_y1;
+  }
+    int pos_y1=0;
+private:
+    int pos_x1;
+    SDL_Surface *obs;
+};
+
 
 class _bullets
 {
@@ -272,7 +302,7 @@ private:
     void set_offset(int w,int h){offset.w=w,offset.h=h;}
     void set_pos(int x, int y){pos_x=x;pos_y=y;}
 };
-
+/*
 class Obstacle
 {
 private:
@@ -290,7 +320,7 @@ private:
     SDL_Rect  move_obstacle();
     SDL_Rect Get_obstacle();
 };
-
+*/
 class Mini_Boss
 {
 public:

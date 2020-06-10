@@ -52,7 +52,7 @@ SDL_Surface *enemy2;
 
 SDL_Rect screen_rect;
 SDL_Rect buffer_rect;
-SDL_Surface *obstacle;  //obstacle image
+//SDL_Surface *obstacle;  //obstacle image
 
 SDL_Event event;
 TTF_Font *font;
@@ -161,6 +161,12 @@ int main(){
   bool dead = false;
   bool dead2 = false;
 
+    //for obstacle
+  int o_bound = 480+100;
+  int hole = rand()%4;
+  vector<Obstacle>::iterator obs_it;
+  vector<Obstacle> Obs;
+
   vector<Enemy_standard_2>::iterator it2;
   vector<Enemy_standard>::iterator it;
   vector<BOOM>::iterator B_it;
@@ -174,8 +180,6 @@ int main(){
   vector<Enemy_standard_2> E2;// 2nd standard enemy
   vector<special> sa_1;
   list<SDL_Rect> CB;//충돌 박스를 저장할 리스트
-
-  
 
   //생성자에 사운드를 저장
   AirPlane A(bullet_sound,item_sound,hit_sound);//사용자 비행기
@@ -209,7 +213,26 @@ int main(){
         bound = (*ta).pos();
     }
 
+    //for obstacle
+    vector<Obstacle> o;
+    obs_it = Obs.begin();
+    for(obs_it; obs_it != Obs.end(); obs_it++) {
+      if((*obs_it).pos() < (480 + 130)) o.push_back(*obs_it);
+    }
+    Obs = o;
+
+    if(o.size()>0){
+      vector<Obstacle>:: iterator oa;
+      oa = (o.begin());
+      o_bound = (*oa).pos();
+    }
+
+    //for obstacle
+    if(o_bound > (480 + 130)) o_bound = 480+100;
+
+    //for special
     if(bound < -130 )bound = -100;
+
     if(count % 5 == 0) shootcnt = 0;
     if(count % 5 == 0) shootcnt2 = 0;
     if(count % 50 == 0)//100count마다 1기씩 생성
@@ -220,7 +243,42 @@ int main(){
       Enemy_standard_2 tmp2(j);
       E.push_back(tmp);
       E2.push_back(tmp2);
-  }
+    }
+
+    if(count % 500 == 0)
+    {
+      Obstacle tmp(0);
+      Obstacle tmp2(50);
+      Obstacle tmp3(100);
+      Obstacle tmp4(150);
+      Obstacle tmp5(200);
+      Obstacle tmp6(250);
+      Obstacle tmp7(300);
+      Obstacle tmp8(350);
+      Obstacle tmp9(400);
+      Obstacle tmp10(450);
+      Obstacle tmp11(500);
+      Obstacle tmp12(550);
+      Obstacle tmp13(600);
+      Obstacle tmp14(650);
+      Obstacle tmp15(700);
+
+      Obs.push_back(tmp);
+      Obs.push_back(tmp2);
+      Obs.push_back(tmp3);
+      Obs.push_back(tmp4);
+      Obs.push_back(tmp5);
+      Obs.push_back(tmp6);
+      Obs.push_back(tmp7);
+      Obs.push_back(tmp8);
+      Obs.push_back(tmp9);
+      Obs.push_back(tmp10);
+      Obs.push_back(tmp11);
+      Obs.push_back(tmp12);
+      Obs.push_back(tmp13);
+      Obs.push_back(tmp14);
+      Obs.push_back(tmp15);
+    }
 
     start_time = SDL_GetTicks();//나중에 프레임 계산할 변수
 
@@ -383,6 +441,11 @@ int main(){
         mini_bullets.eliminate(*it_sa);
     }
 
+    //for obstacle
+    if(Obs.size()>0) {
+      obs_it = Obs.begin();
+    }
+
     if(SDL_PollEvent(&event)){
       if(event.type == SDL_QUIT)//버튼 누르면 꺼저야 되는데 안 꺼짐 수정 사항
 			   break;
@@ -420,6 +483,14 @@ int main(){
     {
         for(it_sa = sa_1.begin(); it_sa != sa_1.end(); it_sa++){
             (*it_sa).control_bullet();
+        }
+    }
+
+    //for obstacle
+    if(Obs.size() >0)
+    {
+        for(obs_it = Obs.begin(); obs_it != Obs.end(); obs_it++){
+            (*obs_it).control_bullet();
         }
     }
 
@@ -886,6 +957,14 @@ int main(){
     {
         for(it_sa = sa_1.begin(); it_sa != sa_1.end(); it_sa++){
             (*it_sa).apply_surface(buffer, NULL);
+        }
+    }
+
+    //for obstacle
+    if(Obs.size() >0)
+    {
+        for(obs_it = Obs.begin(); obs_it != Obs.end(); obs_it++){
+            (*obs_it).apply_surface(buffer, NULL);
         }
     }
 

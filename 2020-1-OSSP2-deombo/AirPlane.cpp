@@ -511,7 +511,7 @@ SDL_Rect Enemy_standard::Get_plane()
   offset.y = pos_y;
   return offset;
 }
-
+/*
 //About Obstacle
 Obstacle::Obstacle()
 {
@@ -522,7 +522,7 @@ Obstacle::Obstacle()
   if( mode == 0)
     pos_x = x;// 처음 시작 위치 지정
   else if(mode == 1)
-    pos_x = y;*/
+    pos_x = y;
 
   pos_y = -OBSTACLE_HEIGHT;//처음 시작 위치 지정
   //life = 1;
@@ -553,7 +553,7 @@ bool Obstacle::Got_shot(_bullets &A)
     {
       flag = true;
     }
-    */
+    
   }
 
   A.blt = tmp;
@@ -591,7 +591,7 @@ SDL_Rect Obstacle::Get_obstacle()
   offset.y = pos_y;
   return offset;
 }
-
+*/
 
 Mini_Boss::Mini_Boss(Mix_Chunk* sound){
     mini_boss = load_image("assets/boss2.png");// 비행기 이미지
