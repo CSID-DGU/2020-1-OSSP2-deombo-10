@@ -1,6 +1,6 @@
 #include "AirPlane.h"
 
-void Item::add_itm(int x, int y, int ply_x, int ply_y)
+void Health_item::add_itm(int x, int y, int ply_x, int ply_y)
 {
   item = load_image("assets/tem_li.png");
   SDL_SetColorKey(item, SDL_SRCCOLORKEY,SDL_MapRGB(item->format,0,0,0));
@@ -8,7 +8,7 @@ void Item::add_itm(int x, int y, int ply_x, int ply_y)
   itm.push_back(tmp);
 }
 
-void Item::item_apply_surface(SDL_Surface *item, SDL_Surface* destination, SDL_Rect* clip)  // item들 그리기
+void Health_item::item_apply_surface(SDL_Surface *item, SDL_Surface* destination, SDL_Rect* clip)  // item들 그리기
 {
   
   for(vector<items>::iterator iter = itm.begin(); iter!= itm.end(); iter++)
@@ -17,7 +17,7 @@ void Item::item_apply_surface(SDL_Surface *item, SDL_Surface* destination, SDL_R
   }
 }
 
-void Item::control_item()
+void Health_item::control_item()
 {
   vector<items> temp;
   for(vector<items>::iterator iter = itm.begin(); iter != itm.end(); iter++)
@@ -30,12 +30,12 @@ void Item::control_item()
   itm = temp;
 }
 
-Item::~Item()
+Health_item::~Health_item()
 {
     SDL_FreeSurface(item);
 }
 
-void Item2::add_itm(int x, int y, int ply_x, int ply_y)
+void Special_item::add_itm(int x, int y, int ply_x, int ply_y)
 {
   item = load_image("assets/tem_sa.png");
   SDL_SetColorKey(item, SDL_SRCCOLORKEY,SDL_MapRGB(item->format,0,0,0));
@@ -43,7 +43,7 @@ void Item2::add_itm(int x, int y, int ply_x, int ply_y)
   itm.push_back(tmp);
 }
 
-void Item2::item_apply_surface(SDL_Surface *item, SDL_Surface* destination, SDL_Rect* clip)  // item들 그리기
+void Special_item::item_apply_surface(SDL_Surface *item, SDL_Surface* destination, SDL_Rect* clip)  // item들 그리기
 {
   for(vector<items>::iterator iter = itm.begin(); iter!= itm.end(); iter++)
   {
@@ -51,7 +51,7 @@ void Item2::item_apply_surface(SDL_Surface *item, SDL_Surface* destination, SDL_
   }
 }
 
-void Item2::control_item()
+void Special_item::control_item()
 {
   vector<items> temp;
   for(vector<items>::iterator iter = itm.begin(); iter != itm.end(); iter++)
@@ -64,12 +64,12 @@ void Item2::control_item()
   itm = temp;
 }
 
-Item2::~Item2()
+Special_item::~Special_item()
 {
     SDL_FreeSurface(item);
 }
 
-void Item3::add_itm(int x, int y, int ply_x, int ply_y)
+void Upgrade_item1::add_itm(int x, int y, int ply_x, int ply_y)
 {
   item = load_image("assets/tem_sh.png");
   SDL_SetColorKey(item, SDL_SRCCOLORKEY,SDL_MapRGB(item->format,0,0,0));
@@ -77,7 +77,7 @@ void Item3::add_itm(int x, int y, int ply_x, int ply_y)
   itm.push_back(tmp);
 }
 
-void Item3::item_apply_surface(SDL_Surface *item, SDL_Surface* destination, SDL_Rect* clip)  // item들 그리기
+void Upgrade_item1::item_apply_surface(SDL_Surface *item, SDL_Surface* destination, SDL_Rect* clip)  // item들 그리기
 {
   for(vector<items>::iterator iter = itm.begin(); iter!= itm.end(); iter++)
   {
@@ -85,7 +85,7 @@ void Item3::item_apply_surface(SDL_Surface *item, SDL_Surface* destination, SDL_
   }
 }
 
-void Item3::control_item()
+void Upgrade_item1::control_item()
 {
   vector<items> temp;
   for(vector<items>::iterator iter = itm.begin(); iter != itm.end(); iter++)
@@ -98,7 +98,7 @@ void Item3::control_item()
   itm = temp;
 }
 
-Item3::~Item3()
+Upgrade_item1::~Upgrade_item1()
 {
     SDL_FreeSurface(item);
 }
@@ -115,7 +115,7 @@ AirPlane::AirPlane(Mix_Chunk* shooting,Mix_Chunk* got,Mix_Chunk* hit)
   get_sound=got;
   hit_sound=hit;
 
-
+  bullet_mode =1;//총알 모드는 기본적으로 1임
   life = 3;
   SA_count = 3;
   invisible_mode = 0;
@@ -128,8 +128,16 @@ AirPlane::~AirPlane()
 
 void AirPlane::shooting(_bullets &player_bullets)
 {
-  Mix_PlayChannel(-1,shooting_sound,0);//총알 발사음 출력
-  player_bullets.add_blt( 0, -10,pos_x,pos_y - 15);
+  if(bullet_mode==1){//기본 총알
+    Mix_PlayChannel(-1,shooting_sound,0);//총알 발사음 출력
+    player_bullets.add_blt( 0, -10,pos_x,pos_y - 15);
+  }
+  else if(bullet_mode==2){//3 방향 발사 모드
+    Mix_PlayChannel(-1,shooting_sound,0);//총알 발사음 출력
+    player_bullets.add_blt( 7, -7,pos_x,pos_y - 15);
+    player_bullets.add_blt( 0, -10,pos_x,pos_y - 15);
+    player_bullets.add_blt(-7, -7,pos_x,pos_y - 15);
+  }
 }
 
 void AirPlane::plane_apply_surface(SDL_Surface* source, SDL_Surface* destination, SDL_Rect* clip )

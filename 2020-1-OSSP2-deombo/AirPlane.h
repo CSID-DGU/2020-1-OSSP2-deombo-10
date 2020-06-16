@@ -56,12 +56,12 @@ public:
   SDL_Rect offset;                      // item의 위치
 }items;
 
-class Item
+class Health_item
 {
 public:
   SDL_Surface *item;
 
-  ~Item();
+  ~Health_item();
   void add_itm(int x, int y, int ply_x, int ply_y);                                      //x,y는 item 방향성, ply_x,y는 item의 현재 위치
   void item_apply_surface(SDL_Surface *item, SDL_Surface* destination, SDL_Rect* clip);  // item들 그리기
   void control_item();
@@ -69,12 +69,12 @@ public:
   vector<items> itm;
 };
 
-class Item2
+class Special_item
 {
 public:
   SDL_Surface *item;
 
-  ~Item2();
+  ~Special_item();
   void add_itm(int x, int y, int ply_x, int ply_y);                                      //x,y는 item 방향성, ply_x,y는 item의 현재 위치
   void item_apply_surface(SDL_Surface *item, SDL_Surface* destination, SDL_Rect* clip);  // item들 그리기
   void control_item();
@@ -82,18 +82,31 @@ public:
   vector<items> itm;
 };
 
-class Item3
+class Upgrade_item1
 {
 public:
   SDL_Surface *item;
 
-  ~Item3();
+  ~Upgrade_item1();
   void add_itm(int x, int y, int ply_x, int ply_y);                                      //x,y는 item 방향성, ply_x,y는 item의 현재 위치
   void item_apply_surface(SDL_Surface *item, SDL_Surface* destination, SDL_Rect* clip);  // item들 그리기
   void control_item();
 
   vector<items> itm;
 };
+class Item4
+{
+public:
+  SDL_Surface *item;
+
+  ~Item4();
+  void add_itm(int x, int y, int ply_x, int ply_y);                                      //x,y는 item 방향성, ply_x,y는 item의 현재 위치
+  void item_apply_surface(SDL_Surface *item, SDL_Surface* destination, SDL_Rect* clip);  // item들 그리기
+  void control_item();
+
+  vector<items> itm;
+};
+
 
 class special
 {
@@ -248,7 +261,7 @@ public:
   void set_offset(int w,int h){offset.w=w,offset.h=h;}
   void set_pos(int x, int y){pos_x=x;pos_y=y;}
 
-
+  short bullet_mode;// 업글 아이템을 먹었을 시 불릿 모드를 저장할 변수 1이 기본 발사 모드 2가 3방향 발사 모드
   int invisible_mode;
   int life;
   int SA_count;

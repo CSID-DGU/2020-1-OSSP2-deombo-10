@@ -197,9 +197,9 @@ int main(){
   Mini_Boss tmp3(hit_sound);
   Boss tmp4(hit_sound);
   
-  Item I;
-  Item2 I2;
-  Item I3;
+  Health_item I;//체력 아이템
+  Special_item I2;//스페셜 아이템
+  Upgrade_item1 I3;//총알 업글 아이템 1
   
   if(Mix_PlayingMusic())
     Mix_HaltMusic();
@@ -348,7 +348,7 @@ int main(){
             I.add_itm((*it).pos_x, (*it).pos_y, (*it).pos_x, (*it).pos_y + 20);
             flag = (rand() % 3);
           }
-          else if(I3.itm.size() == 0)
+          if(I3.itm.size() == 0)
           {
             I3.add_itm((*it).pos_x, (*it).pos_y, (*it).pos_x, (*it).pos_y + 20);
             flag3 = (rand() % 4);
@@ -439,9 +439,9 @@ int main(){
       flag2 = 0;
     }
 
-    if(A.Got_item(I3.itm))//쉴드 아이템 획득시--미구현
+    if(A.Got_item(I3.itm))//업그레이드 아이템 획득시
     {
-      A.Got_shiled(plane);
+      A.bullet_mode=2;
       flag3 = 0;
     }
 
@@ -1072,8 +1072,7 @@ int main(){
     {
       apply_surface(550, 10, life, buffer,NULL); apply_surface(580, 10, life, buffer,NULL); apply_surface(610, 10, life, buffer,NULL);
     }
-
-
+    
     if(mode == 2)
     {
       if(A.life == 0 && A2.life == 0)
@@ -1225,7 +1224,7 @@ bool load_files()
   arrow = load_image("assets/arrow.png");
   sapoint = load_image("assets/sapoint1.png");
 
-  font = TTF_OpenFont("assets/Terminus.ttf", 18);//작은 안내문 폰트
+  font = TTF_OpenFont("assets/Terminus.ttf", 22);//작은 안내문 폰트
   font2 = TTF_OpenFont("assets/Starjout.ttf", 84);//제목 폰트
   font3 = TTF_OpenFont("assets/Starjout.ttf",24);
 
@@ -1316,7 +1315,7 @@ bool menu()   // 처음 시작 메뉴
 	while (quit == false)
 	{
 	
-    message = TTF_RenderText_Solid(font, "Press space to start, s key to key setting, esc key to quit", textColor); // space키는 시작 esc키는 종료
+    message = TTF_RenderText_Solid(font, "Press space to start, esc key to quit", textColor); // space키는 시작 esc키는 종료
     message2 = TTF_RenderText_Solid(font2, "Starwars", textColor2);  // 제목
     background = load_image("assets/menu3.jpg");  // 배경
 		apply_surface(0, 0, background, buffer, NULL);
@@ -1679,20 +1678,19 @@ bool game_over()  // 사용자 죽었을 시 나타나는 게임오버 창
         {
           Continue = 1;
           quit = true;
-          break;
+          return true;
         }
-				default:
-					break;
-				}
-			}
-			else if (event.type == SDL_QUIT)
+				default:{}
+			  }
+		
+	  	}
+      else if (event.type == SDL_QUIT)
 			{
 				quit = true;
         return false;
 			}
-		}
-	}
-  return true;
+  	}
+  }
 }
 
 bool stage_clear()  // 나중에 bosscounter == 0 되면 stage clear 되도록 창 띄우기
