@@ -235,7 +235,8 @@ public:
   bool Got_shot(_bullets &A,_bullets &B,_bullets &C);
   bool Got_item(vector<items> I);
   bool detect_collision(list<SDL_Rect> C);
-   bool detect_collision(SDL_Rect C);
+  bool detect_collision(SDL_Rect C);
+  bool check_in_border(SDL_Rect C,bool& flag);
   void shooting(_bullets &A);
   void increaseLife();
   void increaseSA();

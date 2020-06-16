@@ -87,7 +87,6 @@ bool stage_clear();
 void special_ability(int SA);
 void handle_resize(SDL_ResizeEvent &event){//화면의 크기가 resize 되면 이 함수가 호출됨
   
-
   SDL_FreeSurface(screen);//기존 screen을 free 해준다음.
   screen = SDL_SetVideoMode(event.w, event.h, SCREEN_BPP, SDL_SWSURFACE | SDL_DOUBLEBUF |SDL_RESIZABLE);
   //재조정된 크기에 맞춰 다시 screen을 만든다.
@@ -161,6 +160,9 @@ int main(){
   bool dead = false;
   bool dead2 = false;
 
+  bool border_check=true;//경계 밖을 나간 것을 체크하기 위해 경계 안에 있는 경우 true
+  bool border_check2=true;
+
     //for obstacle
   int o_bound = 480+100;
   int hole = rand()%4;
@@ -180,6 +182,13 @@ int main(){
   vector<Enemy_standard_2> E2;// 2nd standard enemy
   vector<special> sa_1;
   list<SDL_Rect> CB;//충돌 박스를 저장할 리스트
+
+  SDL_Rect Border;//경계를 저장할 Border
+  Border.x =-PLAYER_WIDTH;
+  Border.y=-PLAYER_HEIGHT;
+  Border.w=SCREEN_WIDTH + 2*PLAYER_WIDTH;
+  Border.h=SCREEN_HEIGHT + 2*PLAYER_HEIGHT;
+
 
   //생성자에 사운드를 저장
   AirPlane A(bullet_sound,item_sound,hit_sound);//사용자 비행기
@@ -302,18 +311,26 @@ int main(){
 
     if(mini_bullets.blt.size() > 0)
       mini_bullets.control_bullet();
-
-
-    if(dead != true &&(A.Got_shot(enemy_bullets,boss_bullets,mini_bullets)||A.detect_collision(CB))&& A.invisible_mode == 0)      //사용자 피격 판정
+    
+    if(dead != true &&(A.Got_shot(enemy_bullets,boss_bullets,mini_bullets)||A.detect_collision(CB)
+        ||A.check_in_border(Border,border_check))&& A.invisible_mode == 0)      //1 플레이어 피격 판정
     {
+      //총알에 맞거나 충돌박스에 부딪치거나 경계밖으로 나갔을 시
       A.life--;
       A.invisible_mode = 1;
+      if(!border_check)//경계 밖에 있는 경우
+        A.set_pos(SCREEN_WIDTH/2,SCREEN_HEIGHT/2);//비행기를 초기 위치로 돌려놓음
     }
 
-    if(dead2 != true && mode == 2 &&(A2.Got_shot(enemy_bullets,boss_bullets,mini_bullets)||A2.detect_collision(CB))&& A2.invisible_mode == 0)      //사용자 피격 판정
+    if(dead2 != true && mode == 2 &&(A2.Got_shot(enemy_bullets,boss_bullets,mini_bullets)
+        ||A2.detect_collision(CB)||A2.check_in_border(Border,border_check2))&& A2.invisible_mode == 0)      //2 플레이어 피격 판정
     {
+      //총알에 맞거나 충돌박스에 부딪치거나 경계밖으로 나갔을 시
       A2.life--;
       A2.invisible_mode = 1;
+      if(!border_check2)//경계 밖에 있는 경우
+         A.set_pos(SCREEN_WIDTH/2,SCREEN_HEIGHT/2);//비행기를 초기 위치로 돌려놓음
+      
     }
 
     if(E.size() > 0)
@@ -404,7 +421,7 @@ int main(){
       tmp4.loss_life(score,explosion_sound2);
     }
 
-    if(A.Got_item(I.itm))
+    if(A.Got_item(I.itm))//체력 아이템 획득시
     {
       if(A.life < 3)
       {
@@ -413,7 +430,7 @@ int main(){
       flag = 0;
     }
 
-    if(A.Got_item(I2.itm))
+    if(A.Got_item(I2.itm))//스페셜 아이템 획득시
     {
       if(A.SA_count < 3)
       {
@@ -422,7 +439,7 @@ int main(){
       flag2 = 0;
     }
 
-    if(A.Got_item(I3.itm))
+    if(A.Got_item(I3.itm))//쉴드 아이템 획득시--미구현
     {
       A.Got_shiled(plane);
       flag3 = 0;
@@ -456,7 +473,8 @@ int main(){
     keystates = SDL_GetKeyState(NULL);
     if(!CB.empty())
       CB.clear();
-  
+
+ 
     if(keystates[SDLK_ESCAPE])
       break;
     if(E.size() > 0)//적 비행기 이동 및 발사

@@ -108,6 +108,8 @@ AirPlane::AirPlane(Mix_Chunk* shooting,Mix_Chunk* got,Mix_Chunk* hit)
   pos_x = SCREEN_WIDTH / 2;//처음 시작 위치 지정
   pos_y = SCREEN_HEIGHT / 2;//처음 시작 위치 지정
   
+  offset.x = pos_x;
+  offset.y = pos_y;
   //플레이어 사운드 설정
   shooting_sound=shooting;
   get_sound=got;
@@ -138,12 +140,16 @@ void AirPlane::plane_apply_surface(SDL_Surface* source, SDL_Surface* destination
 }
 void AirPlane::control_plane(int x, int y)
 {
+  /*
   if( pos_x + x >= 0 && (pos_x + PLAYER_WIDTH + x) <= SCREEN_WIDTH &&
       pos_y + y >= 0 && (pos_y + PLAYER_HEIGHT + y) < SCREEN_HEIGHT-6)//화면 범위 안
   {
     pos_x += x;
     pos_y += y;
   }
+  */
+    pos_x += x;
+    pos_y += y;
 }
 void AirPlane::invisible(SDL_Surface *plane)
 {
@@ -292,6 +298,15 @@ bool AirPlane::detect_collision(list<SDL_Rect> C)
 bool AirPlane::detect_collision(SDL_Rect C)
 {
   if(intersects(C,this->offset))//충돌시
+  {
+      Mix_PlayChannel(-1,hit_sound,0);//피격음 출력
+      return true;
+  }
+  return false;
+}
+bool AirPlane::check_in_border(SDL_Rect C,bool& flag)
+{
+  if(!(flag=intersects(C,this->offset)))//경계 밖에 있는 경우
   {
       Mix_PlayChannel(-1,hit_sound,0);//피격음 출력
       return true;
