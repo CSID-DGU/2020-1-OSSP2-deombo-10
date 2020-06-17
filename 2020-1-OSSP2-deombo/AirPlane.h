@@ -385,7 +385,7 @@ public:
   int count = 0;
   int direction = 0;
   int cont_shoot = 0;
-  int life;
+  float life;
 
 public:
   SDL_Rect offset;
@@ -397,7 +397,7 @@ public:
   void shooting(_bullets &A);
   void enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip);
   SDL_Rect  control_plane(_bullets &A);
-  void loss_life(int& score,Mix_Chunk* sound);
+  void loss_life(int& score,Mix_Chunk* sound,float damage);
   SDL_Rect Get_plane();
 
   void set_offset(int w,int h){offset.w=w,offset.h=h;}
@@ -420,16 +420,17 @@ public:
   int count = 0;
   int direction = 0;
   int cont_shoot = 0;
-  int life;
+  float life;
 
 public:
   Second_Boss(Mix_Chunk* sound);
   ~Second_Boss();
   bool Got_shot(_bullets &A, int &x);
+  bool Got_shot(laser_bullet A, int &x,short RNG);
   void shooting(_bullets &A);
   void enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip);
   SDL_Rect  control_plane(_bullets &A);
-  void loss_life(int& score,Mix_Chunk* sound);
+  void loss_life(int& score,Mix_Chunk* sound,float damage);
   SDL_Rect Get_plane();
 
   void set_offset(int w,int h){offset.w=w,offset.h=h;}
@@ -446,7 +447,7 @@ private:
   Mix_Chunk* hit_sound;//피격음
 
   int pos_x, pos_y;
-  int life;
+  float life;
   int count = 0;
   int direction = 0;
   int cont_shoot = 0;
@@ -462,7 +463,7 @@ public:
   void shooting(_bullets &A);
   void enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip);
   SDL_Rect  control_plane(_bullets &A);
-  void loss_life(int& score,Mix_Chunk* sound);
+  void loss_life(int& score,Mix_Chunk* sound,float damage);
   SDL_Rect Get_plane();
 
   void set_offset(int w,int h){offset.w=w,offset.h=h;}

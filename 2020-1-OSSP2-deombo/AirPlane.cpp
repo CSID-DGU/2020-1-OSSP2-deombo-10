@@ -148,7 +148,7 @@ AirPlane::AirPlane(Mix_Chunk* shooting,Mix_Chunk* got,Mix_Chunk* hit)
   get_sound=got;
   hit_sound=hit;
 
-  bullet_mode =1;//총알 모드는 기본적으로 1임
+  bullet_mode =3;//총알 모드는 기본적으로 1임
   life = 3;
   SA_count = 3;
   invisible_mode = 0;
@@ -786,11 +786,14 @@ SDL_Rect Mini_Boss::Get_plane()
   return offset;
 }
 
-void Mini_Boss::loss_life(int& score,Mix_Chunk* sound)
+void Mini_Boss::loss_life(int& score,Mix_Chunk* sound,float damage)
 {
-    this->life--;
-    score +=50;
-    if( this->life == 0) {
+    this->life-=damage;
+    if(damage==1)
+      score += 50;
+    else
+      score+=5;
+    if( this->life <= 0) {
       Mix_PlayChannel(-1,sound,0);//보스 사망시 폭팔음 출력
       this->~Mini_Boss();
       score+=1000;
@@ -850,6 +853,19 @@ bool Second_Boss::Got_shot(_bullets &A, int &x){
 
     return flag;
 };
+
+bool Second_Boss::Got_shot(laser_bullet A, int &x,short RNG){//레이저 빔에 맞을 때 판정
+
+    bool flag=false;
+    if(A.env){
+      if(flag=intersects(this->offset,A.offset))//맞았을때
+      {
+        Mix_PlayChannel(-1,hit_sound,0);//사운드 출력
+        x=RNG%5;
+      }
+    }
+    return flag;
+};
 void Second_Boss::shooting(_bullets &A){
     A.add_blt( 0, 5,pos_x + 125,pos_y + 82);
     A.add_blt( 3, 5,pos_x + 125,pos_y + 82);
@@ -894,11 +910,14 @@ SDL_Rect Second_Boss::Get_plane()
   return offset;
 }
 
-void Second_Boss::loss_life(int& score,Mix_Chunk* sound)
+void Second_Boss::loss_life(int& score,Mix_Chunk* sound,float damage)
 {
-    this->life--;
-    score +=50;
-    if( this->life == 0) {
+    this->life-damage;
+    if(damage==1)
+      score += 50;
+    else
+      score+=5;
+    if( this->life <= 0) {
       Mix_PlayChannel(-1,sound,0);//보스 사망시 폭팔음 출력
       this->~Second_Boss();
       score+=1000;
@@ -1038,11 +1057,15 @@ SDL_Rect Boss::Get_plane()
 
   return offset;
 }
-void Boss::loss_life(int& score,Mix_Chunk* sound)
+void Boss::loss_life(int& score,Mix_Chunk* sound,float damage)
 {
-    this->life--;
-    score += 50;
-    if( this->life == 0) {
+    this->life-=damage;
+    if(damage==1)
+      score += 50;
+    else
+      score+=5;
+    
+    if( this->life <= 0) {
       Mix_PlayChannel(-1,sound,0);
       this->~Boss();
       score+=3000;
