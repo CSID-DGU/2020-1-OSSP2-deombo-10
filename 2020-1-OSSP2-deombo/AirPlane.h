@@ -425,8 +425,8 @@ public:
 
   Boss(Mix_Chunk* sound);
   ~Boss();
-  bool Got_shot(_bullets &A,  int &x);
-  bool Got_shot(laser_bullet A, int &x,short RNG);
+  bool Got_shot(_bullets &A,  int& x);
+  bool Got_shot(laser_bullet A, int& x,short RNG);
   void shooting(_bullets &A);
   void enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip);
   SDL_Rect  control_plane(_bullets &A);

@@ -205,7 +205,12 @@ int main(){
   Special_item I2;//스페셜 아이템
   Upgrade_item1 I3;//3방향 발사 업그레이드
   Upgrade_item2 I4;//직선 관통 레이저 업그레이드 
-  
+  laser_bullet player_laser_bullet;
+  laser_bullet player2_laser_bullet;
+
+
+  player_laser_bullet.offset.w=player2_laser_bullet.offset.w=5;
+  player_laser_bullet.offset.h=player2_laser_bullet.offset.h=(Uint16)SCREEN_HEIGHT;
 
  
  
@@ -216,15 +221,10 @@ int main(){
 
   while(true){
     
-    laser_bullet player_laser_bullet;
-    laser_bullet player2_laser_bullet;
-
-
-    player_laser_bullet.offset.w=player2_laser_bullet.offset.w=5;
-    player_laser_bullet.offset.h=player2_laser_bullet.offset.h=(Uint16)SCREEN_HEIGHT;
+  
 
    
-    player_laser_bullet.env=player2_laser_bullet.env=false;
+   
 
     RNG=rand();//매 프레임마다 확률 변수를 조정
     if(flag_sa < 10) flag_sa++;
@@ -538,6 +538,8 @@ int main(){
           shootcnt = 1;
       }
     }
+    else{ player_laser_bullet.env=false;}
+    /*
     if(mode ==2&&keystates[SDLK_f] && dead2 != true)
       {
         if(shootcnt2 == 0) {
@@ -545,7 +547,9 @@ int main(){
             shootcnt2 = 1;
         }
       }
-
+    */
+   
+   
     if(keystates[SDLK_p] && flag_sa == 10 && dead != true)    /// SHOULD HAVE FLAG TO A ABILITY IS USED NUMEROUS TIMES BY PRESSING ONCE.
     {
 
@@ -679,6 +683,8 @@ int main(){
                 shootcnt = 1;
             }
           }
+        else{player2_laser_bullet.env=false;}
+         
           if(mode == 2 && keystates[SDLK_g])    /// SHOULD HAVE FLAG TO AVOID SPECIAL ABILITY IS USED NUMEROUS TIMES BY PRESSING ONCE.
           {
              

@@ -141,6 +141,8 @@ AirPlane::AirPlane(Mix_Chunk* shooting,Mix_Chunk* got,Mix_Chunk* hit)
   
   offset.x = pos_x;
   offset.y = pos_y;
+  offset.w=PLAYER_WIDTH;
+  offset.h=PLAYER_HEIGHT;
   //플레이어 사운드 설정
   shooting_sound=shooting;
   get_sound=got;
@@ -172,9 +174,10 @@ void AirPlane::shooting(_bullets &player_bullets,laser_bullet &player_laser_bull
   else if(bullet_mode==3)
   {
     player_laser_bullet.env=true;
-    player_laser_bullet.offset.x= pos_x+7;
+    player_laser_bullet.offset.w=3;
+    player_laser_bullet.offset.h=SCREEN_HEIGHT;
+    player_laser_bullet.offset.x= pos_x+9;
     player_laser_bullet.offset.y= pos_y-player_laser_bullet.offset.h;
-    
   }
 }
 
@@ -811,7 +814,7 @@ Boss::~Boss(){
     delete this->mini_boss;
 };
 
-bool Boss::Got_shot(_bullets A, int &x){
+bool Boss::Got_shot(_bullets &A, int& x){
     vector<bullets>::iterator iter;
     vector<bullets> tmp;
 
@@ -844,7 +847,7 @@ bool Boss::Got_shot(_bullets A, int &x){
 
     return flag;
 };
-bool Boss::Got_shot(laser_bullet &A, int &x,short RNG){//레이저 빔에 맞을 때 판정
+bool Boss::Got_shot(laser_bullet A, int &x,short RNG){//레이저 빔에 맞을 때 판정
 
     bool flag=false;
     if(A.env){
