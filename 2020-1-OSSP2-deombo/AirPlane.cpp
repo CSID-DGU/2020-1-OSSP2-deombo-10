@@ -130,13 +130,13 @@ void AirPlane::shooting(_bullets &player_bullets)
 {
   if(bullet_mode==1){//기본 총알
     Mix_PlayChannel(-1,shooting_sound,0);//총알 발사음 출력
-    player_bullets.add_blt( 0, -10,pos_x,pos_y - 15);
+    player_bullets.add_blt( 0, -10,pos_x+5,pos_y - 15);
   }
   else if(bullet_mode==2){//3 방향 발사 모드
     Mix_PlayChannel(-1,shooting_sound,0);//총알 발사음 출력
-    player_bullets.add_blt( 7, -7,pos_x,pos_y - 15);
-    player_bullets.add_blt( 0, -10,pos_x,pos_y - 15);
-    player_bullets.add_blt(-7, -7,pos_x,pos_y - 15);
+    player_bullets.add_blt( 7, -7,pos_x+11,pos_y - 20, -45);
+    player_bullets.add_blt( 0, -10,pos_x+5,pos_y - 15);
+    player_bullets.add_blt(-7, -7,pos_x-13,pos_y - 20, 45);
   }
 }
 

@@ -36,8 +36,18 @@ public:
     move_y = y;
     offset.x = ply_x;
     offset.y = ply_y;
+    angle=0;
+  }
+   bullets(int x, int y , int ply_x, int ply_y,double a )
+  {
+    move_x = x;
+    move_y = y;
+    offset.x = ply_x;
+    offset.y = ply_y;
+    angle = a;
   }
   int move_x, move_y;//총알들의 방향성
+  double angle;
   SDL_Rect offset;//총알들의 위치
 }bullets;
 
@@ -189,6 +199,11 @@ public:
     bullets tmp(x,y,ply_x,ply_y);
     blt.push_back(tmp);
   }
+    void add_blt(int x, int y, int ply_x, int ply_y,double angle)//x,y는 총알 방향성, ply_x,y는 총알의 현재 위치 double은 회전 각도이다.
+  {
+    bullets tmp(x,y,ply_x,ply_y,angle);
+    blt.push_back(tmp);
+  }
   void set_offNmove(int x, int y,int w,int h){
     for(vector<bullets>::iterator iter = blt.begin(); iter != blt.end(); iter++)
       {
@@ -200,7 +215,14 @@ public:
   {
     for(vector<bullets>::iterator iter = blt.begin(); iter!= blt.end(); iter++)
     {
-      SDL_BlitSurface( bullet, clip, destination, &(*iter).offset);
+      if(iter->angle ==0)
+        SDL_BlitSurface( bullet, clip, destination, &(*iter).offset);
+      else
+      {
+       
+        SDL_BlitSurface( rotozoomSurface(bullet,iter->angle,1.0,SMOOTHING_OFF), clip, destination, &(*iter).offset);
+      }
+      
     }
   }
 
@@ -209,7 +231,7 @@ public:
     vector<bullets> temp;
     for(vector<bullets>::iterator iter = blt.begin(); iter != blt.end(); iter++)
     {
-      bullets tmp((*iter).move_x,(*iter).move_y,(*iter).offset.x + (*iter).move_x,(*iter).offset.y + (*iter).move_y);
+      bullets tmp((*iter).move_x,(*iter).move_y,(*iter).offset.x + (*iter).move_x,(*iter).offset.y + (*iter).move_y,(*iter).angle);
       if( -1 < tmp.offset.x && tmp.offset.x< SCREEN_WIDTH && 0 <= tmp.offset.y  && tmp.offset.y < SCREEN_HEIGHT){
         temp.push_back(tmp);
       }

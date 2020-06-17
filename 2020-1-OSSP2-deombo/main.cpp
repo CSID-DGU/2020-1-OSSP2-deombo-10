@@ -1697,7 +1697,7 @@ bool stage_clear()  // 나중에 bosscounter == 0 되면 stage clear 되도록 �
 {
 	bool quit = false;
   Mix_HaltChannel(-1);
-
+  Mix_HaltMusic();
   Mix_PlayChannel(-1,stage_clear_sound,0);
   message = TTF_RenderText_Solid(font, "Stage Clear!", textColor);
   background = load_image("assets/background.png");
