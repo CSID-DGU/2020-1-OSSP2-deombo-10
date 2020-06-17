@@ -413,7 +413,7 @@ int main(){
         }
     }   // have to add the condition when the mini boss appear
 
-    if(tmp4.amount == 1 && tmp4.Got_shot(player_bullets, boom_mode) && score >= 10000) // have to add the condition when the mini boss appear
+    if(tmp4.amount == 1 && tmp4.Got_shot(player_bullets, boom_mode) && score >= 5000) // have to add the condition when the mini boss appear
     {
       BOOM tmp(tmp4.Get_plane());
       tmp.three = boom_mode;
@@ -1316,7 +1316,7 @@ bool menu()   // 처음 시작 메뉴
 	{
 	
     message = TTF_RenderText_Solid(font, "Press space to start, esc key to quit", textColor); // space키는 시작 esc키는 종료
-    message2 = TTF_RenderText_Solid(font2, "Starwars", textColor2);  // 제목
+    message2 = TTF_RenderText_Solid(font2, "2143", textColor2);  // 제목
     background = load_image("assets/menu3.jpg");  // 배경
 		apply_surface(0, 0, background, buffer, NULL);
     apply_surface((640 - message->w) / 2, 280, message, buffer, NULL);
