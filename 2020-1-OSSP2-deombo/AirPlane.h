@@ -267,7 +267,7 @@ private:
 public:
   AirPlane(Mix_Chunk* shooting,Mix_Chunk* get,Mix_Chunk* hit);//생성자를 통해 클래스의 사운드 청크를 지정한다.
   ~AirPlane();
-  bool Got_shot(_bullets &A,_bullets &B,_bullets &C);
+  bool Got_shot(_bullets &A,_bullets &B,_bullets &C,_bullets &D);
   bool Got_item(vector<items> I);
   bool detect_collision(list<SDL_Rect> C);
   bool detect_collision(SDL_Rect C);
@@ -386,7 +386,37 @@ public:
 
   int amount = 1;
 };
+////////////////////////////////////////////////////////////////////
+class Second_Boss
+{
+public:
+  SDL_Surface *Second_boss;
+  SDL_Rect offset;
+  Mix_Chunk* hit_sound;//피격음
+  
 
+  int pos_x, pos_y;
+  int count = 0;
+  int direction = 0;
+  int cont_shoot = 0;
+  int life;
+
+public:
+  Second_Boss(Mix_Chunk* sound);
+  ~Second_Boss();
+  bool Got_shot(_bullets &A, int &x);
+  void shooting(_bullets &A);
+  void enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip);
+  SDL_Rect  control_plane(_bullets &A);
+  void loss_life(int& score,Mix_Chunk* sound);
+  SDL_Rect Get_plane();
+
+  void set_offset(int w,int h){offset.w=w,offset.h=h;}
+  void set_pos(int x, int y){pos_x=x;pos_y=y;}
+
+  int amount = 1;
+};
+//////////////////////////////////////////////////////////////
 class Boss
 {
 private:

@@ -27,6 +27,7 @@ SDL_Surface *sapoint;
 SDL_Surface *bullet;//총알 이미지
 SDL_Surface *bullet_basic;
 SDL_Surface *bullet_mini;//화면에 그리기 전에 버퍼
+SDL_Surface *bullet_second;
 SDL_Surface *bullet_boss;
 SDL_Surface *message;
 SDL_Surface *message2;
@@ -114,6 +115,7 @@ int main(){
   _bullets player_bullets;
   _bullets boss_bullets;
   _bullets mini_bullets;
+  _bullets second_bullets;
  //_special special_one;
   init();//초기화 함수
   load_files();//이미지,폰트,bgm 로드하는 함수
@@ -195,6 +197,7 @@ int main(){
   AirPlane A2(bullet_sound,item_sound,hit_sound);
   AirPlane A3(bullet_sound,item_sound,hit_sound);
   Mini_Boss tmp3(hit_sound);
+  Second_Boss tmp5(hit_sound);
   Boss tmp4(hit_sound);
   
   Health_item I;//체력 아이템
@@ -311,8 +314,12 @@ int main(){
 
     if(mini_bullets.blt.size() > 0)
       mini_bullets.control_bullet();
+
+    if(second_bullets.blt.size() >0)
+    second_bullets.control_bullet();
+  
     
-    if(dead != true &&(A.Got_shot(enemy_bullets,boss_bullets,mini_bullets)||A.detect_collision(CB)
+    if(dead != true &&(A.Got_shot(enemy_bullets,boss_bullets,mini_bullets,second_bullets)||A.detect_collision(CB)
         ||A.check_in_border(Border,border_check))&& A.invisible_mode == 0)      //1 플레이어 피격 판정
     {
       //총알에 맞거나 충돌박스에 부딪치거나 경계밖으로 나갔을 시
@@ -322,7 +329,7 @@ int main(){
         A.set_pos(SCREEN_WIDTH/2,SCREEN_HEIGHT/2);//비행기를 초기 위치로 돌려놓음
     }
 
-    if(dead2 != true && mode == 2 &&(A2.Got_shot(enemy_bullets,boss_bullets,mini_bullets)
+    if(dead2 != true && mode == 2 &&(A2.Got_shot(enemy_bullets,boss_bullets,mini_bullets,second_bullets)
         ||A2.detect_collision(CB)||A2.check_in_border(Border,border_check2))&& A2.invisible_mode == 0)      //2 플레이어 피격 판정
     {
       //총알에 맞거나 충돌박스에 부딪치거나 경계밖으로 나갔을 시
@@ -412,8 +419,27 @@ int main(){
           //flag3 = 1;
         }
     }   // have to add the condition when the mini boss appear
+  if(tmp5.amount == 1 && tmp5.Got_shot(player_bullets, boom_mode) && score >= 200) {
+        BOOM tmp(tmp5.Get_plane());
+        tmp.three = boom_mode;
+        Boss_B.push_back(tmp);
+        tmp5.loss_life(score,explosion_sound2);
+        if(I2.itm.size() == 0 && tmp5.life == 0)
+        {
+          I2.add_itm(tmp5.pos_x, tmp5.pos_y, tmp5.pos_x, tmp5.pos_y + 20);
+          //flag2 = (rand() % 2);
+          flag2 = 1;
+        }
 
-    if(tmp4.amount == 1 && tmp4.Got_shot(player_bullets, boom_mode) && score >= 5000) // have to add the condition when the mini boss appear
+        if(I2.itm.size() == 0 && tmp5.life == 0)
+        {
+          I3.add_itm(tmp5.pos_x, tmp5.pos_y, tmp5.pos_x, tmp5.pos_y + 20);
+          flag3 = (rand() % 2);
+          //flag3 = 1;
+        }
+    }   // have to add the condition when the mini boss appear
+
+    if(tmp4.amount == 1 && tmp4.Got_shot(player_bullets, boom_mode) && score >= 2000) // have to add the condition when the mini boss appear
     {
       BOOM tmp(tmp4.Get_plane());
       tmp.three = boom_mode;
@@ -421,6 +447,7 @@ int main(){
       tmp4.loss_life(score,explosion_sound2);
     }
 
+     
     if(A.Got_item(I.itm))//체력 아이템 획득시
     {
       if(A.life < 3)
@@ -456,6 +483,7 @@ int main(){
         enemy_bullets.eliminate(*it_sa);
         boss_bullets.eliminate(*it_sa);
         mini_bullets.eliminate(*it_sa);
+        second_bullets.eliminate(*it_sa);
     }
 
     //for obstacle
@@ -493,8 +521,8 @@ int main(){
     }
 
     if(tmp3.amount == 1 && score >= 2000)CB.push_back(tmp3.control_plane(mini_bullets)); // have to add the condition when the mini boss appear
-
-    if(tmp4.amount == 1 && score >= 10000)CB.push_back(tmp4.control_plane(boss_bullets)); // have to add the condition when the mini boss appear
+    if(tmp5.amount == 1 && score  >= 8000)CB.push_back(tmp5.control_plane(second_bullets));
+    if(tmp4.amount == 1 && score >= 15000)CB.push_back(tmp4.control_plane(boss_bullets)); // have to add the condition when the mini boss appear
 
     
     if(sa_1.size() >0)
@@ -929,6 +957,7 @@ int main(){
     apply_surface(0, 0 + background_count, background,buffer,NULL);//백그라운드 그리는거
     enemy_bullets.bullet_apply_surface(bullet_basic, buffer,NULL);//적 총알들
     boss_bullets.bullet_apply_surface(bullet_boss, buffer, NULL);
+    second_bullets.bullet_apply_surface(bullet_second, buffer, NULL);
     mini_bullets.bullet_apply_surface(bullet_mini, buffer, NULL);
     player_bullets.bullet_apply_surface(bullet, buffer, NULL);//사용자 총알들
     if(dead != true)
@@ -987,8 +1016,8 @@ int main(){
     }
 
     if(tmp3.amount ==1 && score >= 2000) tmp3.enemy_apply_surface(buffer, NULL); // have to add the condition when the mini boss appear
-
-    if(tmp4.amount == 1 && score>= 10000) tmp4.enemy_apply_surface(buffer, NULL); // have to add the condition when the mini boss appear
+    if(tmp5.amount ==1 && score >= 8000) tmp5.enemy_apply_surface(buffer, NULL);
+    if(tmp4.amount == 1 && score>= 15000) tmp4.enemy_apply_surface(buffer, NULL); // have to add the condition when the mini boss appear
 
     if( B.size() > 0)//폭발
     {
@@ -1210,6 +1239,7 @@ bool load_files()
   bullet = load_image("assets/BULLET.png");// 총알 이미지
   bullet_basic = load_image("assets/bullet.gif");
   bullet_boss = load_image("assets/bossbullet.png");
+  bullet_second = load_image("assets/bossbullet.png");
   bullet_mini = load_image("assets/bossbullet.png");
   plane = load_image("assets/p2.gif");// 사용자 비행기 이미지
   plane2 = load_image("assets/aircraft1.png");
@@ -1264,6 +1294,7 @@ bool load_files()
   SDL_SetColorKey(explosion, SDL_SRCCOLORKEY,SDL_MapRGB(explosion->format,0,0,0));
   SDL_SetColorKey(life, SDL_SRCCOLORKEY,SDL_MapRGB(life->format,255,255,255));
   SDL_SetColorKey(bullet_boss, SDL_SRCCOLORKEY, SDL_MapRGB(bullet_boss->format,0,0,0));
+  SDL_SetColorKey(bullet_boss, SDL_SRCCOLORKEY, SDL_MapRGB(bullet_second->format,0,0,0));
   SDL_SetColorKey(bullet_boss, SDL_SRCCOLORKEY, SDL_MapRGB(bullet_mini->format,0,0,0));
   SDL_SetColorKey(frame, SDL_SRCCOLORKEY,SDL_MapRGB(frame->format,0,0,0));
   SDL_SetColorKey(frame2, SDL_SRCCOLORKEY,SDL_MapRGB(frame2->format,0,0,0));

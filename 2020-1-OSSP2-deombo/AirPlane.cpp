@@ -211,7 +211,7 @@ SDL_Rect AirPlane::Get_plane()
   return offset;
 }
 
-bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C)
+bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C,_bullets &D)
 {
   vector<bullets>::iterator iter;
   vector<bullets> tmp;
@@ -721,6 +721,115 @@ void Mini_Boss::loss_life(int& score,Mix_Chunk* sound)
       score+=1000;
    }
 }
+
+/////////////////////////////////////////////////////////////////////////
+
+Second_Boss::Second_Boss(Mix_Chunk* sound){
+    Second_boss = load_image("assets/boss.png");// 비행기 이미지
+    //Setcolorkey는 네모난 그림에서 비행기로 쓸 그림 빼고 나머지 흰 바탕들만 투명하게 바꾸는거
+    SDL_SetColorKey(Second_boss, SDL_SRCCOLORKEY,SDL_MapRGB(Second_boss->format,0,0,0));
+    pos_x = 320;// 처음 시작 위치 지정
+    pos_y = -MINI_BOSS_HEIGHT;//처음 시작 위치 지정
+    life = 35;//has to be changed later (at least 70)
+    count = 0;
+    offset.w =SECOND_BOSS_WIDTH;
+    offset.h=SECOND_BOSS_HEIGHT;
+    hit_sound=sound;
+    
+}
+
+Second_Boss::~Second_Boss(){
+    this->amount--;
+    delete this->Second_boss;
+};
+
+bool Second_Boss::Got_shot(_bullets &A, int &x){
+    vector<bullets>::iterator iter;
+    vector<bullets> tmp;
+
+    bool flag = false;
+
+    for(iter = A.blt.begin(); iter != A.blt.end(); iter++)
+    {
+      if((pos_x + 240 < (*iter).offset.x + 9 || pos_y + 82 < (*iter).offset.y + 5) ||
+      ((*iter).offset.x + 9 < pos_x + 9 || (*iter).offset.y + 5 < pos_y + 10))//안 맞았을 때
+        tmp.push_back(*iter);
+      else//맞았을때
+      {
+        Mix_PlayChannel(-1,hit_sound,0);//사운드 출력
+        if((*iter).offset.x <= pos_x + SECOND_BOSS_WIDTH / 5)
+          x = 0;
+        else if((*iter).offset.x <= pos_x + (SECOND_BOSS_WIDTH / 5) * 2)
+          x = 1;
+        else if((*iter).offset.x <= pos_x + (SECOND_BOSS_WIDTH / 5) * 3)
+          x = 2;
+        else if((*iter).offset.x <= pos_x + (SECOND_BOSS_WIDTH / 5) * 4)
+          x = 3;
+        else
+          x = 4;
+        flag = true;
+      }
+    }
+
+    A.blt = tmp;
+
+    return flag;
+};
+void Second_Boss::shooting(_bullets &A){
+    A.add_blt( 0, 5,pos_x + 125,pos_y + 82);
+    A.add_blt( 3, 5,pos_x + 125,pos_y + 82);
+    A.add_blt( -3, 5,pos_x + 125,pos_y + 82);
+    A.add_blt( -6, 4,pos_x + 125,pos_y + 82);
+    A.add_blt( 6, 4,pos_x + 125,pos_y + 82);
+};
+
+void Second_Boss::enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip){
+    //SDL_Rect offset;
+    offset.y = pos_y;
+    offset.x = pos_x;
+    SDL_BlitSurface(Second_boss, clip, destination, &offset );
+};
+SDL_Rect Second_Boss::control_plane(_bullets &A){
+    if(cont_shoot>=1 && cont_shoot <= 30) {this->cont_shoot ++; if(cont_shoot%6==0)this->shooting(A);} // TO make gap between each bullets in one cycle
+    if(cont_shoot > 30) {if(cont_shoot>=50)cont_shoot = 0;else cont_shoot++;} // To make gap between each cycles
+    if(count % 30 == 0 ) {this->shooting(A); this->cont_shoot ++;}
+    if(count < 50){
+        pos_y += 3;
+    }
+    else
+    {
+        if(direction == 0){
+            if(this->pos_x>550) direction =1;
+            this->pos_x += 2;
+        }
+        else{
+            if(this->pos_x<90) direction = 0;
+            this->pos_x -= 2;
+        }
+    }
+    count++;
+    return this->offset;
+};
+
+SDL_Rect Second_Boss::Get_plane()
+{
+  offset.x = pos_x;
+  offset.y = pos_y;
+
+  return offset;
+}
+
+void Second_Boss::loss_life(int& score,Mix_Chunk* sound)
+{
+    this->life--;
+    score +=50;
+    if( this->life == 0) {
+      Mix_PlayChannel(-1,sound,0);//보스 사망시 폭팔음 출력
+      this->~Second_Boss();
+      score+=1000;
+   }
+}
+////////////////////////////////////////////////////////////////////////
 
 Boss::Boss(Mix_Chunk* sound){
     mini_boss = load_image("assets/boss4.png");// 비행기 이미지
