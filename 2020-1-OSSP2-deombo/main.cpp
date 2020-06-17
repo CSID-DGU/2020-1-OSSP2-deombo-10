@@ -393,7 +393,7 @@ int main(){
         E2=v_tmp;
     }
 
-    if(tmp3.amount == 1 && tmp3.Got_shot(player_bullets, boom_mode) && score >= 500) {
+    if(tmp3.amount == 1 && tmp3.Got_shot(player_bullets, boom_mode) && score >= 200) {
         BOOM tmp(tmp3.Get_plane());
         tmp.three = boom_mode;
         Boss_B.push_back(tmp);
@@ -413,7 +413,7 @@ int main(){
         }
     }   // have to add the condition when the mini boss appear
 
-    if(tmp4.amount == 1 && tmp4.Got_shot(player_bullets, boom_mode) && score >= 5000) // have to add the condition when the mini boss appear
+    if(tmp4.amount == 1 && tmp4.Got_shot(player_bullets, boom_mode) && score >= 10000) // have to add the condition when the mini boss appear
     {
       BOOM tmp(tmp4.Get_plane());
       tmp.three = boom_mode;
@@ -492,9 +492,9 @@ int main(){
       }
     }
 
-    if(tmp3.amount == 1 && score >= 500)CB.push_back(tmp3.control_plane(mini_bullets)); // have to add the condition when the mini boss appear
+    if(tmp3.amount == 1 && score >= 2000)CB.push_back(tmp3.control_plane(mini_bullets)); // have to add the condition when the mini boss appear
 
-    if(tmp4.amount == 1 && score >= 5000)CB.push_back(tmp4.control_plane(boss_bullets)); // have to add the condition when the mini boss appear
+    if(tmp4.amount == 1 && score >= 10000)CB.push_back(tmp4.control_plane(boss_bullets)); // have to add the condition when the mini boss appear
 
     
     if(sa_1.size() >0)
@@ -986,9 +986,9 @@ int main(){
         }
     }
 
-    if(tmp3.amount ==1 && score >= 500) tmp3.enemy_apply_surface(buffer, NULL); // have to add the condition when the mini boss appear
+    if(tmp3.amount ==1 && score >= 2000) tmp3.enemy_apply_surface(buffer, NULL); // have to add the condition when the mini boss appear
 
-    if(tmp4.amount == 1 && score>= 5000) tmp4.enemy_apply_surface(buffer, NULL); // have to add the condition when the mini boss appear
+    if(tmp4.amount == 1 && score>= 10000) tmp4.enemy_apply_surface(buffer, NULL); // have to add the condition when the mini boss appear
 
     if( B.size() > 0)//폭발
     {
