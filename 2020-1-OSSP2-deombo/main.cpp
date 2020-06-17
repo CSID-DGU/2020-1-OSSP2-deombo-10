@@ -71,7 +71,7 @@ int Continue = 0;
 int craft;
 int SA;
 int SA2;
-int mode;
+short mode;
 
 
 
@@ -153,9 +153,12 @@ int main(){
   int shootcnt2 = 0;
   int background_count = 0;               //background 움직임 count
   int boom_mode = 0;
-  int flag = 0;
-  int flag2 = 0;
-  int flag3 = 0;
+
+  short RNG;//확률 변수를 저장할 변수
+  //int flag = 0;
+  //int flag2 = 0;
+  //int flag3 = 0;
+
   int flag_sa = 0;
   int flag_sa2 = 0;
   int bound = -100;
@@ -202,14 +205,30 @@ int main(){
   
   Health_item I;//체력 아이템
   Special_item I2;//스페셜 아이템
-  Upgrade_item1 I3;//총알 업글 아이템 1
-  
+  Upgrade_item1 I3;//3방향 발사 업그레이드
+  Upgrade_item2 I4;//직선 관통 레이저 업그레이드 
+  laser_bullet player_laser_bullet;
+  laser_bullet player2_laser_bullet;
+
+
+  player_laser_bullet.offset.w=player2_laser_bullet.offset.w=5;
+  player_laser_bullet.offset.h=player2_laser_bullet.offset.h=(Uint16)SCREEN_HEIGHT;
+
+ 
+ 
+
   if(Mix_PlayingMusic())
     Mix_HaltMusic();
   Mix_PlayMusic(stage_music,-1);//스테이지 음악 실행
 
   while(true){
- 
+    
+  
+
+   
+   
+
+    RNG=rand();//매 프레임마다 확률 변수를 조정
     if(flag_sa < 10) flag_sa++;
     if(flag_sa2 <10) flag_sa2++;
     vector<special> t;
@@ -314,10 +333,6 @@ int main(){
 
     if(mini_bullets.blt.size() > 0)
       mini_bullets.control_bullet();
-
-    if(second_bullets.blt.size() >0)
-    second_bullets.control_bullet();
-  
     
     if(dead != true &&(A.Got_shot(enemy_bullets,boss_bullets,mini_bullets,second_bullets)||A.detect_collision(CB)
         ||A.check_in_border(Border,border_check))&& A.invisible_mode == 0)      //1 플레이어 피격 판정
@@ -348,17 +363,15 @@ int main(){
       for(it = E.begin(); it != E.end(); it++)//적 비행기들 피격 판정
       {
         Enemy_standard tmp(0);
-        if((*it).Got_shot(player_bullets) || (bound < (*it).pos_y+32) && (bound+30 > (*it).pos_y))//비행기가 격추 당하면
+        if(((*it).Got_shot(player_bullets)||(*it).Got_shot(player_laser_bullet)||(*it).Got_shot(player2_laser_bullet))||(bound < (*it).pos_y+32) && (bound+30 > (*it).pos_y))//비행기가 격추 당하면
         {
-          if(I.itm.size() == 0)
+          if(I.itm.size() == 0&&RNG%4==07)//4분의 1확률로 아이템을 생성한다.
           {
             I.add_itm((*it).pos_x, (*it).pos_y, (*it).pos_x, (*it).pos_y + 20);
-            flag = (rand() % 3);
           }
-          if(I3.itm.size() == 0)
+          if(I3.itm.size() == 0&&RNG%4==0)//4분의 1확률로 아이템을 생성한다.
           {
             I3.add_itm((*it).pos_x, (*it).pos_y, (*it).pos_x, (*it).pos_y + 20);
-            flag3 = (rand() % 4);
           }
           BOOM B_tmp((*it).Get_plane());
           B.push_back(B_tmp);
@@ -383,7 +396,7 @@ int main(){
         for(it2 = E2.begin(); it2 != E2.end(); it2++)//적 비행기들 피격 판정
         {
           Enemy_standard_2 tmp(0);
-          if((*it2).Got_shot(player_bullets) || (bound < (*it).pos_y+32) && (bound+30 > (*it).pos_y))
+          if(((*it2).Got_shot(player_bullets)||(*it2).Got_shot(player_laser_bullet)||(*it2).Got_shot(player2_laser_bullet))|| (bound < (*it).pos_y+32) && (bound+30 > (*it).pos_y))
           {
             BOOM B_tmp((*it2).Get_plane());
             B.push_back(B_tmp);
@@ -400,46 +413,45 @@ int main(){
         E2=v_tmp;
     }
 
-    if(tmp3.amount == 1 && tmp3.Got_shot(player_bullets, boom_mode) && score >= 200) {
+    if(tmp3.amount == 1 &&(tmp3.Got_shot(player_bullets, boom_mode)||tmp3.Got_shot(player_laser_bullet,boom_mode,RNG)
+    ||tmp3.Got_shot(player2_laser_bullet,boom_mode,RNG)) && score >= 200) {
         BOOM tmp(tmp3.Get_plane());
         tmp.three = boom_mode;
         Boss_B.push_back(tmp);
         tmp3.loss_life(score,explosion_sound2);
-        if(I2.itm.size() == 0 && tmp3.life == 0)
+        if(tmp3.life == 0)//미니 보스 사망시
         {
-          I2.add_itm(tmp3.pos_x, tmp3.pos_y, tmp3.pos_x, tmp3.pos_y + 20);
-          //flag2 = (rand() % 2);
-          flag2 = 1;
-        }
-
-        if(I2.itm.size() == 0 && tmp3.life == 0)
-        {
-          I3.add_itm(tmp3.pos_x, tmp3.pos_y, tmp3.pos_x, tmp3.pos_y + 20);
-          flag3 = (rand() % 2);
-          //flag3 = 1;
+          if(I2.itm.size() == 0 )
+             I2.add_itm(tmp3.pos_x, tmp3.pos_y, tmp3.pos_x, tmp3.pos_y + 20);
+          if(RNG%2==0)// 3방향 업글 아이템이 나오거나 레이저 업글 아이템이 나온다.
+             I3.add_itm(tmp3.pos_x, tmp3.pos_y, tmp3.pos_x+20, tmp3.pos_y + 20);
+          else
+             I4.add_itm(tmp3.pos_x, tmp3.pos_y, tmp3.pos_x+20, tmp3.pos_y + 20);
         }
     }   // have to add the condition when the mini boss appear
-  if(tmp5.amount == 1 && tmp5.Got_shot(player_bullets, boom_mode) && score >= 200) {
+    if(tmp5.amount == 1 && tmp5.Got_shot(player_bullets, boom_mode) && score >= 200) {
         BOOM tmp(tmp5.Get_plane());
         tmp.three = boom_mode;
         Boss_B.push_back(tmp);
         tmp5.loss_life(score,explosion_sound2);
-        if(I2.itm.size() == 0 && tmp5.life == 0)
+        if( tmp5.life == 0)
         {
-          I2.add_itm(tmp5.pos_x, tmp5.pos_y, tmp5.pos_x, tmp5.pos_y + 20);
-          //flag2 = (rand() % 2);
-          flag2 = 1;
-        }
+          if(I2.itm.size() == 0 )
+            I2.add_itm(tmp5.pos_x, tmp5.pos_y, tmp5.pos_x, tmp5.pos_y + 20);
 
-        if(I2.itm.size() == 0 && tmp5.life == 0)
+     
+
+        if(RNG%2==0)
         {
           I3.add_itm(tmp5.pos_x, tmp5.pos_y, tmp5.pos_x, tmp5.pos_y + 20);
-          flag3 = (rand() % 2);
-          //flag3 = 1;
+
+        }
         }
     }   // have to add the condition when the mini boss appear
 
-    if(tmp4.amount == 1 && tmp4.Got_shot(player_bullets, boom_mode) && score >= 2000) // have to add the condition when the mini boss appear
+    if(tmp4.amount == 1 && (tmp4.Got_shot(player_bullets, boom_mode) 
+    ||player_laser_bullet.env?tmp4.Got_shot(player_laser_bullet,boom_mode,RNG):false
+    ||player2_laser_bullet.env?tmp4.Got_shot(player2_laser_bullet,boom_mode,RNG):false)&& score >= 2000) // have to add the condition when the mini boss appear
     {
       BOOM tmp(tmp4.Get_plane());
       tmp.three = boom_mode;
@@ -447,14 +459,12 @@ int main(){
       tmp4.loss_life(score,explosion_sound2);
     }
 
-     
     if(A.Got_item(I.itm))//체력 아이템 획득시
     {
       if(A.life < 3)
       {
         A.increaseLife();
       }
-      flag = 0;
     }
 
     if(A.Got_item(I2.itm))//스페셜 아이템 획득시
@@ -463,13 +473,16 @@ int main(){
       {
         A.increaseSA();
       }
-      flag2 = 0;
     }
 
-    if(A.Got_item(I3.itm))//업그레이드 아이템 획득시
+    if(A.Got_item(I3.itm))//3방향 발사 업그레이드 아이템 획득시
     {
       A.bullet_mode=2;
-      flag3 = 0;
+    }
+
+    if(A.Got_item(I4.itm))//레이저 업그레이드 아이템 획득시
+    {
+      A.bullet_mode=3;
     }
 
     if(tmp4.amount == 0)
@@ -483,7 +496,6 @@ int main(){
         enemy_bullets.eliminate(*it_sa);
         boss_bullets.eliminate(*it_sa);
         mini_bullets.eliminate(*it_sa);
-        second_bullets.eliminate(*it_sa);
     }
 
     //for obstacle
@@ -520,9 +532,9 @@ int main(){
       }
     }
 
-    if(tmp3.amount == 1 && score >= 2000)CB.push_back(tmp3.control_plane(mini_bullets)); // have to add the condition when the mini boss appear
-    if(tmp5.amount == 1 && score  >= 8000)CB.push_back(tmp5.control_plane(second_bullets));
-    if(tmp4.amount == 1 && score >= 15000)CB.push_back(tmp4.control_plane(boss_bullets)); // have to add the condition when the mini boss appear
+    if(tmp3.amount == 1 && score >= 500)CB.push_back(tmp3.control_plane(mini_bullets)); // have to add the condition when the mini boss appear
+
+    if(tmp4.amount == 1 && score >= 5000)CB.push_back(tmp4.control_plane(boss_bullets)); // have to add the condition when the mini boss appear
 
     
     if(sa_1.size() >0)
@@ -543,18 +555,22 @@ int main(){
     if(keystates[SDLK_o] && dead != true)
     {
       if(shootcnt == 0) {
-          A.shooting(player_bullets);
+          A.shooting(player_bullets,player_laser_bullet);
           shootcnt = 1;
       }
     }
+    else{ player_laser_bullet.env=false;}
+    /*
     if(mode ==2&&keystates[SDLK_f] && dead2 != true)
       {
         if(shootcnt2 == 0) {
-            A2.shooting(player_bullets);
+            A2.shooting(player_bullets,player2_laser_bullet);
             shootcnt2 = 1;
         }
       }
-
+    */
+   
+   
     if(keystates[SDLK_p] && flag_sa == 10 && dead != true)    /// SHOULD HAVE FLAG TO A ABILITY IS USED NUMEROUS TIMES BY PRESSING ONCE.
     {
 
@@ -684,10 +700,12 @@ int main(){
         if(keystates[SDLK_f])
           {
             if(shootcnt == 0) {
-                A2.shooting(player_bullets);
+                A2.shooting(player_bullets,player2_laser_bullet);
                 shootcnt = 1;
             }
           }
+        else{player2_laser_bullet.env=false;}
+         
           if(mode == 2 && keystates[SDLK_g])    /// SHOULD HAVE FLAG TO AVOID SPECIAL ABILITY IS USED NUMEROUS TIMES BY PRESSING ONCE.
           {
              
@@ -957,7 +975,6 @@ int main(){
     apply_surface(0, 0 + background_count, background,buffer,NULL);//백그라운드 그리는거
     enemy_bullets.bullet_apply_surface(bullet_basic, buffer,NULL);//적 총알들
     boss_bullets.bullet_apply_surface(bullet_boss, buffer, NULL);
-    second_bullets.bullet_apply_surface(bullet_second, buffer, NULL);
     mini_bullets.bullet_apply_surface(bullet_mini, buffer, NULL);
     player_bullets.bullet_apply_surface(bullet, buffer, NULL);//사용자 총알들
     if(dead != true)
@@ -970,17 +987,17 @@ int main(){
 
     if(mode == 2 && dead2 != true)  A2.plane_apply_surface(plane_2p, buffer,NULL); //사용자 비행기
 
-    if(flag == 1)
+    if(I.itm.size()!=0)
     {
       I.item_apply_surface(I.item, buffer, NULL);
     }
 
-    if(flag2 == 1)
+    if(I2.itm.size()!=0)
     {
       I2.item_apply_surface(I2.item, buffer, NULL);
     }
 
-    if(flag3 == 1)
+    if(I3.itm.size()!=0)
     {
       I3.item_apply_surface(I3.item, buffer, NULL);
     }
@@ -1015,9 +1032,9 @@ int main(){
         }
     }
 
-    if(tmp3.amount ==1 && score >= 2000) tmp3.enemy_apply_surface(buffer, NULL); // have to add the condition when the mini boss appear
-    if(tmp5.amount ==1 && score >= 8000) tmp5.enemy_apply_surface(buffer, NULL);
-    if(tmp4.amount == 1 && score>= 15000) tmp4.enemy_apply_surface(buffer, NULL); // have to add the condition when the mini boss appear
+    if(tmp3.amount ==1 && score >= 500) tmp3.enemy_apply_surface(buffer, NULL); // have to add the condition when the mini boss appear
+
+    if(tmp4.amount == 1 && score>= 5000) tmp4.enemy_apply_surface(buffer, NULL); // have to add the condition when the mini boss appear
 
     if( B.size() > 0)//폭발
     {
@@ -1174,6 +1191,10 @@ int main(){
       }
     }
 
+    if(player_laser_bullet.env)//레이저 발사시 
+      SDL_FillRect(buffer,&(player_laser_bullet.offset),SDL_MapRGB(buffer->format,200,0,0));//레이저의 범위에 해당하는 부분을 옅은 붉은 색으로 칠함
+    if(player2_laser_bullet.env)
+      SDL_FillRect(buffer,&(player2_laser_bullet.offset),SDL_MapRGB(buffer->format,200,0,0));//레이저의 범위에 해당하는 부분을 옅은 붉은 색으로 칠함
 
     ostringstream sc;
     sc<< score;
@@ -1239,7 +1260,6 @@ bool load_files()
   bullet = load_image("assets/BULLET.png");// 총알 이미지
   bullet_basic = load_image("assets/bullet.gif");
   bullet_boss = load_image("assets/bossbullet.png");
-  bullet_second = load_image("assets/bossbullet.png");
   bullet_mini = load_image("assets/bossbullet.png");
   plane = load_image("assets/p2.gif");// 사용자 비행기 이미지
   plane2 = load_image("assets/aircraft1.png");
@@ -1294,7 +1314,6 @@ bool load_files()
   SDL_SetColorKey(explosion, SDL_SRCCOLORKEY,SDL_MapRGB(explosion->format,0,0,0));
   SDL_SetColorKey(life, SDL_SRCCOLORKEY,SDL_MapRGB(life->format,255,255,255));
   SDL_SetColorKey(bullet_boss, SDL_SRCCOLORKEY, SDL_MapRGB(bullet_boss->format,0,0,0));
-  SDL_SetColorKey(bullet_boss, SDL_SRCCOLORKEY, SDL_MapRGB(bullet_second->format,0,0,0));
   SDL_SetColorKey(bullet_boss, SDL_SRCCOLORKEY, SDL_MapRGB(bullet_mini->format,0,0,0));
   SDL_SetColorKey(frame, SDL_SRCCOLORKEY,SDL_MapRGB(frame->format,0,0,0));
   SDL_SetColorKey(frame2, SDL_SRCCOLORKEY,SDL_MapRGB(frame2->format,0,0,0));
@@ -1347,7 +1366,7 @@ bool menu()   // 처음 시작 메뉴
 	{
 	
     message = TTF_RenderText_Solid(font, "Press space to start, esc key to quit", textColor); // space키는 시작 esc키는 종료
-    message2 = TTF_RenderText_Solid(font2, "2143", textColor2);  // 제목
+    message2 = TTF_RenderText_Solid(font2, "Starwars", textColor2);  // 제목
     background = load_image("assets/menu3.jpg");  // 배경
 		apply_surface(0, 0, background, buffer, NULL);
     apply_surface((640 - message->w) / 2, 280, message, buffer, NULL);
