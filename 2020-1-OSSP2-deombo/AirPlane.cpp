@@ -148,7 +148,7 @@ AirPlane::AirPlane(Mix_Chunk* shooting,Mix_Chunk* got,Mix_Chunk* hit)
   get_sound=got;
   hit_sound=hit;
 
-  bullet_mode =3;//총알 모드는 기본적으로 1임
+  bullet_mode =1;//총알 모드는 기본적으로 1임
   life = 3;
   SA_count = 3;
   invisible_mode = 0;
