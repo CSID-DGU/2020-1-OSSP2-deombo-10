@@ -72,6 +72,9 @@ int SA;
 int SA2;
 int mode;
 
+
+
+
 void sprite_surface(SDL_Surface* source, SDL_Rect tmp, SDL_Surface* destination, int w, int h, int step,int mode);
 bool init();//변수들 초기화 함수
 bool load_files();//이미지, 폰트,오디오 초기화 함수
@@ -83,6 +86,7 @@ bool game_over();
 bool stage_clear();
 void special_ability(int SA);
 void handle_resize(SDL_ResizeEvent &event){//화면의 크기가 resize 되면 이 함수가 호출됨
+  
 
   SDL_FreeSurface(screen);//기존 screen을 free 해준다음.
   screen = SDL_SetVideoMode(event.w, event.h, SCREEN_BPP, SDL_SWSURFACE | SDL_DOUBLEBUF |SDL_RESIZABLE);
@@ -157,7 +161,7 @@ int main(){
   bool dead = false;
   bool dead2 = false;
 
-  //for obstacle
+    //for obstacle
   int o_bound = 480+100;
   int hole = rand()%4;
   vector<Obstacle>::iterator obs_it;
@@ -168,7 +172,6 @@ int main(){
   vector<BOOM>::iterator B_it;
   vector<special>::iterator it_sa;
   list<SDL_Rect>::iterator CB_it;
-
 
   vector<BOOM> Boss_B;//보스 폭발
   vector<BOOM> Boss_B4;//보스 폭발
@@ -242,40 +245,40 @@ int main(){
       E2.push_back(tmp2);
     }
 
-    if(count % 1000 == 0)
+    if(count % 500 == 0)
     {
-      Obstacle obstmp(0);
-      Obstacle obstmp2(50);
-      Obstacle obstmp3(100);
-      Obstacle obstmp4(150);
-      Obstacle obstmp5(200);
-      Obstacle obstmp6(250);
-      Obstacle obstmp7(300);
-      Obstacle obstmp8(350);
-      Obstacle obstmp9(400);
-      Obstacle obstmp10(450);
-      Obstacle obstmp11(500);
-      Obstacle obstmp12(550);
-      Obstacle obstmp13(600);
-      Obstacle obstmp14(650);
-      Obstacle obstmp15(700);
+      Obstacle tmp(0);
+      Obstacle tmp2(50);
+      Obstacle tmp3(100);
+      Obstacle tmp4(150);
+      Obstacle tmp5(200);
+      Obstacle tmp6(250);
+      Obstacle tmp7(300);
+      Obstacle tmp8(350);
+      Obstacle tmp9(400);
+      Obstacle tmp10(450);
+      Obstacle tmp11(500);
+      Obstacle tmp12(550);
+      Obstacle tmp13(600);
+      Obstacle tmp14(650);
+      Obstacle tmp15(700);
 
-      Obs.push_back(obstmp);
-      Obs.push_back(obstmp2);
-      if(hole != 0) Obs.push_back(obstmp3);
-      Obs.push_back(obstmp4);
-      Obs.push_back(obstmp5);
-      if(hole != 1) Obs.push_back(obstmp6);
-      Obs.push_back(obstmp7);
-      Obs.push_back(obstmp8);
-      if(hole != 2) Obs.push_back(obstmp9);
-      Obs.push_back(obstmp10);
-      Obs.push_back(obstmp11);
-      if(hole != 3) Obs.push_back(obstmp12);
-      Obs.push_back(obstmp13);
-      Obs.push_back(obstmp14);
-      Obs.push_back(obstmp15);
-    } 
+      Obs.push_back(tmp);
+      Obs.push_back(tmp2);
+      Obs.push_back(tmp3);
+      Obs.push_back(tmp4);
+      Obs.push_back(tmp5);
+      Obs.push_back(tmp6);
+      Obs.push_back(tmp7);
+      Obs.push_back(tmp8);
+      Obs.push_back(tmp9);
+      Obs.push_back(tmp10);
+      Obs.push_back(tmp11);
+      Obs.push_back(tmp12);
+      Obs.push_back(tmp13);
+      Obs.push_back(tmp14);
+      Obs.push_back(tmp15);
+    }
 
     start_time = SDL_GetTicks();//나중에 프레임 계산할 변수
 
@@ -300,6 +303,7 @@ int main(){
     if(mini_bullets.blt.size() > 0)
       mini_bullets.control_bullet();
 
+
     if(dead != true &&(A.Got_shot(enemy_bullets,boss_bullets,mini_bullets)||A.detect_collision(CB))&& A.invisible_mode == 0)      //사용자 피격 판정
     {
       A.life--;
@@ -312,15 +316,10 @@ int main(){
       A2.invisible_mode = 1;
     }
 
-    //for obstacle
-    if(dead != true && A.detect_collision_obstacle(Obs) && A.invisible_mode == 0)      //사용자 피격 판정
-    {
-      A.decrease_pos_y(4);
-    }
-
     if(E.size() > 0)
     {
       vector<Enemy_standard> v_tmp;
+
 
       for(it = E.begin(); it != E.end(); it++)//적 비행기들 피격 판정
       {
@@ -460,7 +459,6 @@ int main(){
   
     if(keystates[SDLK_ESCAPE])
       break;
-
     if(E.size() > 0)//적 비행기 이동 및 발사
     {
       for(it = E.begin(); it != E.end(); it++)
@@ -473,15 +471,6 @@ int main(){
       for(it2 = E2.begin(); it2 != E2.end(); it2++)
       {
          CB.push_back((*it2).control_plane(enemy_bullets));
-      }
-    }
-
-    //for obstacle
-    if(Obs.size() > 0) {
-      for(obs_it = Obs.begin(); obs_it != Obs.end(); it++)
-      {
-        CB.push_back((*obs_it).Get_obstacle());
-        //충돌 판정을 위해 offset을 list에 저장
       }
     }
 
@@ -501,7 +490,7 @@ int main(){
     if(Obs.size() >0)
     {
         for(obs_it = Obs.begin(); obs_it != Obs.end(); obs_it++){
-            (*obs_it).control_obstacle();
+            (*obs_it).control_bullet();
         }
     }
 
