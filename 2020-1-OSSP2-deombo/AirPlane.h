@@ -284,7 +284,7 @@ public:
   void increaseSA();
   void Got_shiled(SDL_Surface *plane);
   void plane_apply_surface(SDL_Surface* source, SDL_Surface* destination, SDL_Rect* clip);
-  void control_plane(int x, int y);
+  void control_plane(int x, int y,laser_bullet &l);
   void invisible(SDL_Surface *plane);
   SDL_Rect Get_plane();//plane 변수 getter
   void set_offset(int w,int h){offset.w=w,offset.h=h;}

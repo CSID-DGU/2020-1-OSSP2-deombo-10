@@ -176,7 +176,7 @@ void AirPlane::shooting(_bullets &player_bullets,laser_bullet &player_laser_bull
     player_laser_bullet.env=true;
     player_laser_bullet.offset.w=3;
     player_laser_bullet.offset.h=SCREEN_HEIGHT;
-    player_laser_bullet.offset.x= pos_x+9;
+    player_laser_bullet.offset.x= pos_x+11;
     player_laser_bullet.offset.y= pos_y-player_laser_bullet.offset.h;
   }
 }
@@ -187,7 +187,7 @@ void AirPlane::plane_apply_surface(SDL_Surface* source, SDL_Surface* destination
   offset.y = pos_y;
   SDL_BlitSurface( source, clip, destination, &offset );
 }
-void AirPlane::control_plane(int x, int y)
+void AirPlane::control_plane(int x, int y,laser_bullet &l)
 {
   /*
   if( pos_x + x >= 0 && (pos_x + PLAYER_WIDTH + x) <= SCREEN_WIDTH &&
@@ -199,6 +199,14 @@ void AirPlane::control_plane(int x, int y)
   */
     pos_x += x;
     pos_y += y;
+    /*
+    offset.x = pos_x;
+    offset.y = pos_y;
+    offset.w=PLAYER_WIDTH;
+    offset.h=PLAYER_HEIGHT;
+    */
+    l.offset.x=pos_x+11;
+    l.offset.y=pos_y-l.offset.h;
 }
 void AirPlane::invisible(SDL_Surface *plane)
 {
@@ -357,12 +365,10 @@ bool AirPlane::detect_collision(SDL_Rect C)
 }
 bool AirPlane::check_in_border(SDL_Rect C,bool& flag)
 {
-  if(!(flag=intersects(C,this->offset)))//경계 밖에 있는 경우
-  {
-      Mix_PlayChannel(-1,hit_sound,0);//피격음 출력
-      return true;
-  }
-  return false;
+  flag=!(pos_x + PLAYER_WIDTH <= C.x || pos_y+ PLAYER_HEIGHT <= C.y || C.x+C.w <= pos_x || C.y+C.h <=pos_y);
+  if(!flag)
+    Mix_PlayChannel(-1,hit_sound,0);//피격음 출력
+	return !flag;
 }
 void AirPlane::increaseLife()
 {
@@ -835,16 +841,12 @@ bool Second_Boss::Got_shot(_bullets &A, int &x){
       else//맞았을때
       {
         Mix_PlayChannel(-1,hit_sound,0);//사운드 출력
-        if((*iter).offset.x <= pos_x + SECOND_BOSS_WIDTH / 5)
+        if((*iter).offset.x <= pos_x + SECOND_BOSS_WIDTH / 3)
           x = 0;
-        else if((*iter).offset.x <= pos_x + (SECOND_BOSS_WIDTH / 5) * 2)
+        else if((*iter).offset.x <= pos_x + (SECOND_BOSS_WIDTH / 3) * 2)
           x = 1;
-        else if((*iter).offset.x <= pos_x + (SECOND_BOSS_WIDTH / 5) * 3)
-          x = 2;
-        else if((*iter).offset.x <= pos_x + (SECOND_BOSS_WIDTH / 5) * 4)
-          x = 3;
         else
-          x = 4;
+          x = 2;
         flag = true;
       }
     }
@@ -861,7 +863,7 @@ bool Second_Boss::Got_shot(laser_bullet A, int &x,short RNG){//레이저 빔에 
       if(flag=intersects(this->offset,A.offset))//맞았을때
       {
         Mix_PlayChannel(-1,hit_sound,0);//사운드 출력
-        x=RNG%5;
+        x=RNG%3;
       }
     }
     return flag;
