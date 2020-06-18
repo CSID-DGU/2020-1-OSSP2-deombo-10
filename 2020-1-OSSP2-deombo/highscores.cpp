@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "highscores.h"
 
-static void logic(void);
+// static void logic(void);
 static void draw(void);
 static int highscoreComparator(const void *a, const void *b);
 static void drawHighscores(void);
