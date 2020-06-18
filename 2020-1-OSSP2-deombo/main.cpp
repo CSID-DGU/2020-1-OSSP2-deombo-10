@@ -174,7 +174,7 @@ int main(){
 
     //for obstacle
   int o_bound = 480+100;
-  int hole = rand()%4;
+  int hole;
   vector<Obstacle>::iterator obs_it;
   vector<Obstacle> Obs;
 
@@ -226,9 +226,7 @@ int main(){
   Mix_PlayMusic(stage_music,-1);//스테이지 음악 실행
 
   while(true){
-    
-
-   
+    hole = rand()%4;
 
     RNG=rand();//매 프레임마다 확률 변수를 조정
     if(flag_sa < 10) flag_sa++;
@@ -300,17 +298,29 @@ int main(){
 
       Obs.push_back(obstmp);
       Obs.push_back(obstmp2);
-      if(hole != 0) Obs.push_back(obstmp3);
-      Obs.push_back(obstmp4);
+      if(hole != 0) 
+      {
+        Obs.push_back(obstmp3);
+        Obs.push_back(obstmp4);
+      }
       Obs.push_back(obstmp5);
-      if(hole != 1) Obs.push_back(obstmp6);
-      Obs.push_back(obstmp7);
+      if(hole != 1) 
+      {
+        Obs.push_back(obstmp6);
+        Obs.push_back(obstmp7);
+      }
       Obs.push_back(obstmp8);
-      if(hole != 2) Obs.push_back(obstmp9);
-      Obs.push_back(obstmp10);
+      if(hole != 2) 
+      {
+        Obs.push_back(obstmp9);
+        Obs.push_back(obstmp10);
+      }
       Obs.push_back(obstmp11);
-      if(hole != 3) Obs.push_back(obstmp12);
-      Obs.push_back(obstmp13);
+      if(hole != 3) 
+      {
+        Obs.push_back(obstmp12);
+        Obs.push_back(obstmp13);
+      }
       Obs.push_back(obstmp14);
       Obs.push_back(obstmp15);
     }
