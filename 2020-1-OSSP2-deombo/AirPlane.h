@@ -38,7 +38,7 @@ public:
     offset.y = ply_y;
     angle=0;
   }
-   bullets(int x, int y , int ply_x, int ply_y,double a )
+  bullets(int x, int y , int ply_x, int ply_y,double a )//angle을 줘서 총알 스프라이트의 모양을 회전시킬수 있다.
   {
     move_x = x;
     move_y = y;
@@ -50,6 +50,11 @@ public:
   double angle;
   SDL_Rect offset;//총알들의 위치
 }bullets;
+
+typedef struct laser_bullet{
+  bool env;
+  SDL_Rect offset;
+}laser_bullet;
 
 typedef struct items
 {
@@ -92,7 +97,7 @@ public:
   vector<items> itm;
 };
 
-class Upgrade_item1
+class Upgrade_item1//3방향 발사
 {
 public:
   SDL_Surface *item;
@@ -104,12 +109,12 @@ public:
 
   vector<items> itm;
 };
-class Item4
+class Upgrade_item2 //레이저 아이템
 {
 public:
   SDL_Surface *item;
 
-  ~Item4();
+  ~Upgrade_item2();
   void add_itm(int x, int y, int ply_x, int ply_y);                                      //x,y는 item 방향성, ply_x,y는 item의 현재 위치
   void item_apply_surface(SDL_Surface *item, SDL_Surface* destination, SDL_Rect* clip);  // item들 그리기
   void control_item();
@@ -167,11 +172,11 @@ public:
         obs = load_image("assets/obstacle.png");
         SDL_SetColorKey(obs, SDL_SRCCOLORKEY, SDL_MapRGB(obs->format,255,255,255));
   };
-  void apply_surface(SDL_Surface * destination, SDL_Rect* clip) //draw obstacle
-  {
+  void apply_surface(SDL_Surface *destination,SDL_Rect* clip){
       SDL_Rect offset;
-      offset.x = pos_x1;
-      offset.y = pos_y1;
+      offset.x=pos_x1;
+      offset.y=pos_y1;
+
       SDL_BlitSurface(obs, clip, destination, &offset);
   };
 
@@ -267,12 +272,14 @@ private:
 public:
   AirPlane(Mix_Chunk* shooting,Mix_Chunk* get,Mix_Chunk* hit);//생성자를 통해 클래스의 사운드 청크를 지정한다.
   ~AirPlane();
+
   bool Got_shot(_bullets &A,_bullets &B,_bullets &C,_bullets &D);
-  bool Got_item(vector<items> I);
+  bool Got_item(vector<items>& I);
+
   bool detect_collision(list<SDL_Rect> C);
   bool detect_collision(SDL_Rect C);
   bool check_in_border(SDL_Rect C,bool& flag);
-  void shooting(_bullets &A);
+  void shooting(_bullets &A,laser_bullet &player_laser_bullet);
   void increaseLife();
   void increaseSA();
   void Got_shiled(SDL_Surface *plane);
@@ -293,7 +300,7 @@ class Enemy_standard_2
 {
 private:
   SDL_Surface *enemy;
-  SDL_Rect offset;
+
   int pos_x, pos_y;
   int life;
   int mode;
@@ -303,9 +310,12 @@ private:
 
 public:
 
+  SDL_Rect offset;
+
   Enemy_standard_2(int mode);
   ~Enemy_standard_2();
   bool Got_shot(_bullets &A);
+  bool Got_shot(laser_bullet A);
   bool eliminate ( int y);
   void shooting(_bullets &A);
   void enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip);
@@ -313,23 +323,27 @@ public:
   SDL_Rect Get_plane();
   void set_offset(int w,int h){offset.w=w,offset.h=h;}
   void set_pos(int x, int y){pos_x=x;pos_y=y;}
+
 };
 
 
 class Enemy_standard
 {
 private:
-    SDL_Rect offset;
+   
     int life;
     int count=0;//루프문 반복할 변수
     int mode;// 좌,우 나타날 장소를 정하는 변수
     bool first_exe = true;
     int pos;
   public:
+    SDL_Rect offset;
+
     int pos_x,pos_y;// 비행기 x,y 좌표;
     Enemy_standard(int mode);
     ~Enemy_standard();
     bool Got_shot(_bullets &A);
+    bool Got_shot(laser_bullet A);
     bool eliminate ( int y);
     void shooting(_bullets &A);
     void enemy_apply_surface(SDL_Surface* source[], SDL_Surface* destination, SDL_Rect* clip);
@@ -337,6 +351,8 @@ private:
     SDL_Rect Get_plane();
     void set_offset(int w,int h){offset.w=w,offset.h=h;}
     void set_pos(int x, int y){pos_x=x;pos_y=y;}
+
+    
 };
 /*
 class Obstacle
@@ -361,7 +377,7 @@ class Mini_Boss
 {
 public:
   SDL_Surface *mini_boss;
-  SDL_Rect offset;
+  
   Mix_Chunk* hit_sound;//피격음
   
 
@@ -369,20 +385,25 @@ public:
   int count = 0;
   int direction = 0;
   int cont_shoot = 0;
-  int life;
+  float life;
 
 public:
+  SDL_Rect offset;
+
   Mini_Boss(Mix_Chunk* sound);
   ~Mini_Boss();
   bool Got_shot(_bullets &A, int &x);
+  bool Got_shot(laser_bullet A, int &x,short RNG);
   void shooting(_bullets &A);
   void enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip);
   SDL_Rect  control_plane(_bullets &A);
-  void loss_life(int& score,Mix_Chunk* sound);
+  void loss_life(int& score,Mix_Chunk* sound,float damage);
   SDL_Rect Get_plane();
 
   void set_offset(int w,int h){offset.w=w,offset.h=h;}
   void set_pos(int x, int y){pos_x=x;pos_y=y;}
+
+  
 
   int amount = 1;
 };
@@ -399,16 +420,17 @@ public:
   int count = 0;
   int direction = 0;
   int cont_shoot = 0;
-  int life;
+  float life;
 
 public:
   Second_Boss(Mix_Chunk* sound);
   ~Second_Boss();
   bool Got_shot(_bullets &A, int &x);
+  bool Got_shot(laser_bullet A, int &x,short RNG);
   void shooting(_bullets &A);
   void enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip);
   SDL_Rect  control_plane(_bullets &A);
-  void loss_life(int& score,Mix_Chunk* sound);
+  void loss_life(int& score,Mix_Chunk* sound,float damage);
   SDL_Rect Get_plane();
 
   void set_offset(int w,int h){offset.w=w,offset.h=h;}
@@ -421,27 +443,33 @@ class Boss
 {
 private:
   SDL_Surface *mini_boss;
-  SDL_Rect offset;
+  
   Mix_Chunk* hit_sound;//피격음
 
   int pos_x, pos_y;
-  int life;
+  float life;
   int count = 0;
   int direction = 0;
   int cont_shoot = 0;
 
 public:
+
+  SDL_Rect offset;
+
   Boss(Mix_Chunk* sound);
   ~Boss();
-  bool Got_shot(_bullets &A,  int &x);
+  bool Got_shot(_bullets &A,  int& x);
+  bool Got_shot(laser_bullet A, int& x,short RNG);
   void shooting(_bullets &A);
   void enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip);
   SDL_Rect  control_plane(_bullets &A);
-  void loss_life(int& score,Mix_Chunk* sound);
+  void loss_life(int& score,Mix_Chunk* sound,float damage);
   SDL_Rect Get_plane();
 
   void set_offset(int w,int h){offset.w=w,offset.h=h;}
   void set_pos(int x, int y){pos_x=x;pos_y=y;}
+
+  
 
   int amount = 1;
 };

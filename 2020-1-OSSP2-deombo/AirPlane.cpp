@@ -10,7 +10,6 @@ void Health_item::add_itm(int x, int y, int ply_x, int ply_y)
 
 void Health_item::item_apply_surface(SDL_Surface *item, SDL_Surface* destination, SDL_Rect* clip)  // item들 그리기
 {
-  
   for(vector<items>::iterator iter = itm.begin(); iter!= itm.end(); iter++)
   {
     SDL_BlitSurface( item, clip, destination, &(*iter).offset);
@@ -26,7 +25,6 @@ void Health_item::control_item()
     if( 0 < tmp.offset.x + 9 && tmp.offset.x< SCREEN_WIDTH && -5 <= tmp.offset.y  && tmp.offset.y < SCREEN_HEIGHT)
       temp.push_back(tmp);
   }
-
   itm = temp;
 }
 
@@ -103,6 +101,39 @@ Upgrade_item1::~Upgrade_item1()
     SDL_FreeSurface(item);
 }
 
+void Upgrade_item2::add_itm(int x, int y, int ply_x, int ply_y)
+{
+  item = load_image("assets/tem_sh.png");
+  SDL_SetColorKey(item, SDL_SRCCOLORKEY,SDL_MapRGB(item->format,0,0,0));
+  items tmp(x,y,ply_x,ply_y);
+  itm.push_back(tmp);
+}
+
+void Upgrade_item2::item_apply_surface(SDL_Surface *item, SDL_Surface* destination, SDL_Rect* clip)  // item들 그리기
+{
+  for(vector<items>::iterator iter = itm.begin(); iter!= itm.end(); iter++)
+  {
+    SDL_BlitSurface( item, clip, destination, &(*iter).offset);
+  }
+}
+
+void Upgrade_item2::control_item()
+{
+  vector<items> temp;
+  for(vector<items>::iterator iter = itm.begin(); iter != itm.end(); iter++)
+  {
+    items tmp((*iter).move_x,(*iter).move_y,(*iter).offset.x,(*iter).offset.y + 2);
+    if( 0 < tmp.offset.x + 9 && tmp.offset.x< SCREEN_WIDTH && -5 <= tmp.offset.y  && tmp.offset.y < SCREEN_HEIGHT)
+      temp.push_back(tmp);
+  }
+
+  itm = temp;
+}
+
+Upgrade_item2::~Upgrade_item2()
+{
+    SDL_FreeSurface(item);
+}
 AirPlane::AirPlane(Mix_Chunk* shooting,Mix_Chunk* got,Mix_Chunk* hit)
 {
   pos_x = SCREEN_WIDTH / 2;//처음 시작 위치 지정
@@ -110,12 +141,14 @@ AirPlane::AirPlane(Mix_Chunk* shooting,Mix_Chunk* got,Mix_Chunk* hit)
   
   offset.x = pos_x;
   offset.y = pos_y;
+  offset.w=PLAYER_WIDTH;
+  offset.h=PLAYER_HEIGHT;
   //플레이어 사운드 설정
   shooting_sound=shooting;
   get_sound=got;
   hit_sound=hit;
 
-  bullet_mode =1;//총알 모드는 기본적으로 1임
+  bullet_mode =3;//총알 모드는 기본적으로 1임
   life = 3;
   SA_count = 3;
   invisible_mode = 0;
@@ -126,7 +159,7 @@ AirPlane::~AirPlane()
 
 }
 
-void AirPlane::shooting(_bullets &player_bullets)
+void AirPlane::shooting(_bullets &player_bullets,laser_bullet &player_laser_bullet)
 {
   if(bullet_mode==1){//기본 총알
     Mix_PlayChannel(-1,shooting_sound,0);//총알 발사음 출력
@@ -137,6 +170,14 @@ void AirPlane::shooting(_bullets &player_bullets)
     player_bullets.add_blt( 7, -7,pos_x+11,pos_y - 20, -45);
     player_bullets.add_blt( 0, -10,pos_x+5,pos_y - 15);
     player_bullets.add_blt(-7, -7,pos_x-13,pos_y - 20, 45);
+  }
+  else if(bullet_mode==3)
+  {
+    player_laser_bullet.env=true;
+    player_laser_bullet.offset.w=3;
+    player_laser_bullet.offset.h=SCREEN_HEIGHT;
+    player_laser_bullet.offset.x= pos_x+9;
+    player_laser_bullet.offset.y= pos_y-player_laser_bullet.offset.h;
   }
 }
 
@@ -266,7 +307,7 @@ bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C,_bullets &D)
   return flag;
 }
 
-bool AirPlane::Got_item(vector<items> I)
+bool AirPlane::Got_item(vector<items>& I)
 {
   vector<items>::iterator iter;
   bool flag = false;
@@ -278,6 +319,7 @@ bool AirPlane::Got_item(vector<items> I)
     else                                                                           //맞았을때
     {
       flag = true;
+      I.clear();
       break;
     }
   }
@@ -303,6 +345,7 @@ bool AirPlane::detect_collision(list<SDL_Rect> C)
   }
   return flag;
 }
+
 bool AirPlane::detect_collision(SDL_Rect C)
 {
   if(intersects(C,this->offset))//충돌시
@@ -393,6 +436,14 @@ bool Enemy_standard_2::Got_shot(_bullets &A)
   return flag;
 }
 
+bool Enemy_standard_2::Got_shot(laser_bullet A){//레이저 빔에 맞을 때 판정
+  if(A.env)
+    return intersects(this->offset,A.offset);
+  else
+    return false;
+};
+
+
 bool Enemy_standard_2:: eliminate(int y){
     if(pos_y+32 > y) return true;
     else return false;
@@ -432,6 +483,8 @@ SDL_Rect Enemy_standard_2::control_plane(_bullets &A)
           pos_y += 3;
       }
   }
+  offset.x = pos_x;
+  offset.y = pos_y;
   count++;
   return this->offset;
 }
@@ -482,12 +535,16 @@ bool Enemy_standard::Got_shot(_bullets &A)
     }
      
   }
-
   A.blt = tmp;
 
   return flag;
 }
-
+bool Enemy_standard::Got_shot(laser_bullet A){//레이저 빔에 맞을 때 판정
+  if(A.env)
+    return intersects(this->offset,A.offset);
+  else
+    return false;
+};
 bool Enemy_standard:: eliminate(int y){
     if(pos_y+32 > y) return true;
     else return false;
@@ -525,6 +582,8 @@ SDL_Rect Enemy_standard::control_plane(_bullets &enemy)
       }
   }
   ++count;
+  offset.x = pos_x;
+  offset.y = pos_y;
   return this->offset;
 }
 
@@ -667,6 +726,20 @@ bool Mini_Boss::Got_shot(_bullets &A, int &x){
 
     return flag;
 };
+
+bool Mini_Boss::Got_shot(laser_bullet A, int &x,short RNG){//레이저 빔에 맞을 때 판정
+
+    bool flag=false;
+    if(A.env){
+      if(flag=intersects(this->offset,A.offset))//맞았을때
+      {
+        Mix_PlayChannel(-1,hit_sound,0);//사운드 출력
+        x=RNG%5;
+      }
+    }
+    return flag;
+};
+
 void Mini_Boss::shooting(_bullets &A){
     A.add_blt( 0, 5,pos_x + 125,pos_y + 82);
     A.add_blt( 3, 5,pos_x + 125,pos_y + 82);
@@ -700,6 +773,8 @@ SDL_Rect Mini_Boss::control_plane(_bullets &A){
         }
     }
     count++;
+    offset.x = pos_x;
+    offset.y = pos_y;
     return this->offset;
 };
 
@@ -711,11 +786,14 @@ SDL_Rect Mini_Boss::Get_plane()
   return offset;
 }
 
-void Mini_Boss::loss_life(int& score,Mix_Chunk* sound)
+void Mini_Boss::loss_life(int& score,Mix_Chunk* sound,float damage)
 {
-    this->life--;
-    score +=50;
-    if( this->life == 0) {
+    this->life-=damage;
+    if(damage==1)
+      score += 50;
+    else
+      score+=5;
+    if( this->life <= 0) {
       Mix_PlayChannel(-1,sound,0);//보스 사망시 폭팔음 출력
       this->~Mini_Boss();
       score+=1000;
@@ -775,6 +853,19 @@ bool Second_Boss::Got_shot(_bullets &A, int &x){
 
     return flag;
 };
+
+bool Second_Boss::Got_shot(laser_bullet A, int &x,short RNG){//레이저 빔에 맞을 때 판정
+
+    bool flag=false;
+    if(A.env){
+      if(flag=intersects(this->offset,A.offset))//맞았을때
+      {
+        Mix_PlayChannel(-1,hit_sound,0);//사운드 출력
+        x=RNG%5;
+      }
+    }
+    return flag;
+};
 void Second_Boss::shooting(_bullets &A){
     A.add_blt( 0, 5,pos_x + 125,pos_y + 82);
     A.add_blt( 3, 5,pos_x + 125,pos_y + 82);
@@ -819,11 +910,14 @@ SDL_Rect Second_Boss::Get_plane()
   return offset;
 }
 
-void Second_Boss::loss_life(int& score,Mix_Chunk* sound)
+void Second_Boss::loss_life(int& score,Mix_Chunk* sound,float damage)
 {
-    this->life--;
-    score +=50;
-    if( this->life == 0) {
+    this->life-damage;
+    if(damage==1)
+      score += 50;
+    else
+      score+=5;
+    if( this->life <= 0) {
       Mix_PlayChannel(-1,sound,0);//보스 사망시 폭팔음 출력
       this->~Second_Boss();
       score+=1000;
@@ -848,7 +942,7 @@ Boss::~Boss(){
     delete this->mini_boss;
 };
 
-bool Boss::Got_shot(_bullets &A, int &x){
+bool Boss::Got_shot(_bullets &A, int& x){
     vector<bullets>::iterator iter;
     vector<bullets> tmp;
 
@@ -879,6 +973,18 @@ bool Boss::Got_shot(_bullets &A, int &x){
 
     A.blt = tmp;
 
+    return flag;
+};
+bool Boss::Got_shot(laser_bullet A, int &x,short RNG){//레이저 빔에 맞을 때 판정
+
+    bool flag=false;
+    if(A.env){
+      if(flag=intersects(this->offset,A.offset))//맞았을때
+      {
+        Mix_PlayChannel(-1,hit_sound,0);//사운드 출력
+        x=RNG%5;
+      }
+    }
     return flag;
 };
 void Boss::shooting(_bullets &A){
@@ -939,6 +1045,8 @@ SDL_Rect Boss::control_plane(_bullets &A){
         }
     }
     count++;
+    offset.x = pos_x;
+    offset.y = pos_y;
     return this->offset;
 };
 
@@ -949,11 +1057,15 @@ SDL_Rect Boss::Get_plane()
 
   return offset;
 }
-void Boss::loss_life(int& score,Mix_Chunk* sound)
+void Boss::loss_life(int& score,Mix_Chunk* sound,float damage)
 {
-    this->life--;
-    score += 50;
-    if( this->life == 0) {
+    this->life-=damage;
+    if(damage==1)
+      score += 50;
+    else
+      score+=5;
+    
+    if( this->life <= 0) {
       Mix_PlayChannel(-1,sound,0);
       this->~Boss();
       score+=3000;
