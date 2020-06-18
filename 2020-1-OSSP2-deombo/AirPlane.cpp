@@ -252,6 +252,28 @@ SDL_Rect AirPlane::Get_plane()
   return offset;
 }
 
+bool AirPlane::detect_obstacle(vector<Obstacle> &Obs)
+{
+  vector<Obstacle>::iterator iter;
+  vector<Obstacle> obstmp;
+
+  bool flag = false;
+
+  for(iter = Obs.begin(); iter != Obs.end(); iter++)
+  {
+    if((pos_x + 18 < (*iter).get_offset().x || pos_y + 20 < (*iter).get_offset().y + 17) ||
+    ((*iter).get_offset().x + 50 < pos_x + 9 || (*iter).get_offset().y + 50 < pos_y + 10))
+      obstmp.push_back(*iter);
+    else
+    {
+      flag = true;
+    }
+    //Obs = obstmp;
+  }
+
+  return flag;
+}
+
 bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C,_bullets &D)
 {
   vector<bullets>::iterator iter;
@@ -273,6 +295,7 @@ bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C,_bullets &D)
     }
   }
   A.blt = tmp;
+
   for(iter = B.blt.begin(); iter != B.blt.end(); iter++)
   {
     if((pos_x + 18 < (*iter).offset.x || pos_y + 20 < (*iter).offset.y + 5) ||
@@ -593,87 +616,6 @@ SDL_Rect Enemy_standard::Get_plane()
   offset.y = pos_y;
   return offset;
 }
-/*
-//About Obstacle
-Obstacle::Obstacle()
-{
-  int x = rand()%200+80;
-  int y = rand()%200+400;
-
-  /*this->mode = mode;// 이동경로 mode
-  if( mode == 0)
-    pos_x = x;// 처음 시작 위치 지정
-  else if(mode == 1)
-    pos_x = y;
-
-  pos_y = -OBSTACLE_HEIGHT;//처음 시작 위치 지정
-  //life = 1;
-
-  offset.w =OBSTACLE_WIDTH;
-  offset.h=OBSTACLE_HEIGHT;
-}
-
-Obstacle::~Obstacle()
-{
-}
-
-bool Obstacle::Got_shot(_bullets &A)
-{
-  vector<bullets>::iterator iter;
-  vector<bullets> tmp;
-
-  bool flag = false;
-
-  for(iter = A.blt.begin(); iter != A.blt.end(); iter++)
-  {
-    /*
-      if((pos_x + 22 < (*iter).bullet_pos.x + 3 || pos_y + 32 < (*iter).bullet_pos.y) ||
-      ((*iter).bullet_pos.x + 13 < pos_x + 10 || (*iter).bullet_pos.y + 32 < pos_y))//안 맞았을 때
-      tmp.push_back(*iter);
-     
-    else//맞았을때
-    {
-      flag = true;
-    }
-    
-  }
-
-  A.blt = tmp;
-
-  return flag;
-}
-
-void Obstacle::obstacle_apply_surface(SDL_Surface* source, SDL_Surface* destination, SDL_Rect* clip)
-{
-
-  offset.x = pos_x;
-  offset.y = pos_y;
-  SDL_BlitSurface(source, clip, destination, &offset );
-}
-
-SDL_Rect Obstacle::move_obstacle()
-{//y= 3일 때 속도가 적당.
-  if(first_exe == true){
-    pos = rand()%75+75;
-    first_exe=false;
-  }
-  
-  if(count<pos) pos_y += 3;
-  else{
-          pos_x+=3;
-          pos_y+=3;
-  }
-  ++count;
-  return this->offset;
-}
-
-SDL_Rect Obstacle::Get_obstacle()
-{
-  offset.x = pos_x;
-  offset.y = pos_y;
-  return offset;
-}
-*/
 
 Mini_Boss::Mini_Boss(Mix_Chunk* sound){
     mini_boss = load_image("assets/boss2.png");// 비행기 이미지

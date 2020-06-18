@@ -164,33 +164,41 @@ private:
     Mix_Chunk* special_sound;//특수기 효과음
 };
 
+//for obstacle
 class Obstacle
 {
 public:
-    Obstacle(int x) {
+  Obstacle(int x) {
         pos_x1=x;
         obs = load_image("assets/obstacle.png");
         SDL_SetColorKey(obs, SDL_SRCCOLORKEY, SDL_MapRGB(obs->format,255,255,255));
   };
-  void apply_surface(SDL_Surface *destination,SDL_Rect* clip){
-      SDL_Rect offset;
-      offset.x=pos_x1;
-      offset.y=pos_y1;
 
+  void apply_surface(SDL_Surface * destination, SDL_Rect* clip) //draw obstacle
+  {
+      offset.x = pos_x1;
+      offset.y = pos_y1;
       SDL_BlitSurface(obs, clip, destination, &offset);
   };
 
   void control_bullet()
   {
-    pos_y1 += 4;
+    pos_y1 += 2;
+  };
+
+  SDL_Rect get_offset()
+  {
+    return offset;
   };
 
   int pos(){
       return pos_y1;
   }
-    int pos_y1=0;
+
+  int pos_y1=0;
 private:
     int pos_x1;
+    SDL_Rect offset;
     SDL_Surface *obs;
 };
 
@@ -275,11 +283,12 @@ public:
 
   bool Got_shot(_bullets &A,_bullets &B,_bullets &C,_bullets &D);
   bool Got_item(vector<items>& I);
-
   bool detect_collision(list<SDL_Rect> C);
   bool detect_collision(SDL_Rect C);
   bool check_in_border(SDL_Rect C,bool& flag);
   void shooting(_bullets &A,laser_bullet &player_laser_bullet);
+  bool detect_obstacle(vector<Obstacle> &Obs);
+
   void increaseLife();
   void increaseSA();
   void Got_shiled(SDL_Surface *plane);
@@ -289,7 +298,10 @@ public:
   SDL_Rect Get_plane();//plane 변수 getter
   void set_offset(int w,int h){offset.w=w,offset.h=h;}
   void set_pos(int x, int y){pos_x=x;pos_y=y;}
-
+  void pushed_by_obstacle(int d) {pos_y+=d;}
+  int get_pos_x(){return pos_x;}
+  int get_pos_y(){return pos_y;}
+  
   short bullet_mode;// 업글 아이템을 먹었을 시 불릿 모드를 저장할 변수 1이 기본 발사 모드 2가 3방향 발사 모드
   int invisible_mode;
   int life;
@@ -354,25 +366,7 @@ private:
 
     
 };
-/*
-class Obstacle
-{
-private:
-    SDL_Rect offset;
-    //int life;
-    int count=0;//루프문 반복할 변수
-    bool first_exe = true;
-    int pos;
-  public:
-    int pos_x,pos_y;// x,y 좌표;
-    Obstacle();
-    ~Obstacle();
-    bool Got_shot(_bullets &A);
-    void obstacle_apply_surface(SDL_Surface* source, SDL_Surface* destination, SDL_Rect* clip);
-    SDL_Rect  move_obstacle();
-    SDL_Rect Get_obstacle();
-};
-*/
+
 class Mini_Boss
 {
 public:
