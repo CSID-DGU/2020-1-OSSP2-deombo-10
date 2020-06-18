@@ -136,14 +136,16 @@ private:
     Mix_Chunk* special_sound;//특수기 효과음
 };
 
+//for obstacle
 class Obstacle
 {
 public:
-    Obstacle(int x) {
+  Obstacle(int x) {
         pos_x1=x;
         obs = load_image("assets/obstacle.png");
         SDL_SetColorKey(obs, SDL_SRCCOLORKEY, SDL_MapRGB(obs->format,255,255,255));
   };
+
   void apply_surface(SDL_Surface * destination, SDL_Rect* clip) //draw obstacle
   {
       offset.x = pos_x1;
@@ -156,10 +158,16 @@ public:
     pos_y1 += 3;
   };
 
+  SDL_Rect get_offset()
+  {
+    return offset;
+  };
+
   int pos(){
       return pos_y1;
   }
-    int pos_y1=0;
+
+  int pos_y1=0;
 private:
     int pos_x1;
     SDL_Rect offset;
@@ -232,10 +240,11 @@ private:
 public:
   AirPlane(Mix_Chunk* shooting,Mix_Chunk* get,Mix_Chunk* hit);//생성자를 통해 클래스의 사운드 청크를 지정한다.
   ~AirPlane();
+  bool detect_obstacle(vector<Obstacle> &Obs);
   bool Got_shot(_bullets &A,_bullets &B,_bullets &C);
   bool Got_item(vector<items> I);
   bool detect_collision(list<SDL_Rect> C);
-   bool detect_collision(SDL_Rect C);
+  bool detect_collision(SDL_Rect C);
   void shooting(_bullets &A);
   void increaseLife();
   void increaseSA();
@@ -246,7 +255,9 @@ public:
   SDL_Rect Get_plane();//plane 변수 getter
   void set_offset(int w,int h){offset.w=w,offset.h=h;}
   void set_pos(int x, int y){pos_x=x;pos_y=y;}
-
+  void pushed_by_obstacle(int d) {pos_y+=d;}
+  int get_pos_x(){return pos_x;}
+  int get_pos_y(){return pos_y;}
 
   int invisible_mode;
   int life;

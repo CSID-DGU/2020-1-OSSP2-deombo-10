@@ -218,6 +218,7 @@ int main(){
     obs_it = Obs.begin();
     for(obs_it; obs_it != Obs.end(); obs_it++) {
       if((*obs_it).pos() < (480 + 130)) o.push_back(*obs_it);
+      
     }
     Obs.clear();
     Obs = o;
@@ -246,7 +247,7 @@ int main(){
       E2.push_back(tmp2);
     }
 
-    if(count != 0 && count % 500 == 0)
+    if(count % 500 == 0)
     {
       Obstacle obstmp(0);
       Obstacle obstmp2(50);
@@ -310,6 +311,14 @@ int main(){
       A.life--;
       A.invisible_mode = 1;
     }
+    
+    /*
+    if(!((A.get_pos_x() + 18 < (*obs_it).get_offset().x || A.get_pos_y() + 20 < (*obs_it).get_offset().y + 5) ||
+    ((*obs_it).get_offset().x + 15 < A.get_pos_x() + 9 || (*obs_it).get_offset().y + 10 < A.get_pos_y() + 10)))
+    {
+      A.pushed_by_obstacle(6);
+      A.invisible_mode = 1;
+    }*/
 
     if(dead2 != true && mode == 2 &&(A2.Got_shot(enemy_bullets,boss_bullets,mini_bullets)||A2.detect_collision(CB))&& A2.invisible_mode == 0)      //사용자 피격 판정
     {

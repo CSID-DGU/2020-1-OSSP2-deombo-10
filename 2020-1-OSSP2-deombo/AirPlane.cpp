@@ -197,6 +197,30 @@ SDL_Rect AirPlane::Get_plane()
   return offset;
 }
 
+/*
+bool AirPlane::detect_obstacle(vector<Obstacle> &Obs)
+{
+  vector<Obstacle>::iterator iter;
+  vector<Obstacle> obstmp;
+
+  bool flag = false;
+
+  for(iter = Obs.begin(); iter != Obs.end(); iter++)
+  {
+    if((pos_x + 18 < (*iter).get_offset().x || pos_y + 20 < (*iter).get_offset().y + 5) ||
+    ((*iter).get_offset().x + 15 < pos_x + 9 || (*iter).get_offset().y + 10 < pos_y + 10))
+      obstmp.push_back(*iter);
+    else
+    {
+      flag = true;
+    }
+    Obs = obstmp;
+  }
+
+  return flag;
+}
+*/
+
 bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C)
 {
   vector<bullets>::iterator iter;
@@ -218,6 +242,7 @@ bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C)
     }
   }
   A.blt = tmp;
+
   for(iter = B.blt.begin(); iter != B.blt.end(); iter++)
   {
     if((pos_x + 18 < (*iter).offset.x || pos_y + 20 < (*iter).offset.y + 5) ||
