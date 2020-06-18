@@ -312,13 +312,11 @@ int main(){
       A.invisible_mode = 1;
     }
     
-    /*
-    if(!((A.get_pos_x() + 18 < (*obs_it).get_offset().x || A.get_pos_y() + 20 < (*obs_it).get_offset().y + 5) ||
-    ((*obs_it).get_offset().x + 15 < A.get_pos_x() + 9 || (*obs_it).get_offset().y + 10 < A.get_pos_y() + 10)))
+    
+    if(dead != true && A.detect_obstacle(Obs) && A.invisible_mode == 0)
     {
-      A.pushed_by_obstacle(6);
-      A.invisible_mode = 1;
-    }*/
+      A.pushed_by_obstacle(30);
+    }
 
     if(dead2 != true && mode == 2 &&(A2.Got_shot(enemy_bullets,boss_bullets,mini_bullets)||A2.detect_collision(CB))&& A2.invisible_mode == 0)      //사용자 피격 판정
     {

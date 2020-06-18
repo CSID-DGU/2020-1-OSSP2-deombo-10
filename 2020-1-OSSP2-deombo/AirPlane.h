@@ -155,7 +155,7 @@ public:
 
   void control_bullet()
   {
-    pos_y1 += 3;
+    pos_y1 += 2;
   };
 
   SDL_Rect get_offset()
