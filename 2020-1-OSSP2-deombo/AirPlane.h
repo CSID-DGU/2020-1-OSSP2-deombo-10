@@ -146,7 +146,6 @@ public:
   };
   void apply_surface(SDL_Surface * destination, SDL_Rect* clip) //draw obstacle
   {
-      SDL_Rect offset;
       offset.x = pos_x1;
       offset.y = pos_y1;
       SDL_BlitSurface(obs, clip, destination, &offset);
@@ -154,7 +153,7 @@ public:
 
   void control_bullet()
   {
-    pos_y1 += 4;
+    pos_y1 += 3;
   };
 
   int pos(){
@@ -163,6 +162,7 @@ public:
     int pos_y1=0;
 private:
     int pos_x1;
+    SDL_Rect offset;
     SDL_Surface *obs;
 };
 
@@ -302,25 +302,7 @@ private:
     void set_offset(int w,int h){offset.w=w,offset.h=h;}
     void set_pos(int x, int y){pos_x=x;pos_y=y;}
 };
-/*
-class Obstacle
-{
-private:
-    SDL_Rect offset;
-    //int life;
-    int count=0;//루프문 반복할 변수
-    bool first_exe = true;
-    int pos;
-  public:
-    int pos_x,pos_y;// x,y 좌표;
-    Obstacle();
-    ~Obstacle();
-    bool Got_shot(_bullets &A);
-    void obstacle_apply_surface(SDL_Surface* source, SDL_Surface* destination, SDL_Rect* clip);
-    SDL_Rect  move_obstacle();
-    SDL_Rect Get_obstacle();
-};
-*/
+
 class Mini_Boss
 {
 public:

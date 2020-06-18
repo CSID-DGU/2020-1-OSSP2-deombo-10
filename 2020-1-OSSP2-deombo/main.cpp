@@ -85,8 +85,8 @@ bool menu3();
 bool game_over();
 bool stage_clear();
 void special_ability(int SA);
-void handle_resize(SDL_ResizeEvent &event){//화면의 크기가 resize 되면 이 함수가 호출됨
-  
+
+void handle_resize(SDL_ResizeEvent &event) {//화면의 크기가 resize 되면 이 함수가 호출됨
 
   SDL_FreeSurface(screen);//기존 screen을 free 해준다음.
   screen = SDL_SetVideoMode(event.w, event.h, SCREEN_BPP, SDL_SWSURFACE | SDL_DOUBLEBUF |SDL_RESIZABLE);
@@ -219,6 +219,7 @@ int main(){
     for(obs_it; obs_it != Obs.end(); obs_it++) {
       if((*obs_it).pos() < (480 + 130)) o.push_back(*obs_it);
     }
+    Obs.clear();
     Obs = o;
 
     if(o.size()>0){
@@ -231,7 +232,7 @@ int main(){
     if(o_bound > (480 + 130)) o_bound = 480+100;
 
     //for special
-    if(bound < -130 )bound = -100;
+    if(bound < -130 ) bound = -100;
 
     if(count % 5 == 0) shootcnt = 0;
     if(count % 5 == 0) shootcnt2 = 0;
@@ -245,39 +246,39 @@ int main(){
       E2.push_back(tmp2);
     }
 
-    if(count % 500 == 0)
+    if(count != 0 && count % 500 == 0)
     {
-      Obstacle tmp(0);
-      Obstacle tmp2(50);
-      Obstacle tmp3(100);
-      Obstacle tmp4(150);
-      Obstacle tmp5(200);
-      Obstacle tmp6(250);
-      Obstacle tmp7(300);
-      Obstacle tmp8(350);
-      Obstacle tmp9(400);
-      Obstacle tmp10(450);
-      Obstacle tmp11(500);
-      Obstacle tmp12(550);
-      Obstacle tmp13(600);
-      Obstacle tmp14(650);
-      Obstacle tmp15(700);
+      Obstacle obstmp(0);
+      Obstacle obstmp2(50);
+      Obstacle obstmp3(100);
+      Obstacle obstmp4(150);
+      Obstacle obstmp5(200);
+      Obstacle obstmp6(250);
+      Obstacle obstmp7(300);
+      Obstacle obstmp8(350);
+      Obstacle obstmp9(400);
+      Obstacle obstmp10(450);
+      Obstacle obstmp11(500);
+      Obstacle obstmp12(550);
+      Obstacle obstmp13(600);
+      Obstacle obstmp14(650);
+      Obstacle obstmp15(700);
 
-      Obs.push_back(tmp);
-      Obs.push_back(tmp2);
-      Obs.push_back(tmp3);
-      Obs.push_back(tmp4);
-      Obs.push_back(tmp5);
-      Obs.push_back(tmp6);
-      Obs.push_back(tmp7);
-      Obs.push_back(tmp8);
-      Obs.push_back(tmp9);
-      Obs.push_back(tmp10);
-      Obs.push_back(tmp11);
-      Obs.push_back(tmp12);
-      Obs.push_back(tmp13);
-      Obs.push_back(tmp14);
-      Obs.push_back(tmp15);
+      Obs.push_back(obstmp);
+      Obs.push_back(obstmp2);
+      if(hole != 0) Obs.push_back(obstmp3);
+      Obs.push_back(obstmp4);
+      Obs.push_back(obstmp5);
+      if(hole != 1) Obs.push_back(obstmp6);
+      Obs.push_back(obstmp7);
+      Obs.push_back(obstmp8);
+      if(hole != 2) Obs.push_back(obstmp9);
+      Obs.push_back(obstmp10);
+      Obs.push_back(obstmp11);
+      if(hole != 3) Obs.push_back(obstmp12);
+      Obs.push_back(obstmp13);
+      Obs.push_back(obstmp14);
+      Obs.push_back(obstmp15);
     }
 
     start_time = SDL_GetTicks();//나중에 프레임 계산할 변수
