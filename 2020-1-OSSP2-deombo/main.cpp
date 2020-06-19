@@ -372,11 +372,7 @@ int main(){
       A2.invisible_mode = 1;
       if(!border_check2)//경계 밖에 있는 경우
          A.set_pos(SCREEN_WIDTH/2,SCREEN_HEIGHT/2);//비행기를 초기 위치로 돌려놓음
-    }
-
-    if(dead2 != true && mode == 2 && A2.detect_obstacle(Obs) && A.invisible_mode == 0)
-    {
-      A2.pushed_by_obstacle(30);
+      
     }
 
     if(E.size() > 0)
@@ -749,8 +745,8 @@ int main(){
             }
           }
         else{player2_laser_bullet.env=false;}
-// SHOULD HAVE FLAG TO AVOID SPECIAL ABILITY IS USED NUMEROUS TIMES BY PRESSING ONCE.
-          if(mode == 2 && keystates[SDLK_g])    
+         
+          if(mode == 2 && keystates[SDLK_g])    /// SHOULD HAVE FLAG TO AVOID SPECIAL ABILITY IS USED NUMEROUS TIMES BY PRESSING ONCE.
           {
              
               if(A2.SA_count >0 && flag_sa2 == 10){
@@ -866,8 +862,8 @@ int main(){
           
           
       }
-// SHOULD HAVE FLAG TO AVOID SPECIAL ABILITY IS USED NUMEROUS TIMES BY PRESSING ONCE.
-          if(mode ==2&&keystates[SDLK_g])   
+
+          if(mode ==2&&keystates[SDLK_g])    /// SHOULD HAVE FLAG TO AVOID SPECIAL ABILITY IS USED NUMEROUS TIMES BY PRESSING ONCE.
           {
              
               if(A2.SA_count >0&& flag_sa2==10){
