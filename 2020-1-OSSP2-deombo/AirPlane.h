@@ -263,6 +263,7 @@ class AirPlane
 private:
 
   Mix_Chunk* shooting_sound;//총알 발사 사운드
+  Mix_Chunk* shooting_sound2;//총알 발사 사운드2
   Mix_Chunk* get_sound;//아이템 획득 사운드
   Mix_Chunk* hit_sound;//피격음
   

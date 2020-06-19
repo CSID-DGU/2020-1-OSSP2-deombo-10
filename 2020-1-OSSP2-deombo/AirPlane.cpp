@@ -134,7 +134,7 @@ Upgrade_item2::~Upgrade_item2()
 {
     SDL_FreeSurface(item);
 }
-AirPlane::AirPlane(Mix_Chunk* shooting,Mix_Chunk* got,Mix_Chunk* hit)
+AirPlane::AirPlane(Mix_Chunk* shooting, Mix_Chunk* got,Mix_Chunk* hit)
 {
   pos_x = SCREEN_WIDTH / 2;//처음 시작 위치 지정
   pos_y = SCREEN_HEIGHT / 2;//처음 시작 위치 지정

@@ -9,6 +9,7 @@ Mix_Music *stage_music;//스테이지 음악
 Mix_Chunk *game_over_sound;//게임오버 사운드
 Mix_Chunk *selection_sound;//메뉴 선택음
 Mix_Chunk *bullet_sound;//총알 발사음
+Mix_Chunk *beam_sound;//총알2 발사음
 Mix_Chunk *hit_sound;//플레이어 피격음
 Mix_Chunk *explosion_sound1;//적 폭팔음
 Mix_Chunk *explosion_sound2;//보스 폭팔음
@@ -72,7 +73,8 @@ int craft;
 int SA;
 int SA2;
 short mode;
-
+short played_channel=-1;
+short played_channel2=-1;
 
 
 
@@ -581,14 +583,22 @@ int main(){
       A.control_plane(4, 0,player_laser_bullet);
 
 
-    if(keystates[SDLK_o] && dead != true)
+    if((keystates[SDLK_o] && dead != true))
     {
       if(shootcnt == 0) {
           A.shooting(player_bullets,player_laser_bullet);
+          if(player_laser_bullet.env&&played_channel==-1)
+            played_channel=Mix_PlayChannel(-1,beam_sound,-1);
           shootcnt = 1;
       }
     }
-    else{ player_laser_bullet.env=false;}
+    else{ 
+      if(player_laser_bullet.env==false)
+        played_channel=-1;
+      player_laser_bullet.env=false;
+      if(played_channel!=-1)
+        Mix_HaltChannel(played_channel);
+    }
     /*
     if(mode ==2&&keystates[SDLK_f] && dead2 != true)
       {
@@ -716,24 +726,33 @@ int main(){
       if(mode == 2 && dead2 != true)
       {
         if(keystates[SDLK_w])
-            A2.control_plane(0,-0,player2_laser_bullet);
+            A2.control_plane(0,-4,player2_laser_bullet);
 
           if(keystates[SDLK_s])
-            A2.control_plane(0, 0,player2_laser_bullet);
+            A2.control_plane(0, 4,player2_laser_bullet);
 
           if(keystates[SDLK_a])
-            A2.control_plane(-0, 0,player2_laser_bullet);
+            A2.control_plane(-4, 0,player2_laser_bullet);
 
           if(keystates[SDLK_d])
-            A2.control_plane(0, 0,player2_laser_bullet);
+            A2.control_plane(4, 0,player2_laser_bullet);
         if(keystates[SDLK_f])
           {
             if(shootcnt == 0) {
                 A2.shooting(player_bullets,player2_laser_bullet);
+                if(player2_laser_bullet.env&&played_channel2==-1)
+                  played_channel2=Mix_PlayChannel(-1,beam_sound,-1);
                 shootcnt = 1;
             }
           }
-        else{player2_laser_bullet.env=false;}
+        else{
+          player2_laser_bullet.env=false;
+          if(player2_laser_bullet.env==false)
+             played_channel2=-1;
+          player2_laser_bullet.env=false;
+          if(played_channel2!=-1)
+            Mix_HaltChannel(played_channel2);
+          }
          
           if(mode == 2 && keystates[SDLK_g])    /// SHOULD HAVE FLAG TO AVOID SPECIAL ABILITY IS USED NUMEROUS TIMES BY PRESSING ONCE.
           {
@@ -1338,12 +1357,14 @@ bool load_files()
   game_over_sound=Mix_LoadWAV("assets/Audio/gameover.wav");
   selection_sound=Mix_LoadWAV("assets/Audio/selection.wav");
   bullet_sound=Mix_LoadWAV("assets/Audio/laser_shot.wav");
+  beam_sound=Mix_LoadWAV("assets/Audio/beam_sound.wav");
   hit_sound=Mix_LoadWAV("assets/Audio/hit.wav");
   explosion_sound1=Mix_LoadWAV("assets/Audio/explosion1.aiff");
   explosion_sound2=Mix_LoadWAV("assets/Audio/explosion2.wav");
   special_sound=Mix_LoadWAV("assets/Audio/special.wav");
   item_sound=Mix_LoadWAV("assets/Audio/get_item.wav");
   stage_clear_sound=Mix_LoadWAV("assets/Audio/clear.wav");
+  Mix_VolumeChunk(beam_sound,40);
   Mix_VolumeChunk(explosion_sound1,60);
 
   for(int i = 0 ; i < 4; i++)
@@ -1397,6 +1418,7 @@ bool SDL_free()
   Mix_FreeChunk(hit_sound);
   Mix_FreeChunk(explosion_sound1);
   Mix_FreeChunk(bullet_sound);
+  Mix_FreeChunk(beam_sound);
   Mix_FreeChunk(explosion_sound2);
   Mix_FreeChunk(special_sound);
   Mix_FreeChunk(item_sound);
