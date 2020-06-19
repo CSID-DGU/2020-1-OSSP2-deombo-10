@@ -252,6 +252,7 @@ SDL_Rect AirPlane::Get_plane()
   return offset;
 }
 
+//for obstacle, made this method like Got_shot()
 bool AirPlane::detect_obstacle(vector<Obstacle> &Obs)
 {
   vector<Obstacle>::iterator iter;
@@ -261,7 +262,7 @@ bool AirPlane::detect_obstacle(vector<Obstacle> &Obs)
 
   for(iter = Obs.begin(); iter != Obs.end(); iter++)
   {
-    if((pos_x + 18 < (*iter).get_offset().x || pos_y + 20 < (*iter).get_offset().y + 17) ||
+    if((pos_x + 18 < (*iter).get_offset().x || pos_y + 20 < (*iter).get_offset().y + 50) ||
     ((*iter).get_offset().x + 50 < pos_x + 9 || (*iter).get_offset().y + 50 < pos_y + 10))
       obstmp.push_back(*iter);
     else
@@ -285,6 +286,8 @@ bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C,_bullets &D)
 
   for(iter = A.blt.begin(); iter != A.blt.end(); iter++)
   {
+    //(right of airplane body < left of bullet body || below of airplane body > above of bullet body) ||
+    //(right of bullet body < left of airplane body || below of bullet body > above of airplane body)
     if((pos_x + 18 < (*iter).offset.x || pos_y + 20 < (*iter).offset.y + 5) ||
     ((*iter).offset.x + 15 < pos_x + 9 || (*iter).offset.y + 10 < pos_y + 10))//안 맞았을 때
       tmp.push_back(*iter);
@@ -337,8 +340,8 @@ bool AirPlane::Got_item(vector<items>& I)
 
   for(iter = I.begin(); iter != I.end(); iter++)
   {
-    if((pos_x + 18 < (*iter).offset.x + 9 || pos_y + 20 < (*iter).offset.y + 5) ||
-    ((*iter).offset.x + 18 < pos_x + 9 || (*iter).offset.y + 10 < pos_y + 10));//안 맞았을 때
+    if((pos_x + 27 < (*iter).offset.x || pos_y + 31 < (*iter).offset.y) ||
+    ((*iter).offset.x + 30 < pos_x || (*iter).offset.y + 30 < pos_y ));//안 맞았을 때
     else                                                                           //맞았을때
     {
       flag = true;
