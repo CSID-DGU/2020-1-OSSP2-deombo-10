@@ -281,7 +281,7 @@ public:
   AirPlane(Mix_Chunk* shooting,Mix_Chunk* get,Mix_Chunk* hit);//생성자를 통해 클래스의 사운드 청크를 지정한다.
   ~AirPlane();
 
-  bool Got_shot(_bullets &A,_bullets &B,_bullets &C,_bullets &D, laser_bullet E);
+  bool Got_shot(_bullets &A,_bullets &B,_bullets &C,_bullets &D, laser_bullet E, bool is_boss_laser_harmful);
   bool Got_item(vector<items>& I);
   bool detect_collision(list<SDL_Rect> C);
   bool detect_collision(SDL_Rect C);

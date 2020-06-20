@@ -166,7 +166,7 @@ int main(){
 
   bool is_laser=false;
   bool is_laser2=false;
-  bool is_boss_laser=false;
+  bool is_boss_laser_harmful = false;
 
     //for obstacle
   int o_bound = 480+100;
@@ -210,11 +210,6 @@ int main(){
   laser_bullet player_laser_bullet;
   laser_bullet player2_laser_bullet;
   laser_bullet laser_boss_bullet;
-  int is_boss_laser_harmful;
-
-  //player_laser_bullet.offset.w=player2_laser_bullet.offset.w=5;
-  //player_laser_bullet.offset.h=player2_laser_bullet.offset.h=laser_boss_bullet.offset.h=(Uint16)SCREEN_HEIGHT;
-  
 
   if(Mix_PlayingMusic())
     Mix_HaltMusic();
@@ -273,7 +268,7 @@ int main(){
       E2.push_back(tmp2);
     }
 
-    if(count % 500 == 0)
+    if(count > 0 && score > 1000 && count % 500 == 0)
     {
       Obstacle obstmp(0);
       Obstacle obstmp2(50);
@@ -343,7 +338,7 @@ int main(){
     if(mini_bullets.blt.size() > 0)
       mini_bullets.control_bullet();
     
-    if(dead != true &&(A.Got_shot(enemy_bullets,boss_bullets,mini_bullets,second_bullets, laser_boss_bullet)||A.detect_collision(CB)
+    if(dead != true &&(A.Got_shot(enemy_bullets,boss_bullets,mini_bullets,second_bullets, laser_boss_bullet, is_boss_laser_harmful)||A.detect_collision(CB)
         ||A.check_in_border(Border,border_check))&& A.invisible_mode == 0)      //1 플레이어 피격 판정
     {
       //총알에 맞거나 충돌박스에 부딪치거나 경계밖으로 나갔을 시
@@ -359,7 +354,7 @@ int main(){
       A.pushed_by_obstacle(30);
     }
 
-    if(dead2 != true && mode == 2 &&(A2.Got_shot(enemy_bullets,boss_bullets,mini_bullets,second_bullets, laser_boss_bullet)
+    if(dead2 != true && mode == 2 &&(A2.Got_shot(enemy_bullets,boss_bullets,mini_bullets,second_bullets, laser_boss_bullet, is_boss_laser_harmful)
         ||A2.detect_collision(CB)||A2.check_in_border(Border,border_check2))&& A2.invisible_mode == 0)      //2 플레이어 피격 판정
     {
       //총알에 맞거나 충돌박스에 부딪치거나 경계밖으로 나갔을 시
@@ -1254,14 +1249,16 @@ int main(){
       SDL_FillRect(buffer,&(player_laser_bullet.offset),SDL_MapRGB(buffer->format,200,0,0));//레이저의 범위에 해당하는 부분을 옅은 붉은 색으로 칠함
     if(player2_laser_bullet.env)
       SDL_FillRect(buffer,&(player2_laser_bullet.offset),SDL_MapRGB(buffer->format,200,0,0));//레이저의 범위에 해당하는 부분을 옅은 붉은 색으로 칠함
-    if(laser_boss_bullet.env && laser_boss_bullet.offset.w < 10)
+    if(laser_boss_bullet.env && laser_boss_bullet.offset.w <= 30)
     {
-      is_boss_laser_harmful = 0;
-      SDL_FillRect(buffer,&(laser_boss_bullet.offset),SDL_MapRGB(buffer->format,255,255,255));
+      is_boss_laser_harmful = false;
+      if(laser_boss_bullet.offset.w == 10) 
+        SDL_FillRect(buffer,&(laser_boss_bullet.offset),SDL_MapRGB(buffer->format,255,255,255));
+      else SDL_FillRect(buffer,&(laser_boss_bullet.offset),SDL_MapRGB(buffer->format,255,165,0));
     }
-    if(laser_boss_bullet.env && laser_boss_bullet.offset.w >= 10)
+    else if(laser_boss_bullet.env && laser_boss_bullet.offset.w >= 30)
     {
-      is_boss_laser_harmful = 0;
+      is_boss_laser_harmful = true;
       SDL_FillRect(buffer,&(laser_boss_bullet.offset),SDL_MapRGB(buffer->format,100,0,100));
     }
 

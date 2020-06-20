@@ -275,7 +275,7 @@ bool AirPlane::detect_obstacle(vector<Obstacle> &Obs)
   return flag;
 }
 
-bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C,_bullets &D, laser_bullet E)
+bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C,_bullets &D, laser_bullet E, bool is_boss_laser_harmful)
 {
   vector<bullets>::iterator iter;
   vector<bullets> tmp;
@@ -339,7 +339,7 @@ bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C,_bullets &D, laser_b
   }
   D.blt = tmp3;
 
-  if(E.env)
+  if(E.env && is_boss_laser_harmful)
   {
     if(intersects(this->offset,E.offset))
     {
@@ -1133,8 +1133,9 @@ SDL_Rect Laser_Boss::control_plane(laser_bullet &A){
       }
 
       A.offset.w = 0;
-      if(cont_shoot >= 10) A.offset.w = 2;
-      if(cont_shoot >= 80) A.offset.w = 60;
+      if(cont_shoot >= 15) A.offset.w = 10;
+      if(cont_shoot >= 20) A.offset.w = 20;
+      if(cont_shoot >= 80) A.offset.w = 40;
       this->shooting(A);
     }
 
