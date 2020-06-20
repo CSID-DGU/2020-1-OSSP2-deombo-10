@@ -607,9 +607,9 @@ int main(){
       }
     }
     if(E2.size() >0){
-      for(it3 = E3.begin(); it3 != E3.end(); it3++)
+      for(it2 = E2.begin(); it2 != E2.end(); it2++)
       {
-         CB.push_back((*it3).control_plane());
+         CB.push_back((*it2).control_plane(enemy_bullets));
       }
     }
     if(E3.size() >0){
