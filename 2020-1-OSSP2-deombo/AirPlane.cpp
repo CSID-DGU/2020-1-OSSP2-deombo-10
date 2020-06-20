@@ -1144,7 +1144,7 @@ Laser_Boss::Laser_Boss(Mix_Chunk* sound){
     pos_x = rand() % (SCREEN_WIDTH-LASER_BOSS_WIDTH);// 처음 시작 위치 지정
     SDL_SetColorKey(laser_boss, SDL_SRCCOLORKEY,SDL_MapRGB(laser_boss->format,255,255,255));
     pos_y = -LASER_BOSS_HEIGHT;//처음 시작 위치 지정
-    life = 60;//has to be changed later (at least 70)
+    life = 30;//has to be changed later (at least 70)
     offset.w = LASER_BOSS_WIDTH;
     offset.h = LASER_BOSS_HEIGHT;
     hit_sound = sound;
@@ -1230,10 +1230,9 @@ SDL_Rect Laser_Boss::control_plane(laser_bullet &A){
         this->pos_x -= 1;
       }
 
-      A.offset.w = 0;
-      if(cont_shoot >= 15) A.offset.w = 10;
-      if(cont_shoot >= 20) A.offset.w = 20;
-      if(cont_shoot >= 80) A.offset.w = 40;
+      A.offset.w = 5;
+      if(cont_shoot >= 75) A.offset.w = 20;
+      if(cont_shoot >= 90) A.offset.w = 40;
       this->shooting(A);
     }
 
