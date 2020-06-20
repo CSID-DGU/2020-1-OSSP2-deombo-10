@@ -210,7 +210,7 @@ int main(){
   Mini_Boss mini_boss(hit_sound);
   Second_Boss second_boss(hit_sound);
   Boss final_boss(hit_sound);
-  Laser_Boss (hit_sound);
+  Laser_Boss laser_boss(hit_sound);
   
   Health_item I;//체력 아이템
   Special_item I2;//스페셜 아이템
