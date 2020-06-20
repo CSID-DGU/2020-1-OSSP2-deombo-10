@@ -30,6 +30,7 @@ void Health_item::control_item()
 
 Health_item::~Health_item()
 {
+  if(item!=nullptr)
     SDL_FreeSurface(item);
 }
 
@@ -64,6 +65,7 @@ void Special_item::control_item()
 
 Special_item::~Special_item()
 {
+  if(item!=nullptr)
     SDL_FreeSurface(item);
 }
 
@@ -98,6 +100,7 @@ void Upgrade_item1::control_item()
 
 Upgrade_item1::~Upgrade_item1()
 {
+  if(item!=nullptr)
     SDL_FreeSurface(item);
 }
 
@@ -132,6 +135,7 @@ void Upgrade_item2::control_item()
 
 Upgrade_item2::~Upgrade_item2()
 {
+  if(item!=NULL)
     SDL_FreeSurface(item);
 }
 AirPlane::AirPlane(Mix_Chunk* shooting, Mix_Chunk* got,Mix_Chunk* hit)
@@ -151,7 +155,7 @@ AirPlane::AirPlane(Mix_Chunk* shooting, Mix_Chunk* got,Mix_Chunk* hit)
   bullet_mode =1;//총알 모드는 기본적으로 1임
   life = 3;
   SA_count = 3;
-  invisible_mode = 0;
+  invisible_mode = 1;
 }
 
 AirPlane::~AirPlane()

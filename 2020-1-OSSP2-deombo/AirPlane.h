@@ -75,7 +75,7 @@ class Health_item
 {
 public:
   SDL_Surface *item;
-
+  Health_item(){item=NULL;}
   ~Health_item();
   void add_itm(int x, int y, int ply_x, int ply_y);                                      //x,y는 item 방향성, ply_x,y는 item의 현재 위치
   void item_apply_surface(SDL_Surface *item, SDL_Surface* destination, SDL_Rect* clip);  // item들 그리기
@@ -88,7 +88,7 @@ class Special_item
 {
 public:
   SDL_Surface *item;
-
+  Special_item(){item=NULL;}
   ~Special_item();
   void add_itm(int x, int y, int ply_x, int ply_y);                                      //x,y는 item 방향성, ply_x,y는 item의 현재 위치
   void item_apply_surface(SDL_Surface *item, SDL_Surface* destination, SDL_Rect* clip);  // item들 그리기
@@ -101,7 +101,7 @@ class Upgrade_item1//3방향 발사
 {
 public:
   SDL_Surface *item;
-
+  Upgrade_item1(){item=NULL;}
   ~Upgrade_item1();
   void add_itm(int x, int y, int ply_x, int ply_y);                                      //x,y는 item 방향성, ply_x,y는 item의 현재 위치
   void item_apply_surface(SDL_Surface *item, SDL_Surface* destination, SDL_Rect* clip);  // item들 그리기
@@ -114,6 +114,7 @@ class Upgrade_item2 //레이저 아이템
 public:
   SDL_Surface *item;
 
+  Upgrade_item2(){item=NULL;}
   ~Upgrade_item2();
   void add_itm(int x, int y, int ply_x, int ply_y);                                      //x,y는 item 방향성, ply_x,y는 item의 현재 위치
   void item_apply_surface(SDL_Surface *item, SDL_Surface* destination, SDL_Rect* clip);  // item들 그리기
@@ -173,7 +174,6 @@ public:
         obs = load_image("assets/obstacle.png");
         SDL_SetColorKey(obs, SDL_SRCCOLORKEY, SDL_MapRGB(obs->format,255,255,255));
   };
-
   void apply_surface(SDL_Surface * destination, SDL_Rect* clip) //draw obstacle
   {
       offset.x = pos_x1;

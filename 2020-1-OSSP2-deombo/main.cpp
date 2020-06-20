@@ -66,7 +66,6 @@ Uint8 *keystates;
 
 const int INITIAL_MODE = 10;
 int EXIT = -1;
-int Continue = 0;
 int craft;
 int SA;
 int SA2;
@@ -79,13 +78,14 @@ short played_channel2=-1;
 void sprite_surface(SDL_Surface* source, SDL_Rect tmp, SDL_Surface* destination, int w, int h, int step,int mode);
 bool init();//변수들 초기화 함수
 bool load_files();//이미지, 폰트,오디오 초기화 함수
-bool SDL_free();// sdl 변수들 free 함수
+bool SDL_free_all();// sdl 변수들 free 함수
 bool menu();
 bool menu2();
 bool menu3();
 bool game_over();
 bool stage_clear();
 void special_ability(int SA);
+bool game_start();
 
 void handle_resize(SDL_ResizeEvent &event){//화면의 크기가 resize 되면 이 함수가 호출됨
   
@@ -109,41 +109,13 @@ void show_screen(){//SDL_flip을 직접적으로  호출하지 않고 show_scree
   SDL_Flip(screen);//Filp을 통해 화면에 screen을 출력
   SDL_FreeSurface(temp);//temp를 반드시 free 해줘야 한다!!!
 }
-int main(){
- 
- loop://gameover 시 재시작을 했을 때 돌아오는 부분
+bool game_start()
+{
   _bullets enemy_bullets;
   _bullets player_bullets;
   _bullets boss_bullets;
   _bullets mini_bullets;
   _bullets second_bullets;
- //_special special_one;
-  init();//초기화 함수
-  load_files();//이미지,폰트,bgm 로드하는 함수
-  
-  bool run=true;
-  run=menu();
-  if(EXIT == 1||!run)
-  {
-    SDL_free();
-    return 0;
-  }
-  run=menu3();
-  if(!run)
-  {
-    SDL_free();
-    return 0;
-  }
-  run=menu2();
-  if(!run)
-  {
-    SDL_free();
-    return 0;
-  }
-  //menu3();
-  //menu2();  //select airplane and start
-
-  Continue = 0;
   srand(time(NULL));
 
   int score = 0;
@@ -1281,13 +1253,8 @@ int main(){
 
     if(A.life == 0 && mode == 1)//생명력 0
     {
-      game_over();
-      if (Continue == 1)
-      {
-        SDL_free();
-        goto loop;
-      }
-      break;
+      return game_over();
+
     }
 
     if(A.life == 1)//생명력 1
@@ -1305,13 +1272,8 @@ int main(){
     {
       if(A.life == 0 && A2.life == 0)
       {
-        game_over();
-        if (Continue == 1)
-        {
-          SDL_free();
-          goto loop;
-        }
-        break;
+       return game_over();
+    
       }
       else if(A.life == 0 && A2.life > 0)//생명력 0
       {
@@ -1406,7 +1368,38 @@ int main(){
   
     
   }
-  SDL_free();
+  return false;
+}
+int main(){
+ 
+
+ //_special special_one;
+  init();//초기화 함수
+  load_files();//이미지,폰트,bgm 로드하는 함수
+  bool retry=false;
+  bool run=true;
+  run=menu();
+  if(EXIT == 1||!run)
+  {
+    SDL_free_all();
+    return 0;
+  }
+  run=menu3();
+  if(!run)
+  {
+    SDL_free_all();
+    return 0;
+  }
+  run=menu2();
+  if(!run)
+  {
+    SDL_free_all();
+    return 0;
+  }
+  do{
+    retry=game_start();
+  }while(retry);
+  SDL_free_all();
   return 0;
 }
 
@@ -1522,7 +1515,7 @@ bool load_files()
   return true;
 }
 
-bool SDL_free()
+bool SDL_free_all()
 {//올바르게 free하면 true 반환하게 수정
   SDL_FreeSurface(plane);
   SDL_FreeSurface(bullet);
@@ -1895,7 +1888,6 @@ bool game_over()  // 사용자 죽었을 시 나타나는 게임오버 창
     Mix_HaltMusic();//음악 정지
   Mix_HaltChannel(-1);//모든 사운드 채널 정지
   font = TTF_OpenFont("assets/Terminus.ttf", 24);//작은 안내문 폰트
-	bool quit = false;
   background = load_image("assets/background.png");
   message2 = TTF_RenderText_Solid(font2, "Game over", textColor2);
   apply_surface(0, 0, background, buffer, NULL);
@@ -1905,7 +1897,7 @@ bool game_over()  // 사용자 죽었을 시 나타나는 게임오버 창
   show_screen();
 	//SDL_Flip(buffer);
   Mix_PlayChannel(-1,game_over_sound,0);
-	while (quit == false)
+	while (true)
 	{
 		if (SDL_PollEvent(&event))
 		{
@@ -1918,13 +1910,12 @@ bool game_over()  // 사용자 죽었을 시 나타나는 게임오버 창
 				{
 				case SDLK_ESCAPE://esc 키가 눌리면 종료
         {
-          quit = true;
+
           return false;
         }
         case SDLK_SPACE:
         {
-          Continue = 1;
-          quit = true;
+    
           return true;
         }
 				default:{}
@@ -1933,7 +1924,7 @@ bool game_over()  // 사용자 죽었을 시 나타나는 게임오버 창
 	  	}
       else if (event.type == SDL_QUIT)
 			{
-				quit = true;
+
         return false;
 			}
   	}
