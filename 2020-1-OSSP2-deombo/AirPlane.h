@@ -271,6 +271,7 @@ class AirPlane
 private:
 
   Mix_Chunk* shooting_sound;//총알 발사 사운드
+  Mix_Chunk* shooting_sound2;//총알 발사 사운드2
   Mix_Chunk* get_sound;//아이템 획득 사운드
   Mix_Chunk* hit_sound;//피격음
   
@@ -293,7 +294,7 @@ public:
   void increaseSA();
   void Got_shiled(SDL_Surface *plane);
   void plane_apply_surface(SDL_Surface* source, SDL_Surface* destination, SDL_Rect* clip);
-  void control_plane(int x, int y);
+  void control_plane(int x, int y,laser_bullet &l);
   void invisible(SDL_Surface *plane);
   SDL_Rect Get_plane();//plane 변수 getter
   void set_offset(int w,int h){offset.w=w,offset.h=h;}
@@ -307,7 +308,34 @@ public:
   int life;
   int SA_count;
 };
+class Enemy_standard_3//폭팔형 적
+{
+private:
+   
+    SDL_Surface *enemy;
 
+    int life;
+    int count=0;//루프문 반복할 변수
+    int mode;// 좌,우 나타날 장소를 정하는 변수
+    bool first_exe = true;
+    int pos;
+  public:
+    SDL_Rect offset;
+
+    int pos_x,pos_y;// 비행기 x,y 좌표;
+    Enemy_standard_3(int mode);
+    ~Enemy_standard_3();
+    bool Got_shot(_bullets &A);
+    bool Got_shot(laser_bullet A);
+    bool eliminate ( int y);
+    void enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip);
+    SDL_Rect  control_plane();
+    SDL_Rect Get_plane();
+    void set_offset(int w,int h){offset.w=w,offset.h=h;}
+    void set_pos(int x, int y){pos_x=x;pos_y=y;}
+
+    
+};
 class Enemy_standard_2
 {
 private:
@@ -367,6 +395,25 @@ private:
     
 };
 
+/*
+class Obstacle
+{
+private:
+    SDL_Rect offset;
+    //int life;
+    int count=0;//루프문 반복할 변수
+    bool first_exe = true;
+    int pos;
+  public:
+    int pos_x,pos_y;// x,y 좌표;
+    Obstacle();
+    ~Obstacle();
+    bool Got_shot(_bullets &A);
+    void obstacle_apply_surface(SDL_Surface* source, SDL_Surface* destination, SDL_Rect* clip);
+    SDL_Rect  move_obstacle();
+    SDL_Rect Get_obstacle();
+};
+*/
 class Mini_Boss
 {
 public:

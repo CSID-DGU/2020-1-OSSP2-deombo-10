@@ -69,7 +69,7 @@ Special_item::~Special_item()
 
 void Upgrade_item1::add_itm(int x, int y, int ply_x, int ply_y)
 {
-  item = load_image("assets/tem_sh.png");
+  item = load_image("assets/tem_spread.png");
   SDL_SetColorKey(item, SDL_SRCCOLORKEY,SDL_MapRGB(item->format,0,0,0));
   items tmp(x,y,ply_x,ply_y);
   itm.push_back(tmp);
@@ -103,7 +103,7 @@ Upgrade_item1::~Upgrade_item1()
 
 void Upgrade_item2::add_itm(int x, int y, int ply_x, int ply_y)
 {
-  item = load_image("assets/tem_sh.png");
+  item = load_image("assets/tem_beam.png");
   SDL_SetColorKey(item, SDL_SRCCOLORKEY,SDL_MapRGB(item->format,0,0,0));
   items tmp(x,y,ply_x,ply_y);
   itm.push_back(tmp);
@@ -134,7 +134,7 @@ Upgrade_item2::~Upgrade_item2()
 {
     SDL_FreeSurface(item);
 }
-AirPlane::AirPlane(Mix_Chunk* shooting,Mix_Chunk* got,Mix_Chunk* hit)
+AirPlane::AirPlane(Mix_Chunk* shooting, Mix_Chunk* got,Mix_Chunk* hit)
 {
   pos_x = SCREEN_WIDTH / 2;//처음 시작 위치 지정
   pos_y = SCREEN_HEIGHT / 2;//처음 시작 위치 지정
@@ -148,7 +148,7 @@ AirPlane::AirPlane(Mix_Chunk* shooting,Mix_Chunk* got,Mix_Chunk* hit)
   get_sound=got;
   hit_sound=hit;
 
-  bullet_mode =3;//총알 모드는 기본적으로 1임
+  bullet_mode =1;//총알 모드는 기본적으로 1임
   life = 3;
   SA_count = 3;
   invisible_mode = 0;
@@ -176,7 +176,7 @@ void AirPlane::shooting(_bullets &player_bullets,laser_bullet &player_laser_bull
     player_laser_bullet.env=true;
     player_laser_bullet.offset.w=3;
     player_laser_bullet.offset.h=SCREEN_HEIGHT;
-    player_laser_bullet.offset.x= pos_x+9;
+    player_laser_bullet.offset.x= pos_x+11;
     player_laser_bullet.offset.y= pos_y-player_laser_bullet.offset.h;
   }
 }
@@ -187,7 +187,7 @@ void AirPlane::plane_apply_surface(SDL_Surface* source, SDL_Surface* destination
   offset.y = pos_y;
   SDL_BlitSurface( source, clip, destination, &offset );
 }
-void AirPlane::control_plane(int x, int y)
+void AirPlane::control_plane(int x, int y,laser_bullet &l)
 {
   /*
   if( pos_x + x >= 0 && (pos_x + PLAYER_WIDTH + x) <= SCREEN_WIDTH &&
@@ -199,6 +199,9 @@ void AirPlane::control_plane(int x, int y)
   */
     pos_x += x;
     pos_y += y;
+  
+    l.offset.x=pos_x+11;
+    l.offset.y=pos_y-l.offset.h;
 }
 void AirPlane::invisible(SDL_Surface *plane)
 {
@@ -380,12 +383,10 @@ bool AirPlane::detect_collision(SDL_Rect C)
 }
 bool AirPlane::check_in_border(SDL_Rect C,bool& flag)
 {
-  if(!(flag=intersects(C,this->offset)))//경계 밖에 있는 경우
-  {
-      Mix_PlayChannel(-1,hit_sound,0);//피격음 출력
-      return true;
-  }
-  return false;
+  flag=!(pos_x + PLAYER_WIDTH <= C.x || pos_y+ PLAYER_HEIGHT <= C.y || C.x+C.w <= pos_x || C.y+C.h <=pos_y);
+  if(!flag)
+    Mix_PlayChannel(-1,hit_sound,0);//피격음 출력
+	return !flag;
 }
 void AirPlane::increaseLife()
 {
@@ -415,6 +416,103 @@ void AirPlane::Got_shiled(SDL_Surface *plane)
   }
 }
 
+Enemy_standard_3::Enemy_standard_3(int mode)
+{
+  enemy = load_image("assets/E3.png");// 비행기 이미지
+  //Setcolorkey는 네모난 그림에서 비행기로 쓸 그림 빼고 나머지 흰 바탕들만 투명하게 바꾸는거
+  SDL_SetColorKey(enemy, SDL_SRCCOLORKEY,SDL_MapRGB(enemy->format,255,255,255));
+
+  this->mode = mode;
+  int y = rand()%100 + 10;
+  if(mode == 0) pos_x = -ENEMY_WIDTH;//처음 시작 위치 지정
+  else pos_x = SCREEN_WIDTH+ENEMY_WIDTH;
+  pos_y = y;//처음 시작 위치 지정
+  life = 1;
+  count = 0;
+  offset.w =ENEMY_WIDTH;
+  offset.h=28;
+}
+
+Enemy_standard_3::~Enemy_standard_3()
+{
+}
+
+bool Enemy_standard_3::Got_shot(_bullets &A)
+{
+  vector<bullets>::iterator iter;
+  vector<bullets> tmp;
+
+  bool flag = false;
+
+  for(iter = A.blt.begin(); iter != A.blt.end(); iter++)
+  {
+    if((pos_x + 25 < (*iter).offset.x + 3 || pos_y + 32 < (*iter).offset.y) ||
+    ((*iter).offset.x + 13 < pos_x + 10 || (*iter).offset.y + 32 < pos_y))//안 맞았을 때
+      tmp.push_back(*iter);
+    else//맞았을때
+    {
+      flag = true;
+    }
+  }
+
+  A.blt = tmp;
+
+  return flag;
+}
+
+bool Enemy_standard_3::Got_shot(laser_bullet A){//레이저 빔에 맞을 때 판정
+  if(A.env)
+    return intersects(this->offset,A.offset);
+  else
+    return false;
+};
+
+
+bool Enemy_standard_3:: eliminate(int y){
+    if(pos_y+32 > y) return true;
+    else return false;
+}
+
+void Enemy_standard_3::enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip )
+{
+  
+  offset.x = pos_x;
+  offset.y = pos_y;
+  SDL_BlitSurface(enemy, clip, destination, &offset );
+}
+
+SDL_Rect Enemy_standard_3::control_plane()
+{
+  if(first_exe==true){
+    pos = rand()%75+75;
+    first_exe=false;
+  }
+  if(count < pos){
+      if(mode == 0) pos_x += 3;
+      else pos_x -= 3;
+  }
+  else {
+      if(mode == 0){
+          pos_y += 3;
+      }
+      else {
+          pos_y += 3;
+      }
+  }
+  offset.x = pos_x;
+  offset.y = pos_y;
+  count++;
+  return this->offset;
+}
+
+SDL_Rect Enemy_standard_3::Get_plane()
+{
+  offset.x = pos_x;
+  offset.y = pos_y;
+
+  return offset;//오프셋(충돌 박스)를 리턴함
+}
+//////
 Enemy_standard_2::Enemy_standard_2(int mode)
 {
   enemy = load_image("assets/3.gif");// 비행기 이미지
@@ -777,16 +875,12 @@ bool Second_Boss::Got_shot(_bullets &A, int &x){
       else//맞았을때
       {
         Mix_PlayChannel(-1,hit_sound,0);//사운드 출력
-        if((*iter).offset.x <= pos_x + SECOND_BOSS_WIDTH / 5)
+        if((*iter).offset.x <= pos_x + SECOND_BOSS_WIDTH / 3)
           x = 0;
-        else if((*iter).offset.x <= pos_x + (SECOND_BOSS_WIDTH / 5) * 2)
+        else if((*iter).offset.x <= pos_x + (SECOND_BOSS_WIDTH / 3) * 2)
           x = 1;
-        else if((*iter).offset.x <= pos_x + (SECOND_BOSS_WIDTH / 5) * 3)
-          x = 2;
-        else if((*iter).offset.x <= pos_x + (SECOND_BOSS_WIDTH / 5) * 4)
-          x = 3;
         else
-          x = 4;
+          x = 2;
         flag = true;
       }
     }
@@ -803,7 +897,7 @@ bool Second_Boss::Got_shot(laser_bullet A, int &x,short RNG){//레이저 빔에 
       if(flag=intersects(this->offset,A.offset))//맞았을때
       {
         Mix_PlayChannel(-1,hit_sound,0);//사운드 출력
-        x=RNG%5;
+        x=RNG%3;
       }
     }
     return flag;

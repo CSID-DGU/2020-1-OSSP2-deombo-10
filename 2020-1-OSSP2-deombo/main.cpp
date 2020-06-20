@@ -9,6 +9,7 @@ Mix_Music *stage_music;//스테이지 음악
 Mix_Chunk *game_over_sound;//게임오버 사운드
 Mix_Chunk *selection_sound;//메뉴 선택음
 Mix_Chunk *bullet_sound;//총알 발사음
+Mix_Chunk *beam_sound;//총알2 발사음
 Mix_Chunk *hit_sound;//플레이어 피격음
 Mix_Chunk *explosion_sound1;//적 폭팔음
 Mix_Chunk *explosion_sound2;//보스 폭팔음
@@ -72,7 +73,8 @@ int craft;
 int SA;
 int SA2;
 short mode;
-
+short played_channel=-1;
+short played_channel2=-1;
 
 
 
@@ -178,23 +180,26 @@ int main(){
   vector<Obstacle>::iterator obs_it;
   vector<Obstacle> Obs;
 
+  vector<Enemy_standard_3>::iterator it3;
   vector<Enemy_standard_2>::iterator it2;
   vector<Enemy_standard>::iterator it;
   vector<BOOM>::iterator B_it;
   vector<special>::iterator it_sa;
   list<SDL_Rect>::iterator CB_it;
 
-  vector<BOOM> Boss_B;//보스 폭발
-  vector<BOOM> Boss_B4;//보스 폭발
+  vector<BOOM> mini_Boss_BOOM;//보스 폭발
+  vector<BOOM> final_Boss_BOOM;//보스 폭발
+  vector<BOOM> second_Boss_BOOM;// 폭발
   vector<BOOM> B;//폭발
   vector<Enemy_standard> E;//기본1형 비행기
   vector<Enemy_standard_2> E2;// 2nd standard enemy
+  vector<Enemy_standard_3> E3;// 3번째 적 공격시 4방향으로 총알 방출
   vector<special> sa_1;
   list<SDL_Rect> CB;//충돌 박스를 저장할 리스트
 
   SDL_Rect Border;//경계를 저장할 Border
-  Border.x =-PLAYER_WIDTH;
-  Border.y=-PLAYER_HEIGHT;
+  Border.x=(-PLAYER_WIDTH);
+  Border.y=(-PLAYER_HEIGHT);
   Border.w=SCREEN_WIDTH + 2*PLAYER_WIDTH;
   Border.h=SCREEN_HEIGHT + 2*PLAYER_HEIGHT;
 
@@ -214,7 +219,8 @@ int main(){
   laser_bullet player_laser_bullet;
   laser_bullet player2_laser_bullet;
 
-
+  player_laser_bullet.env=false;
+  player_laser_bullet.env=false;
   player_laser_bullet.offset.w=player2_laser_bullet.offset.w=5;
   player_laser_bullet.offset.h=player2_laser_bullet.offset.h=(Uint16)SCREEN_HEIGHT;
 
@@ -268,7 +274,7 @@ int main(){
 
     if(count % 5 == 0) shootcnt = 0;
     if(count % 5 == 0) shootcnt2 = 0;
-    if(count % 50 == 0)//100count마다 1기씩 생성
+    if(count % 50 == 0)//50count마다 1기씩 생성
     {
       int i = rand()%2;
       int j = rand()%2;
@@ -277,7 +283,11 @@ int main(){
       E.push_back(tmp);
       E2.push_back(tmp2);
     }
-
+    else if(count % 75==0)
+    {
+      Enemy_standard_3 tmp3(rand()%2);
+      E3.push_back(tmp3);
+    }
     if(count % 500 == 0)
     {
       Obstacle obstmp(0);
@@ -327,12 +337,8 @@ int main(){
 
     start_time = SDL_GetTicks();//나중에 프레임 계산할 변수
 
-    if(player_bullets.blt.size() > 0 )//총알들 위치 이동
-      player_bullets.control_bullet();
-
-    if(enemy_bullets.blt.size() > 0)//적 총알들 위치 이동
-      enemy_bullets.control_bullet();
-
+   
+    /////////////아이템 존재시 이동////////////////
     if(I.itm.size() > 0)
       I.control_item();
 
@@ -342,6 +348,14 @@ int main(){
     if(I3.itm.size() > 0)
       I3.control_item();
 
+    if(I4.itm.size() > 0)
+      I4.control_item();
+  //////////////총알 이동////////////////////////
+    if(player_bullets.blt.size() > 0 )//총알들 위치 이동
+      player_bullets.control_bullet();
+
+    if(enemy_bullets.blt.size() > 0)//적 총알들 위치 이동
+      enemy_bullets.control_bullet();
     if(boss_bullets.blt.size()>0)
       boss_bullets.control_bullet();
 
@@ -385,13 +399,17 @@ int main(){
         Enemy_standard tmp(0);
         if(((*it).Got_shot(player_bullets)||(*it).Got_shot(player_laser_bullet)||(*it).Got_shot(player2_laser_bullet))||(bound < (*it).pos_y+32) && (bound+30 > (*it).pos_y))//비행기가 격추 당하면
         {
-          if(I.itm.size() == 0&&RNG%4==07)//4분의 1확률로 아이템을 생성한다.
+          if(I.itm.size() == 0&&RNG%4==0)//4분의 1확률로 아이템을 생성한다.
           {
             I.add_itm((*it).pos_x, (*it).pos_y, (*it).pos_x, (*it).pos_y + 20);
           }
-          if(I3.itm.size() == 0&&RNG%4==0)//4분의 1확률로 아이템을 생성한다.
+          else if(I3.itm.size() == 0&&(RNG+1)%4==0)//4분의 1확률로 아이템을 생성한다.
           {
             I3.add_itm((*it).pos_x, (*it).pos_y, (*it).pos_x, (*it).pos_y + 20);
+          }
+          else if(I4.itm.size() == 0&&RNG%5==0)//5분의 1확률로 아이템을 생성한다.
+          {
+            I4.add_itm((*it).pos_x, (*it).pos_y, (*it).pos_x, (*it).pos_y + 20);
           }
           BOOM B_tmp((*it).Get_plane());
           B.push_back(B_tmp);
@@ -432,12 +450,42 @@ int main(){
 
         E2=v_tmp;
     }
+    if(E3.size()>0)
+    {
+        vector<special> t;
+        vector<Enemy_standard_3> v_tmp;
+        it_sa = sa_1.begin();
+        for(it3 = E3.begin(); it3 != E3.end(); it3++)//적 비행기들 피격 판정
+        {
+          Enemy_standard_3 tmp(0);
+          if(((*it3).Got_shot(player_bullets)||(*it3).Got_shot(player_laser_bullet)||(*it3).Got_shot(player2_laser_bullet))|| (bound < (*it3).pos_y+32) && (bound+30 > (*it3).pos_y))
+          {
+            SDL_Rect e_rect=(*it3).Get_plane();
+            BOOM B_tmp(e_rect);
+            B.push_back(B_tmp);
+            enemy_bullets.add_blt(3,3,e_rect.x,e_rect.y);
+            enemy_bullets.add_blt(3,-3,e_rect.x,e_rect.y);
+            enemy_bullets.add_blt(-3,3,e_rect.x,e_rect.y);
+            enemy_bullets.add_blt(-3,-3,e_rect.x,e_rect.y);
+
+            (*it3).~Enemy_standard_3();
+            score += 100;
+          }
+          else
+          {
+            tmp = *it3;
+            v_tmp.push_back(tmp);
+          }
+        }
+
+        E3=v_tmp;
+    }
     is_laser=mini_boss.Got_shot(player_laser_bullet,boom_mode,RNG);//레이저 공격에 맞은지 판별
     is_laser2=mini_boss.Got_shot(player2_laser_bullet,boom_mode,RNG);
     if(mini_boss.amount == 1 &&(mini_boss.Got_shot(player_bullets, boom_mode)||is_laser||is_laser2 )&& score >= 200) {
         BOOM tmp(mini_boss.Get_plane());
         tmp.three = boom_mode;
-        Boss_B.push_back(tmp);
+        mini_Boss_BOOM.push_back(tmp);
         if(is_laser)//레이저 공격이면
           mini_boss.loss_life(score,explosion_sound2,0.1);//프레임당 0.1데미지가 들어간다.
         if(is_laser2)
@@ -459,7 +507,7 @@ int main(){
     if(second_boss.amount == 1 && (second_boss.Got_shot(player_bullets, boom_mode)||is_laser||is_laser2 )&& score >= 200) {
         BOOM tmp(second_boss.Get_plane());
         tmp.three = boom_mode;
-        Boss_B.push_back(tmp);
+        second_Boss_BOOM.push_back(tmp);
         if(is_laser)//레이저 공격이면
           second_boss.loss_life(score,explosion_sound2,0.1);//프레임당 0.1데미지가 들어간다.
         if(is_laser2)
@@ -472,6 +520,8 @@ int main(){
             I2.add_itm(second_boss.pos_x, second_boss.pos_y, second_boss.pos_x, second_boss.pos_y + 20);
           if(RNG%2==0)
             I3.add_itm(second_boss.pos_x, second_boss.pos_y, second_boss.pos_x, second_boss.pos_y + 20);
+          else
+            I4.add_itm(second_boss.pos_x, second_boss.pos_y, second_boss.pos_x+20, second_boss.pos_y + 20);
         }
     }   // have to add the condition when the mini boss appear
     is_laser=final_boss.Got_shot(player_laser_bullet,boom_mode,RNG);
@@ -480,7 +530,7 @@ int main(){
     {
       BOOM tmp(final_boss.Get_plane());
       tmp.three = boom_mode;
-      Boss_B4.push_back(tmp);
+      final_Boss_BOOM.push_back(tmp);
       if(is_laser)
           final_boss.loss_life(score,explosion_sound2,0.1);
       if(is_laser2)
@@ -547,6 +597,7 @@ int main(){
  
     if(keystates[SDLK_ESCAPE])
       break;
+    /////////적기 이동과 충돌 판정 추가/////////
     if(E.size() > 0)//적 비행기 이동 및 발사
     {
       for(it = E.begin(); it != E.end(); it++)
@@ -556,12 +607,17 @@ int main(){
       }
     }
     if(E2.size() >0){
-      for(it2 = E2.begin(); it2 != E2.end(); it2++)
+      for(it3 = E3.begin(); it3 != E3.end(); it3++)
       {
-         CB.push_back((*it2).control_plane(enemy_bullets));
+         CB.push_back((*it3).control_plane());
       }
     }
-  
+    if(E3.size() >0){
+      for(it3 = E3.begin(); it3 != E3.end(); it3++)
+      {
+         CB.push_back((*it3).control_plane());
+      }
+    }
 
     //////////////////////////////////////////
     if(sa_1.size() >0)
@@ -580,26 +636,34 @@ int main(){
     }
     //////////////1p플레이어 조작//////////////
     if(keystates[SDLK_UP])
-      A.control_plane(0,-4);
+      A.control_plane(0,-4,player_laser_bullet);
 
     if(keystates[SDLK_DOWN])
-      A.control_plane(0, 4);
+      A.control_plane(0, 4,player_laser_bullet);
 
     if(keystates[SDLK_LEFT])
-      A.control_plane(-4, 0);
+      A.control_plane(-4, 0,player_laser_bullet);
 
     if(keystates[SDLK_RIGHT])
-      A.control_plane(4, 0);
+      A.control_plane(4, 0,player_laser_bullet);
 
 
-    if(keystates[SDLK_o] && dead != true)
+    if((keystates[SDLK_o] && dead != true))
     {
       if(shootcnt == 0) {
           A.shooting(player_bullets,player_laser_bullet);
+          if(player_laser_bullet.env&&played_channel==-1)
+            played_channel=Mix_PlayChannel(-1,beam_sound,-1);
           shootcnt = 1;
       }
     }
-    else{ player_laser_bullet.env=false;}
+    else{ 
+      if(player_laser_bullet.env==false)
+        played_channel=-1;
+      player_laser_bullet.env=false;
+      if(played_channel!=-1)
+        Mix_HaltChannel(played_channel);
+    }
     /*
     if(mode ==2&&keystates[SDLK_f] && dead2 != true)
       {
@@ -727,24 +791,33 @@ int main(){
       if(mode == 2 && dead2 != true)
       {
         if(keystates[SDLK_w])
-            A2.control_plane(0,-0);
+            A2.control_plane(0,-4,player2_laser_bullet);
 
           if(keystates[SDLK_s])
-            A2.control_plane(0, 0);
+            A2.control_plane(0, 4,player2_laser_bullet);
 
           if(keystates[SDLK_a])
-            A2.control_plane(-0, 0);
+            A2.control_plane(-4, 0,player2_laser_bullet);
 
           if(keystates[SDLK_d])
-            A2.control_plane(0, 0);
+            A2.control_plane(4, 0,player2_laser_bullet);
         if(keystates[SDLK_f])
           {
             if(shootcnt == 0) {
                 A2.shooting(player_bullets,player2_laser_bullet);
+                if(player2_laser_bullet.env&&played_channel2==-1)
+                  played_channel2=Mix_PlayChannel(-1,beam_sound,-1);
                 shootcnt = 1;
             }
           }
-        else{player2_laser_bullet.env=false;}
+        else{
+          player2_laser_bullet.env=false;
+          if(player2_laser_bullet.env==false)
+             played_channel2=-1;
+          player2_laser_bullet.env=false;
+          if(played_channel2!=-1)
+            Mix_HaltChannel(played_channel2);
+          }
          
           if(mode == 2 && keystates[SDLK_g])    /// SHOULD HAVE FLAG TO AVOID SPECIAL ABILITY IS USED NUMEROUS TIMES BY PRESSING ONCE.
           {
@@ -1018,7 +1091,7 @@ int main(){
     }
 
     if(mode == 2 && dead2 != true)  A2.plane_apply_surface(plane_2p, buffer,NULL); //사용자 비행기
-
+    /////////////아이템 그리는 부분///////////////
     if(I.itm.size()!=0)
     {
       I.item_apply_surface(I.item, buffer, NULL);
@@ -1033,7 +1106,11 @@ int main(){
     {
       I3.item_apply_surface(I3.item, buffer, NULL);
     }
-
+    if(I4.itm.size()!=0)
+    {
+      I4.item_apply_surface(I4.item, buffer, NULL);
+    }
+    ///////////적 비행기 그리는 부분///////////////
     if( E.size() > 0)//적 비행기
     {
       for( it = E.begin(); it != E.end(); it++)
@@ -1048,7 +1125,18 @@ int main(){
         (*it2).enemy_apply_surface(buffer, NULL);
       }
     }
-
+    if( E3.size() > 0)
+    {
+      SDL_Rect tmp;
+      tmp.x=0;
+      tmp.y=4;
+      tmp.w=32;
+      tmp.h=28;
+      for( it3 = E3.begin(); it3 != E3.end(); it3++)
+      {
+        (*it3).enemy_apply_surface(buffer, &tmp);
+      }
+    }
     if(sa_1.size() >0)
     {
         for(it_sa = sa_1.begin(); it_sa != sa_1.end(); it_sa++){
@@ -1063,7 +1151,7 @@ int main(){
             (*obs_it).apply_surface(buffer, NULL);
         }
     }
-        //////////////보스 추가 조건//////////////
+        //////////////보스 추가 조건과 충돌판정 이미지 그리는 부분//////////////
     if(mini_boss.amount == 1 && score >=2000){
       mini_boss.enemy_apply_surface(buffer, NULL);
       CB.push_back(mini_boss.control_plane(mini_bullets));
@@ -1098,11 +1186,11 @@ int main(){
       B = B_tmp;
     }
 
-    if(Boss_B.size() > 0)                                    //보스 맞을 때 폭발 구현
+    if(mini_Boss_BOOM.size() > 0)                                    //보스 맞을 때 폭발 구현
     {
       vector<BOOM> B_tmp;
 
-      for(B_it = Boss_B.begin(); B_it != Boss_B.end(); B_it++)
+      for(B_it = mini_Boss_BOOM.begin(); B_it != mini_Boss_BOOM.end(); B_it++)
       {
         if((*B_it).b.count <  8)
         {
@@ -1116,14 +1204,33 @@ int main(){
           (*B_it).~BOOM();
         }
       }
-      Boss_B = B_tmp;
+      mini_Boss_BOOM = B_tmp;
     }
-
-    if(Boss_B4.size() > 0)                                    //보스 맞을 때 폭발 구현
+    if(second_Boss_BOOM.size() > 0)                                    //보스 맞을 때 폭발 구현
     {
       vector<BOOM> B_tmp;
 
-      for(B_it = Boss_B4.begin(); B_it != Boss_B4.end(); B_it++)
+      for(B_it = second_Boss_BOOM.begin(); B_it != second_Boss_BOOM.end(); B_it++)
+      {
+        if((*B_it).b.count <  8)
+        {
+          sprite_surface(buffer,second_boss.Get_plane(), explosion, 8, 1, (*B_it).b.count, (*B_it).three);
+          (*B_it).b.count++;
+          B_tmp.push_back(*B_it);
+        }
+
+        else
+        {
+          (*B_it).~BOOM();
+        }
+      }
+      second_Boss_BOOM = B_tmp;
+    }
+    if(final_Boss_BOOM.size() > 0)                                    //보스 맞을 때 폭발 구현
+    {
+      vector<BOOM> B_tmp;
+
+      for(B_it = final_Boss_BOOM.begin(); B_it != final_Boss_BOOM.end(); B_it++)
       {
         if((*B_it).b.count <  8)
         {
@@ -1136,7 +1243,7 @@ int main(){
           (*B_it).~BOOM();
         }
       }
-      Boss_B4 = B_tmp;
+      final_Boss_BOOM = B_tmp;
     }
 
 
@@ -1234,11 +1341,13 @@ int main(){
       }
     }
     ////////////레이저 그래픽 구현 파트///////////////
-    if(player_laser_bullet.env)//레이저 발사시 
+    if(player_laser_bullet.env&&A.bullet_mode==3)//레이저 발사시 
       SDL_FillRect(buffer,&(player_laser_bullet.offset),SDL_MapRGB(buffer->format,200,0,0));//레이저의 범위에 해당하는 부분을 옅은 붉은 색으로 칠함
-    if(player2_laser_bullet.env)
+    if(player2_laser_bullet.env&&A2.bullet_mode==3)
       SDL_FillRect(buffer,&(player2_laser_bullet.offset),SDL_MapRGB(buffer->format,200,0,0));//레이저의 범위에 해당하는 부분을 옅은 붉은 색으로 칠함
-
+   
+    //SDL_FillRect(buffer,&(Border),SDL_MapRGB(buffer->format,200,0,0));테스트용
+    
     ostringstream sc;
     sc<< score;
     message5 = TTF_RenderText_Solid(font3, sc.str().c_str(), textColor);
@@ -1328,12 +1437,14 @@ bool load_files()
   game_over_sound=Mix_LoadWAV("assets/Audio/gameover.wav");
   selection_sound=Mix_LoadWAV("assets/Audio/selection.wav");
   bullet_sound=Mix_LoadWAV("assets/Audio/laser_shot.wav");
+  beam_sound=Mix_LoadWAV("assets/Audio/beam_sound.wav");
   hit_sound=Mix_LoadWAV("assets/Audio/hit.wav");
   explosion_sound1=Mix_LoadWAV("assets/Audio/explosion1.aiff");
   explosion_sound2=Mix_LoadWAV("assets/Audio/explosion2.wav");
   special_sound=Mix_LoadWAV("assets/Audio/special.wav");
   item_sound=Mix_LoadWAV("assets/Audio/get_item.wav");
   stage_clear_sound=Mix_LoadWAV("assets/Audio/clear.wav");
+  Mix_VolumeChunk(beam_sound,40);
   Mix_VolumeChunk(explosion_sound1,60);
 
   for(int i = 0 ; i < 4; i++)
@@ -1387,6 +1498,7 @@ bool SDL_free()
   Mix_FreeChunk(hit_sound);
   Mix_FreeChunk(explosion_sound1);
   Mix_FreeChunk(bullet_sound);
+  Mix_FreeChunk(beam_sound);
   Mix_FreeChunk(explosion_sound2);
   Mix_FreeChunk(special_sound);
   Mix_FreeChunk(item_sound);
