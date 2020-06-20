@@ -200,6 +200,7 @@ int main(){
   Mini_Boss mini_boss(hit_sound);
   Second_Boss second_boss(hit_sound);
   Boss final_boss(hit_sound);
+  Laser_Boss laser_boss(hit_sound);
   
   Health_item I;//체력 아이템
   Special_item I2;//스페셜 아이템
@@ -207,10 +208,12 @@ int main(){
   Upgrade_item2 I4;//직선 관통 레이저 업그레이드 
   laser_bullet player_laser_bullet;
   laser_bullet player2_laser_bullet;
+  laser_bullet laser_boss_bullet;
+  int is_boss_laser_harmful;
 
-
-  player_laser_bullet.offset.w=player2_laser_bullet.offset.w=5;
-  player_laser_bullet.offset.h=player2_laser_bullet.offset.h=(Uint16)SCREEN_HEIGHT;
+  //player_laser_bullet.offset.w=player2_laser_bullet.offset.w=5;
+  //player_laser_bullet.offset.h=player2_laser_bullet.offset.h=laser_boss_bullet.offset.h=(Uint16)SCREEN_HEIGHT;
+  
 
   if(Mix_PlayingMusic())
     Mix_HaltMusic();
@@ -482,6 +485,21 @@ int main(){
           final_boss.loss_life(score,explosion_sound2,0.1);
        if(!is_laser&&!is_laser2)
           final_boss.loss_life(score,explosion_sound2,1);
+    }
+
+    is_laser=laser_boss.Got_shot(player_laser_bullet,boom_mode,RNG);
+    is_laser2=laser_boss.Got_shot(player2_laser_bullet,boom_mode,RNG);
+    if(laser_boss.Got_shot(player_bullets, boom_mode)||is_laser||is_laser2) // have to add the condition when the mini boss appear
+    {
+      BOOM tmp(laser_boss.Get_plane());
+      tmp.three = boom_mode;
+      Boss_B4.push_back(tmp);
+      if(is_laser)
+          laser_boss.loss_life(score,explosion_sound2,0.1);
+      if(is_laser2)
+          laser_boss.loss_life(score,explosion_sound2,0.1);
+       if(!is_laser&&!is_laser2)
+          laser_boss.loss_life(score,explosion_sound2,1);
     }
 
     if(A.Got_item(I.itm))//체력 아이템 획득시
@@ -1059,6 +1077,12 @@ int main(){
         }
     }
         //////////////보스 추가 조건//////////////
+
+    if(laser_boss.amount == 1) {
+      laser_boss.enemy_apply_surface(buffer,NULL);
+      CB.push_back(laser_boss.control_plane(laser_boss_bullet));
+    }
+
     if(mini_boss.amount == 1 && score >=2000){
       mini_boss.enemy_apply_surface(buffer, NULL);
       CB.push_back(mini_boss.control_plane(mini_bullets));
@@ -1233,6 +1257,16 @@ int main(){
       SDL_FillRect(buffer,&(player_laser_bullet.offset),SDL_MapRGB(buffer->format,200,0,0));//레이저의 범위에 해당하는 부분을 옅은 붉은 색으로 칠함
     if(player2_laser_bullet.env)
       SDL_FillRect(buffer,&(player2_laser_bullet.offset),SDL_MapRGB(buffer->format,200,0,0));//레이저의 범위에 해당하는 부분을 옅은 붉은 색으로 칠함
+    if(laser_boss_bullet.env && laser_boss_bullet.offset.w < 10)
+    {
+      is_boss_laser_harmful = 0;
+      SDL_FillRect(buffer,&(laser_boss_bullet.offset),SDL_MapRGB(buffer->format,255,255,255));
+    }
+    if(laser_boss_bullet.env && laser_boss_bullet.offset.w >= 10)
+    {
+      is_boss_laser_harmful = 0;
+      SDL_FillRect(buffer,&(laser_boss_bullet.offset),SDL_MapRGB(buffer->format,100,0,100));
+    }
 
     ostringstream sc;
     sc<< score;

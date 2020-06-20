@@ -463,15 +463,13 @@ public:
   void set_offset(int w,int h){offset.w=w,offset.h=h;}
   void set_pos(int x, int y){pos_x=x;pos_y=y;}
 
-  
-
   int amount = 1;
 };
 
 class Laser_Boss
 {
 private:
-  SDL_Surface *mini_boss;
+  SDL_Surface *laser_boss;
   
   Mix_Chunk* hit_sound;//피격음
 
@@ -489,16 +487,14 @@ public:
   ~Laser_Boss();
   bool Got_shot(_bullets &A,  int& x);
   bool Got_shot(laser_bullet A, int& x,short RNG);
-  void shooting(_bullets &A);
+  void shooting(laser_bullet &A);
   void enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip);
-  SDL_Rect  control_plane(_bullets &A);
+  SDL_Rect  control_plane(laser_bullet &A);
   void loss_life(int& score,Mix_Chunk* sound,float damage);
   SDL_Rect Get_plane();
 
   void set_offset(int w,int h){offset.w=w,offset.h=h;}
   void set_pos(int x, int y){pos_x=x;pos_y=y;}
-
-  
 
   int amount = 1;
 };
