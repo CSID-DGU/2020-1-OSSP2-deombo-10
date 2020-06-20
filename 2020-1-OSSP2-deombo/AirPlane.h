@@ -96,7 +96,18 @@ public:
 
   vector<items> itm;
 };
+class Shield_item
+{
+public:
+  SDL_Surface *item;
+  Shield_item(){item=NULL;}
+  ~Shield_item();
+  void add_itm(int x, int y, int ply_x, int ply_y);                                      //x,y는 item 방향성, ply_x,y는 item의 현재 위치
+  void item_apply_surface(SDL_Surface *item, SDL_Surface* destination, SDL_Rect* clip);  // item들 그리기
+  void control_item();
 
+  vector<items> itm;
+};
 class Upgrade_item1//3방향 발사
 {
 public:
@@ -274,9 +285,10 @@ private:
   Mix_Chunk* shooting_sound2;//총알 발사 사운드2
   Mix_Chunk* get_sound;//아이템 획득 사운드
   Mix_Chunk* hit_sound;//피격음
-  
+
   SDL_Rect offset;
   int pos_x,pos_y;// 비행기 x,y 좌표
+  int shield_x,shield_y;
 
 public:
   AirPlane(Mix_Chunk* shooting,Mix_Chunk* get,Mix_Chunk* hit);//생성자를 통해 클래스의 사운드 청크를 지정한다.
@@ -292,7 +304,7 @@ public:
 
   void increaseLife();
   void increaseSA();
-  void Got_shiled(SDL_Surface *plane);
+  void shield(short& counter);
   void plane_apply_surface(SDL_Surface* source, SDL_Surface* destination, SDL_Rect* clip);
   void control_plane(int x, int y,laser_bullet &l);
   void invisible(SDL_Surface *plane);
@@ -302,24 +314,27 @@ public:
   void pushed_by_obstacle(int d) {pos_y+=d;}
   int get_pos_x(){return pos_x;}
   int get_pos_y(){return pos_y;}
-  
+  int get_shield_x(){return shield_x;}
+  int get_shield_y(){return shield_y;}
+
   short bullet_mode;// 업글 아이템을 먹었을 시 불릿 모드를 저장할 변수 1이 기본 발사 모드 2가 3방향 발사 모드
+  bool shield_mode;
   int invisible_mode;
   int life;
   int SA_count;
 };
 class Enemy_standard_3//폭팔형 적
 {
-private:
+public:
    
     SDL_Surface *enemy;
 
-    int life;
+ 
     int count=0;//루프문 반복할 변수
     int mode;// 좌,우 나타날 장소를 정하는 변수
     bool first_exe = true;
     int pos;
-  public:
+public:
     SDL_Rect offset;
 
     int pos_x,pos_y;// 비행기 x,y 좌표;
@@ -338,11 +353,11 @@ private:
 };
 class Enemy_standard_2
 {
-private:
+public:
   SDL_Surface *enemy;
 
   int pos_x, pos_y;
-  int life;
+
   int mode;
   int count = 0;
   bool first_exe = true;   // to initialize count in control for only one time
@@ -371,7 +386,7 @@ class Enemy_standard
 {
 private:
    
-    int life;
+
     int count=0;//루프문 반복할 변수
     int mode;// 좌,우 나타날 장소를 정하는 변수
     bool first_exe = true;

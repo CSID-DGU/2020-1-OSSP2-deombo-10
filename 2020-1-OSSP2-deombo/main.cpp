@@ -17,6 +17,7 @@ Mix_Chunk *special_sound;//특수기 효과음
 Mix_Chunk *item_sound;//아이템 획득음
 Mix_Chunk *stage_clear_sound;//스테이지 클리어 사운드
 
+SDL_Surface *shield;
 SDL_Surface *screen;//실제 출력되는 화면
 SDL_Surface *buffer;//화면에 그리기 전에 버퍼
 SDL_Surface *background;//배경화면
@@ -127,6 +128,7 @@ bool game_start()
   int background_count = 0;               //background 움직임 count
   int boom_mode = 0;
 
+  short shield_counter=0;
   short RNG;//확률 변수를 저장할 변수
   //int flag = 0;
   //int flag2 = 0;
@@ -188,10 +190,13 @@ bool game_start()
   Special_item I2;//스페셜 아이템
   Upgrade_item1 I3;//3방향 발사 업그레이드
   Upgrade_item2 I4;//직선 관통 레이저 업그레이드 
+  Shield_item I5;//쉴드 아이템
+
   laser_bullet player_laser_bullet;
   laser_bullet player2_laser_bullet;
   laser_bullet laser_boss_bullet;
 
+  laser_boss_bullet.env=false;
 
   player_laser_bullet.env=false;
   player_laser_bullet.env=false;
@@ -325,6 +330,9 @@ bool game_start()
 
     if(I4.itm.size() > 0)
       I4.control_item();
+
+    if(I5.itm.size() > 0)
+      I5.control_item();
   //////////////총알 이동////////////////////////
     if(player_bullets.blt.size() > 0 )//총알들 위치 이동
       player_bullets.control_bullet();
@@ -415,6 +423,14 @@ bool game_start()
             B.push_back(B_tmp);
             (*it2).~Enemy_standard_2();
             score += 100;
+          if(I2.itm.size() == 0&&(RNG)%4==0)//4분의 1확률로 아이템을 생성한다.
+          {
+            I2.add_itm((*it2).pos_x, (*it2).pos_y, (*it2).pos_x, (*it2).pos_y + 20);
+          }
+          else if(I5.itm.size() == 0&&(RNG+1)%2==0)//5분의 1확률로 아이템을 생성한다.
+          {
+            I5.add_itm((*it2).pos_x, (*it2).pos_y, (*it2).pos_x, (*it2).pos_y + 20);
+          }
           }
           else
           {
@@ -425,6 +441,7 @@ bool game_start()
 
         E2=v_tmp;
     }
+    
     if(E3.size()>0)
     {
         vector<special> t;
@@ -442,6 +459,11 @@ bool game_start()
             enemy_bullets.add_blt(3,-3,e_rect.x,e_rect.y);
             enemy_bullets.add_blt(-3,3,e_rect.x,e_rect.y);
             enemy_bullets.add_blt(-3,-3,e_rect.x,e_rect.y);
+
+          if(I.itm.size() == 0&&(RNG)%3==0)//4분의 1확률로 아이템을 생성한다.
+          {
+            I.add_itm((*it3).pos_x, (*it3).pos_y, (*it3).pos_x, (*it3).pos_y + 20);
+          }
 
             (*it3).~Enemy_standard_3();
             score += 100;
@@ -562,6 +584,12 @@ bool game_start()
     {
       A.bullet_mode=3;
     }
+    if(A.Got_item(I5.itm)&&!A.shield_mode)//쉴드 아이템 획득시
+    {
+      A.shield_mode=true;
+    }
+    else
+      A.shield(shield_counter);
 
     if(final_boss.amount == 0)
     {
@@ -1068,9 +1096,9 @@ bool game_start()
     if( mode ==2&&A2.invisible_mode == 1)//투명화 상태, 투명도 조절
       A2.invisible(plane_2p);
      //////////////배경을 움직이게 하는 부분//////////////
-      if(background_count++ != 480);
-      else
-        background_count = 0;
+    if(background_count++ != 480);
+    else
+      background_count = 0;
 
     //이미지 그리는 부분
     apply_surface(0, -480 + background_count, background2,buffer,NULL);//백그라운드 그리는거
@@ -1083,12 +1111,19 @@ bool game_start()
     if(dead != true)
     {
       A.plane_apply_surface(plane_1p, buffer, NULL); //사용자 비행기
+      if(A.shield_mode)
+        apply_surface(A.get_shield_x(),A.get_shield_y(),shield,buffer,NULL);
     }
     else if (dead == true) {
       A.~AirPlane();
     }
 
-    if(mode == 2 && dead2 != true)  A2.plane_apply_surface(plane_2p, buffer,NULL); //사용자 비행기
+    if(mode == 2 && dead2 != true) {
+      
+      A2.plane_apply_surface(plane_2p, buffer,NULL);
+      if(A2.shield_mode)
+        apply_surface(A2.get_shield_x(),A2.get_shield_y(),shield,buffer,NULL);
+    } //사용자 비행기
     /////////////아이템 그리는 부분///////////////
     if(I.itm.size()!=0)
     {
@@ -1107,6 +1142,10 @@ bool game_start()
     if(I4.itm.size()!=0)
     {
       I4.item_apply_surface(I4.item, buffer, NULL);
+    }
+    if(I5.itm.size()!=0)
+    {
+      I5.item_apply_surface(I5.item, buffer, NULL);
     }
     ///////////적 비행기 그리는 부분///////////////
     if( E.size() > 0)//적 비행기
@@ -1362,15 +1401,16 @@ bool game_start()
     if(delay > 0)
       SDL_Delay(delay);
    
-      show_screen();
+    show_screen();
       //SDL_Flip(buffer);
-      count ++;
+     count ++;
   
     
   }
   return false;
 }
-int main(){
+int main()
+{
  
 
  //_special special_one;
@@ -1460,6 +1500,7 @@ bool load_files()
   frame2 = load_image("assets/redframe.png");
   arrow = load_image("assets/arrow.png");
   sapoint = load_image("assets/sapoint1.png");
+  shield =load_image("assets/shield_effect.png");
 
   font = TTF_OpenFont("assets/Terminus.ttf", 22);//작은 안내문 폰트
   font2 = TTF_OpenFont("assets/Starjout.ttf", 84);//제목 폰트
@@ -1500,6 +1541,7 @@ bool load_files()
     boom[i] =load_image(str3);
     SDL_SetColorKey(boom[i], SDL_SRCCOLORKEY,SDL_MapRGB(boom[i]->format,255,255,255));
   }
+  SDL_SetColorKey(shield, SDL_SRCCOLORKEY,SDL_MapRGB(shield->format,0,0,0));
   SDL_SetColorKey(explosion, SDL_SRCCOLORKEY,SDL_MapRGB(explosion->format,0,0,0));
   SDL_SetColorKey(life, SDL_SRCCOLORKEY,SDL_MapRGB(life->format,255,255,255));
   SDL_SetColorKey(bullet_boss, SDL_SRCCOLORKEY, SDL_MapRGB(bullet_boss->format,0,0,0));
@@ -1517,6 +1559,7 @@ bool load_files()
 
 bool SDL_free_all()
 {//올바르게 free하면 true 반환하게 수정
+  SDL_FreeSurface(shield);
   SDL_FreeSurface(plane);
   SDL_FreeSurface(bullet);
   SDL_FreeSurface(background);

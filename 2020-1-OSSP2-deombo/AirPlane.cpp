@@ -68,6 +68,43 @@ Special_item::~Special_item()
   if(item!=nullptr)
     SDL_FreeSurface(item);
 }
+////
+
+void Shield_item::add_itm(int x, int y, int ply_x, int ply_y)
+{
+  item = load_image("assets/tem_sh.png");
+  SDL_SetColorKey(item, SDL_SRCCOLORKEY,SDL_MapRGB(item->format,0,0,0));
+  items tmp(x, y,ply_x,ply_y);
+  itm.push_back(tmp);
+}
+
+void Shield_item::item_apply_surface(SDL_Surface *item, SDL_Surface* destination, SDL_Rect* clip)  // item들 그리기
+{
+  for(vector<items>::iterator iter = itm.begin(); iter!= itm.end(); iter++)
+  {
+    SDL_BlitSurface( item, clip, destination, &(*iter).offset);
+  }
+}
+
+void Shield_item::control_item()
+{
+  vector<items> temp;
+  for(vector<items>::iterator iter = itm.begin(); iter != itm.end(); iter++)
+  {
+    items tmp((*iter).move_x,(*iter).move_y,(*iter).offset.x,(*iter).offset.y + 2);
+    if( 0 < tmp.offset.x + 9 && tmp.offset.x< SCREEN_WIDTH && -5 <= tmp.offset.y  && tmp.offset.y < SCREEN_HEIGHT)
+      temp.push_back(tmp);
+  }
+
+  itm = temp;
+}
+
+Shield_item::~Shield_item()
+{
+  if(item!=nullptr)
+    SDL_FreeSurface(item);
+}
+
 
 void Upgrade_item1::add_itm(int x, int y, int ply_x, int ply_y)
 {
@@ -142,7 +179,9 @@ AirPlane::AirPlane(Mix_Chunk* shooting, Mix_Chunk* got,Mix_Chunk* hit)
 {
   pos_x = SCREEN_WIDTH / 2;//처음 시작 위치 지정
   pos_y = SCREEN_HEIGHT / 2;//처음 시작 위치 지정
-  
+  shield_x=pos_x-6;
+  shield_y=pos_y-6;
+
   offset.x = pos_x;
   offset.y = pos_y;
   offset.w=PLAYER_WIDTH;
@@ -156,6 +195,7 @@ AirPlane::AirPlane(Mix_Chunk* shooting, Mix_Chunk* got,Mix_Chunk* hit)
   life = 3;
   SA_count = 3;
   invisible_mode = 1;
+  shield_mode=false;
 }
 
 AirPlane::~AirPlane()
@@ -203,7 +243,8 @@ void AirPlane::control_plane(int x, int y,laser_bullet &l)
   */
     pos_x += x;
     pos_y += y;
-  
+    shield_x=pos_x-6;
+    shield_y=pos_y-6;
     l.offset.x=pos_x+11;
     l.offset.y=pos_y-l.offset.h;
 }
@@ -300,8 +341,10 @@ bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C,_bullets &D, laser_b
       tmp.push_back(*iter);
     else//맞았을때
     {
+      if(!shield_mode){
       Mix_PlayChannel(-1,hit_sound,0);//피격음 출력
       flag = true;
+      }
     }
   }
   A.blt = tmp;
@@ -313,8 +356,10 @@ bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C,_bullets &D, laser_b
       tmp2.push_back(*iter);
     else//맞았을때
     {
+      if(!shield_mode){
       Mix_PlayChannel(-1,hit_sound,0);//피격음 출력
       flag = true;
+      }
     }
   }
   B.blt = tmp2;
@@ -327,8 +372,10 @@ bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C,_bullets &D, laser_b
       tmp3.push_back(*iter);
     else//맞았을때
     {
+      if(!shield_mode){
       Mix_PlayChannel(-1,hit_sound,0);//피격음 출력
       flag = true;
+      }
     }
   }
   C.blt = tmp3;
@@ -340,8 +387,10 @@ bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C,_bullets &D, laser_b
       tmp3.push_back(*iter);
     else//맞았을때
     {
+      if(!shield_mode){
       Mix_PlayChannel(-1,hit_sound,0);//피격음 출력
       flag = true;
+      }
     }
   }
   D.blt = tmp3;
@@ -350,8 +399,10 @@ bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C,_bullets &D, laser_b
   {
     if(intersects(this->offset,E.offset))
     {
+      if(!shield_mode){
       Mix_PlayChannel(-1,hit_sound,0);//피격음 출력
       flag = true;
+      }
     }
   }
 
@@ -428,21 +479,13 @@ void AirPlane::increaseSA()
   SA_count++;
 }
 
-void AirPlane::Got_shiled(SDL_Surface *plane)
+void AirPlane::shield(short& counter)
 {
-  static int count = 0;                               //투명화 지속 시간
-  static int i =0;                                    //투명도
-
-  if(count++ != 120)
+   //쉴드 아이템을
+  if(!this->shield_mode||counter++ == 240)   
   {
-      i -= 50;
-      SDL_SetAlpha(plane,SDL_SRCALPHA,i);
-  }
-  else                                               //불투명화,count 초기화
-  {
-    count = 0;
-    this->invisible_mode = 0;
-    SDL_SetAlpha(plane,SDL_SRCALPHA,255);
+    counter = 0;
+    this->shield_mode=false;
   }
 }
 
@@ -457,7 +500,7 @@ Enemy_standard_3::Enemy_standard_3(int mode)
   if(mode == 0) pos_x = -ENEMY_WIDTH;//처음 시작 위치 지정
   else pos_x = SCREEN_WIDTH+ENEMY_WIDTH;
   pos_y = y;//처음 시작 위치 지정
-  life = 1;
+ // life = 1;
   count = 0;
   offset.w =ENEMY_WIDTH;
   offset.h=28;
@@ -554,7 +597,7 @@ Enemy_standard_2::Enemy_standard_2(int mode)
   if(mode == 0) pos_x = -ENEMY_WIDTH;//처음 시작 위치 지정
   else pos_x = SCREEN_WIDTH+ENEMY_WIDTH;
   pos_y = y;//처음 시작 위치 지정
-  life = 1;
+ // life = 1;
   count = 0;
   offset.w =ENEMY_WIDTH;
   offset.h=ENEMY_HEIGHT;
@@ -658,7 +701,7 @@ Enemy_standard::Enemy_standard(int mode)
   else if(mode == 1)
     pos_x = y;
   pos_y = -ENEMY_HEIGHT;//처음 시작 위치 지정
-  life = 1;
+ // life = 1;
 
   offset.w =ENEMY_WIDTH;
   offset.h=ENEMY_HEIGHT;
