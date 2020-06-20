@@ -53,7 +53,6 @@ SDL_Surface *enemy2;
 
 SDL_Rect screen_rect;
 SDL_Rect buffer_rect;
-//SDL_Surface *obstacle;  //obstacle image
 
 SDL_Event event;
 TTF_Font *font;
@@ -61,7 +60,6 @@ TTF_Font *font2;
 TTF_Font *font3;
 SDL_Color textColor = {0, 0, 0};
 SDL_Color textColor2 = {0, 0, 0};
-
 
 Uint8 *keystates;
 
@@ -72,9 +70,6 @@ int craft;
 int SA;
 int SA2;
 short mode;
-
-
-
 
 void sprite_surface(SDL_Surface* source, SDL_Rect tmp, SDL_Surface* destination, int w, int h, int step,int mode);
 bool init();//변수들 초기화 함수
@@ -198,7 +193,6 @@ int main(){
   Border.w=SCREEN_WIDTH + 2*PLAYER_WIDTH;
   Border.h=SCREEN_HEIGHT + 2*PLAYER_HEIGHT;
 
-
   //생성자에 사운드를 저장
   AirPlane A(bullet_sound,item_sound,hit_sound);//사용자 비행기
   AirPlane A2(bullet_sound,item_sound,hit_sound);
@@ -217,9 +211,6 @@ int main(){
 
   player_laser_bullet.offset.w=player2_laser_bullet.offset.w=5;
   player_laser_bullet.offset.h=player2_laser_bullet.offset.h=(Uint16)SCREEN_HEIGHT;
-
- 
- 
 
   if(Mix_PlayingMusic())
     Mix_HaltMusic();

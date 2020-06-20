@@ -467,3 +467,38 @@ public:
 
   int amount = 1;
 };
+
+class Laser_Boss
+{
+private:
+  SDL_Surface *mini_boss;
+  
+  Mix_Chunk* hit_sound;//피격음
+
+  int pos_x, pos_y;
+  float life;
+  int count = 0;
+  int direction = 0;
+  int cont_shoot = 0;
+
+public:
+
+  SDL_Rect offset;
+
+  Laser_Boss(Mix_Chunk* sound);
+  ~Laser_Boss();
+  bool Got_shot(_bullets &A,  int& x);
+  bool Got_shot(laser_bullet A, int& x,short RNG);
+  void shooting(_bullets &A);
+  void enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip);
+  SDL_Rect  control_plane(_bullets &A);
+  void loss_life(int& score,Mix_Chunk* sound,float damage);
+  SDL_Rect Get_plane();
+
+  void set_offset(int w,int h){offset.w=w,offset.h=h;}
+  void set_pos(int x, int y){pos_x=x;pos_y=y;}
+
+  
+
+  int amount = 1;
+};

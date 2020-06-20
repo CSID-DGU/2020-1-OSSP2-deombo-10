@@ -1016,3 +1016,150 @@ void Boss::loss_life(int& score,Mix_Chunk* sound,float damage)
       score+=3000;
   }
 }
+
+Laser_Boss::Laser_Boss(Mix_Chunk* sound){
+    mini_boss = load_image("assets/boss4.png");// 비행기 이미지
+    //Setcolorkey는 네모난 그림에서 비행기로 쓸 그림 빼고 나머지 흰 바탕들만 투명하게 바꾸는거
+    pos_x = 280;// 처음 시작 위치 지정
+    SDL_SetColorKey(mini_boss, SDL_SRCCOLORKEY,SDL_MapRGB(mini_boss->format,255,255,255));
+    pos_y = -MINI_BOSS_HEIGHT;//처음 시작 위치 지정
+    life = 60;//has to be changed later (at least 70)
+    offset.w =BOSS_WIDTH;
+    offset.h=BOSS_HEIGHT;
+    hit_sound=sound;
+}
+
+Laser_Boss::~Laser_Boss(){
+    this->amount--;
+    delete this->mini_boss;
+};
+
+bool Laser_Boss::Got_shot(_bullets &A, int& x){
+    vector<bullets>::iterator iter;
+    vector<bullets> tmp;
+
+    bool flag = false;
+
+    for(iter = A.blt.begin(); iter != A.blt.end(); iter++)
+    {
+      if((pos_x + 135 < (*iter).offset.x + 9 || pos_y + 85 < (*iter).offset.y + 5) ||
+      ((*iter).offset.x + 9 < pos_x + 9 || (*iter).offset.y + 5 < pos_y + 10))//안 맞았을 때
+        tmp.push_back(*iter);
+      else//맞았을때
+      {
+        Mix_PlayChannel(-1,hit_sound,0);//사운드 출력
+        if((*iter).offset.x <= pos_x + BOSS_WIDTH / 5)
+          x = 0;
+        else if((*iter).offset.x <= pos_x + (BOSS_WIDTH / 5) * 2)
+          x = 1;
+        else if((*iter).offset.x <= pos_x + (BOSS_WIDTH / 5) * 3)
+          x = 2;
+        else if((*iter).offset.x <= pos_x + (BOSS_WIDTH / 5) * 4)
+          x = 3;
+        else
+          x = 4;
+
+        flag = true;
+      }
+    }
+
+    A.blt = tmp;
+
+    return flag;
+};
+bool Laser_Boss::Got_shot(laser_bullet A, int &x,short RNG){//레이저 빔에 맞을 때 판정
+
+    bool flag=false;
+    if(A.env){
+      if(flag=intersects(this->offset,A.offset))//맞았을때
+      {
+        Mix_PlayChannel(-1,hit_sound,0);//사운드 출력
+        x=RNG%5;
+      }
+    }
+    return flag;
+};
+void Laser_Boss::shooting(_bullets &A){
+
+    //rhombus
+    A.add_blt( 0, 5,pos_x + 75,pos_y + 50);
+    A.add_blt( 1, 4,pos_x + 75,pos_y + 50);
+    A.add_blt( -1, 4,pos_x + 75,pos_y + 50);
+    A.add_blt( -2, 3,pos_x + 75,pos_y + 50);
+    A.add_blt( 2, 3,pos_x + 75,pos_y + 50);
+    A.add_blt( 3, 2,pos_x + 75,pos_y + 50);
+    A.add_blt( -3, 2,pos_x + 75,pos_y + 50);
+    A.add_blt( 4, 1,pos_x + 75,pos_y + 50);
+    A.add_blt( -4, 1,pos_x + 75,pos_y + 50);
+    A.add_blt( 5, 0,pos_x + 75,pos_y + 50);
+    A.add_blt( -5, 0,pos_x + 75,pos_y + 50);
+    A.add_blt( -4, -1,pos_x + 75,pos_y + 50);
+    A.add_blt( 4, -1,pos_x + 75,pos_y + 50);
+    A.add_blt( -3, -2,pos_x + 75,pos_y + 50);
+    A.add_blt( 3, -2,pos_x + 75,pos_y + 50);
+    A.add_blt( -2, -3,pos_x + 75,pos_y + 50);
+    A.add_blt( 2, -3,pos_x + 75,pos_y + 50);
+    A.add_blt( -1, -4,pos_x + 75,pos_y + 50);
+    A.add_blt( 1, -4,pos_x + 75,pos_y + 50);
+    A.add_blt( 0, -5,pos_x + 75,pos_y + 50);
+
+    //cross
+    /*A.add_blt( 3, 0,pos_x + 75,pos_y + 50);
+    A.add_blt( 4, 0,pos_x + 75,pos_y + 50);
+    A.add_blt( -3, 0,pos_x + 75,pos_y + 50);
+    A.add_blt( -4, 0,pos_x + 75,pos_y + 50);*/
+
+    //A.add_blt( 10, 0,pos_x + 35,pos_y + 50);
+    //A.add_blt( -10, 0,pos_x + 35,pos_y + 50);
+};
+void Laser_Boss::enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip){
+    //SDL_Rect offset;
+    offset.y = pos_y;
+    offset.x = pos_x;
+    SDL_BlitSurface(mini_boss, clip, destination, &offset );
+};
+SDL_Rect Laser_Boss::control_plane(_bullets &A){
+    if(cont_shoot>=1 && cont_shoot <15) {this->cont_shoot ++; if(cont_shoot%3==0)this->shooting(A);}
+    if(cont_shoot >=15) cont_shoot = 0;
+    if(count % 30 == 0 ) {this->shooting(A); this->cont_shoot ++;}
+    if(count < 50){
+        pos_y += 3;
+    }
+    else
+    {
+        if(direction == 0){
+            if(this->pos_x>550) direction =1;
+            this->pos_x += 2;
+        }
+        else{
+            if(this->pos_x<90) direction = 0;
+            this->pos_x -= 2;
+        }
+    }
+    count++;
+    offset.x = pos_x;
+    offset.y = pos_y;
+    return this->offset;
+};
+
+SDL_Rect Laser_Boss::Get_plane()
+{
+  offset.x = pos_x;
+  offset.y = pos_y;
+
+  return offset;
+}
+void Laser_Boss::loss_life(int& score,Mix_Chunk* sound,float damage)
+{
+    this->life-=damage;
+    if(damage==1)
+      score += 50;
+    else
+      score+=5;
+    
+    if( this->life <= 0) {
+      Mix_PlayChannel(-1,sound,0);
+      this->~Boss();
+      score+=3000;
+  }
+}
