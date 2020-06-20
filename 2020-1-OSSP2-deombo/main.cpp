@@ -1190,22 +1190,22 @@ bool game_start()
     }
         //////////////보스 추가 조건//////////////
 
-    if(laser_boss.amount == 1 && score >= 1000) {
+    if(laser_boss.amount == 1 && score >= 2000) {
       laser_boss.enemy_apply_surface(buffer,NULL);
       CB.push_back(laser_boss.control_plane(laser_boss_bullet));
     }
 
-    if(mini_boss.amount == 1 && score >= 4000){
+    if(mini_boss.amount == 1 && score >= 5000){
       mini_boss.enemy_apply_surface(buffer, NULL);
       CB.push_back(mini_boss.control_plane(mini_bullets));
     } // have to add the condition when the mini boss appear
 
-    if(second_boss.amount == 1 && score >= 8000){
+    if(second_boss.amount == 1 && score >= 10000){
       second_boss.enemy_apply_surface(buffer, NULL);
       CB.push_back(second_boss.control_plane(second_bullets)); 
     }//세컨드 보스 등장 조건
 
-    if(final_boss.amount == 1 && score >= 15000){
+    if(final_boss.amount == 1 && score >= 20000){
       final_boss.enemy_apply_surface(buffer, NULL);
       CB.push_back(final_boss.control_plane(boss_bullets));
     } // have to add the condition when the mini boss appear
@@ -1375,7 +1375,8 @@ bool game_start()
     }
     ////////////레이저 그래픽 구현 파트///////////////
     if(player_laser_bullet.env&&A.bullet_mode==3)//레이저 발사시 
-      SDL_FillRect(buffer,&(player_laser_bullet.offset),SDL_MapRGB(buffer->format,200,0,0));//레이저의 범위에 해당하는 부분을 옅은 붉은 색으로 칠함
+      
+      SDL_FillRect(buffer,&(player_laser_bullet.offset),SDL_MapRGB(buffer->format,200,0,0));/*SDL_MapRGB(buffer->format,200,0,0));*/ //레이저의 범위에 해당하는 부분을 옅은 붉은 색으로 칠함
     if(player2_laser_bullet.env&&A2.bullet_mode==3)
       SDL_FillRect(buffer,&(player2_laser_bullet.offset),SDL_MapRGB(buffer->format,200,0,0));//레이저의 범위에 해당하는 부분을 옅은 붉은 색으로 칠함
     if(laser_boss_bullet.env && laser_boss_bullet.offset.w <= 30)
@@ -1488,6 +1489,7 @@ bool load_files()
   bullet_basic = load_image("assets/bullet.gif");
   bullet_boss = load_image("assets/bossbullet.png");
   bullet_mini = load_image("assets/bossbullet.png");
+ // bullet_laser = load_image("assets/MeagaLaser-2.png"); // Laser image
   plane = load_image("assets/p2.gif");// 사용자 비행기 이미지
   plane2 = load_image("assets/aircraft1.png");
   plane3 = load_image("assets/aircraft3.png");
@@ -1599,8 +1601,8 @@ bool menu()   // 처음 시작 메뉴
 	{
 	
     message = TTF_RenderText_Solid(font, "Press space to start, esc key to quit", textColor); // space키는 시작 esc키는 종료
-    message2 = TTF_RenderText_Solid(font2, "Starwars", textColor2);  // 제목
-    background = load_image("assets/menu3.jpg");  // 배경
+    message2 = TTF_RenderText_Solid(font2, "SPACE 2143", textColor2);  // 제목
+    background = load_image("assets/menu3.png");  // 배경
 		apply_surface(0, 0, background, buffer, NULL);
     apply_surface((640 - message->w) / 2, 280, message, buffer, NULL);
     apply_surface((640 - message2->w) / 2, 100, message2, buffer, NULL);
@@ -1931,7 +1933,7 @@ bool game_over()  // 사용자 죽었을 시 나타나는 게임오버 창
     Mix_HaltMusic();//음악 정지
   Mix_HaltChannel(-1);//모든 사운드 채널 정지
   font = TTF_OpenFont("assets/Terminus.ttf", 24);//작은 안내문 폰트
-  background = load_image("assets/background.png");
+  background = load_image("assets/gameover.png");
   message2 = TTF_RenderText_Solid(font2, "Game over", textColor2);
   apply_surface(0, 0, background, buffer, NULL);
   message = TTF_RenderText_Solid(font, "Press space to restart, esc key to quit", textColor);
