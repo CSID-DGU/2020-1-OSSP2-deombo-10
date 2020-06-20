@@ -252,6 +252,7 @@ SDL_Rect AirPlane::Get_plane()
   return offset;
 }
 
+//for obstacle, made this method like Got_shot()
 bool AirPlane::detect_obstacle(vector<Obstacle> &Obs)
 {
   vector<Obstacle>::iterator iter;
@@ -261,7 +262,7 @@ bool AirPlane::detect_obstacle(vector<Obstacle> &Obs)
 
   for(iter = Obs.begin(); iter != Obs.end(); iter++)
   {
-    if((pos_x + 18 < (*iter).get_offset().x || pos_y + 20 < (*iter).get_offset().y + 17) ||
+    if((pos_x + 18 < (*iter).get_offset().x || pos_y + 20 < (*iter).get_offset().y + 50) ||
     ((*iter).get_offset().x + 50 < pos_x + 9 || (*iter).get_offset().y + 50 < pos_y + 10))
       obstmp.push_back(*iter);
     else
@@ -274,7 +275,7 @@ bool AirPlane::detect_obstacle(vector<Obstacle> &Obs)
   return flag;
 }
 
-bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C,_bullets &D)
+bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C,_bullets &D, laser_bullet E)
 {
   vector<bullets>::iterator iter;
   vector<bullets> tmp;
@@ -285,6 +286,8 @@ bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C,_bullets &D)
 
   for(iter = A.blt.begin(); iter != A.blt.end(); iter++)
   {
+    //(right of airplane body < left of bullet body || below of airplane body > above of bullet body) ||
+    //(right of bullet body < left of airplane body || below of bullet body > above of airplane body)
     if((pos_x + 18 < (*iter).offset.x || pos_y + 20 < (*iter).offset.y + 5) ||
     ((*iter).offset.x + 15 < pos_x + 9 || (*iter).offset.y + 10 < pos_y + 10))//안 맞았을 때
       tmp.push_back(*iter);
@@ -322,6 +325,29 @@ bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C,_bullets &D)
     }
   }
   C.blt = tmp3;
+
+  for(iter = D.blt.begin(); iter != D.blt.end(); iter++)
+  {
+    if((pos_x + 18 < (*iter).offset.x || pos_y + 20 < (*iter).offset.y + 5) ||
+    ((*iter).offset.x + 15 < pos_x + 9 || (*iter).offset.y + 10 < pos_y + 10))//안 맞았을 때
+      tmp3.push_back(*iter);
+    else//맞았을때
+    {
+      Mix_PlayChannel(-1,hit_sound,0);//피격음 출력
+      flag = true;
+    }
+  }
+  D.blt = tmp3;
+
+  if(E.env)
+  {
+    if(intersects(this->offset,E.offset))
+    {
+      Mix_PlayChannel(-1,hit_sound,0);//피격음 출력
+      flag = true;
+    }
+  }
+
   /*
   if(flag == true) {
     Mix_PlayChannel(-1,hit_sound,0);//피격음 출력
@@ -337,8 +363,8 @@ bool AirPlane::Got_item(vector<items>& I)
 
   for(iter = I.begin(); iter != I.end(); iter++)
   {
-    if((pos_x + 18 < (*iter).offset.x + 9 || pos_y + 20 < (*iter).offset.y + 5) ||
-    ((*iter).offset.x + 18 < pos_x + 9 || (*iter).offset.y + 10 < pos_y + 10));//안 맞았을 때
+    if((pos_x + 27 < (*iter).offset.x || pos_y + 31 < (*iter).offset.y) ||
+    ((*iter).offset.x + 30 < pos_x || (*iter).offset.y + 30 < pos_y ));//안 맞았을 때
     else                                                                           //맞았을때
     {
       flag = true;
@@ -1010,6 +1036,139 @@ void Boss::loss_life(int& score,Mix_Chunk* sound,float damage)
     if( this->life <= 0) {
       Mix_PlayChannel(-1,sound,0);
       this->~Boss();
+      score+=3000;
+  }
+}
+
+Laser_Boss::Laser_Boss(Mix_Chunk* sound){
+    laser_boss = load_image("assets/boss4.png");// 비행기 이미지
+    //Setcolorkey는 네모난 그림에서 비행기로 쓸 그림 빼고 나머지 흰 바탕들만 투명하게 바꾸는거
+    pos_x = rand() % (SCREEN_WIDTH-LASER_BOSS_WIDTH);// 처음 시작 위치 지정
+    SDL_SetColorKey(laser_boss, SDL_SRCCOLORKEY,SDL_MapRGB(laser_boss->format,255,255,255));
+    pos_y = -LASER_BOSS_HEIGHT;//처음 시작 위치 지정
+    life = 60;//has to be changed later (at least 70)
+    offset.w = LASER_BOSS_WIDTH;
+    offset.h = LASER_BOSS_HEIGHT;
+    hit_sound = sound;
+}
+
+Laser_Boss::~Laser_Boss(){
+    this->amount--;
+    delete this->laser_boss;
+};
+
+bool Laser_Boss::Got_shot(_bullets &A, int& x){
+    vector<bullets>::iterator iter;
+    vector<bullets> tmp;
+
+    bool flag = false;
+
+    for(iter = A.blt.begin(); iter != A.blt.end(); iter++)
+    {
+      if((pos_x + 135 < (*iter).offset.x + 9 || pos_y + 85 < (*iter).offset.y + 5) ||
+      ((*iter).offset.x + 9 < pos_x + 9 || (*iter).offset.y + 5 < pos_y + 10))//안 맞았을 때
+        tmp.push_back(*iter);
+      else//맞았을때
+      {
+        Mix_PlayChannel(-1,hit_sound,0);//사운드 출력
+        if((*iter).offset.x <= pos_x + BOSS_WIDTH / 5)
+          x = 0;
+        else if((*iter).offset.x <= pos_x + (BOSS_WIDTH / 5) * 2)
+          x = 1;
+        else if((*iter).offset.x <= pos_x + (BOSS_WIDTH / 5) * 3)
+          x = 2;
+        else if((*iter).offset.x <= pos_x + (BOSS_WIDTH / 5) * 4)
+          x = 3;
+        else
+          x = 4;
+
+        flag = true;
+      }
+    }
+
+    A.blt = tmp;
+
+    return flag;
+};
+bool Laser_Boss::Got_shot(laser_bullet A, int &x,short RNG){//레이저 빔에 맞을 때 판정
+
+    bool flag=false;
+    if(A.env){
+      if(flag=intersects(this->offset,A.offset))//맞았을때
+      {
+        Mix_PlayChannel(-1,hit_sound,0);//사운드 출력
+        x=RNG%5;
+      }
+    }
+    return flag;
+};
+void Laser_Boss::shooting(laser_bullet &A){
+    A.env=true;
+    A.offset.h = SCREEN_HEIGHT;
+    A.offset.x = pos_x+75; //shoud be middle x value of offset
+    A.offset.y = pos_y+100;
+};
+
+void Laser_Boss::enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip){
+    //SDL_Rect offset;
+    offset.y = pos_y;
+    offset.x = pos_x;
+    SDL_BlitSurface(laser_boss, clip, destination, &offset );
+};
+
+SDL_Rect Laser_Boss::control_plane(laser_bullet &A){
+    if(cont_shoot>=0 && cont_shoot < 100) 
+    {
+      this->cont_shoot ++;
+
+      if(direction == 0)
+      {
+        if(this->pos_x>550) direction =1;
+        this->pos_x += 1;
+      }
+      else
+      {
+        if(this->pos_x<90) direction = 0;
+        this->pos_x -= 1;
+      }
+
+      A.offset.w = 0;
+      if(cont_shoot >= 10) A.offset.w = 2;
+      if(cont_shoot >= 80) A.offset.w = 60;
+      this->shooting(A);
+    }
+
+    if(cont_shoot >= 100) 
+    {
+      cont_shoot = 0; 
+      A.env = false;
+    }
+    
+    count++;
+    offset.y = pos_y;
+    offset.x = pos_x;
+    return this->offset;
+};
+
+SDL_Rect Laser_Boss::Get_plane()
+{
+  offset.x = pos_x;
+  offset.y = pos_y;
+
+  return offset;
+}
+
+void Laser_Boss::loss_life(int& score,Mix_Chunk* sound,float damage)
+{
+    this->life-=damage;
+    if(damage==1)
+      score += 50;
+    else
+      score+=5;
+    
+    if( this->life <= 0) {
+      Mix_PlayChannel(-1,sound,0);
+      this->~Laser_Boss();
       score+=3000;
   }
 }
