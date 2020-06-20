@@ -275,7 +275,7 @@ bool AirPlane::detect_obstacle(vector<Obstacle> &Obs)
   return flag;
 }
 
-bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C,_bullets &D)
+bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C,_bullets &D, laser_bullet E)
 {
   vector<bullets>::iterator iter;
   vector<bullets> tmp;
@@ -325,6 +325,29 @@ bool AirPlane::Got_shot(_bullets &A,_bullets &B,_bullets &C,_bullets &D)
     }
   }
   C.blt = tmp3;
+
+  for(iter = D.blt.begin(); iter != D.blt.end(); iter++)
+  {
+    if((pos_x + 18 < (*iter).offset.x || pos_y + 20 < (*iter).offset.y + 5) ||
+    ((*iter).offset.x + 15 < pos_x + 9 || (*iter).offset.y + 10 < pos_y + 10))//안 맞았을 때
+      tmp3.push_back(*iter);
+    else//맞았을때
+    {
+      Mix_PlayChannel(-1,hit_sound,0);//피격음 출력
+      flag = true;
+    }
+  }
+  D.blt = tmp3;
+
+  if(E.env)
+  {
+    if(intersects(this->offset,E.offset))
+    {
+      Mix_PlayChannel(-1,hit_sound,0);//피격음 출력
+      flag = true;
+    }
+  }
+
   /*
   if(flag == true) {
     Mix_PlayChannel(-1,hit_sound,0);//피격음 출력
@@ -1083,7 +1106,7 @@ void Laser_Boss::shooting(laser_bullet &A){
     A.env=true;
     A.offset.h = SCREEN_HEIGHT;
     A.offset.x = pos_x+75; //shoud be middle x value of offset
-    A.offset.y = pos_y+90;
+    A.offset.y = pos_y+100;
 };
 
 void Laser_Boss::enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip){
@@ -1097,9 +1120,21 @@ SDL_Rect Laser_Boss::control_plane(laser_bullet &A){
     if(cont_shoot>=0 && cont_shoot < 100) 
     {
       this->cont_shoot ++;
+
+      if(direction == 0)
+      {
+        if(this->pos_x>550) direction =1;
+        this->pos_x += 1;
+      }
+      else
+      {
+        if(this->pos_x<90) direction = 0;
+        this->pos_x -= 1;
+      }
+
       A.offset.w = 0;
       if(cont_shoot >= 10) A.offset.w = 2;
-      if(cont_shoot >= 80) A.offset.w = 30;
+      if(cont_shoot >= 80) A.offset.w = 60;
       this->shooting(A);
     }
 
@@ -1107,10 +1142,11 @@ SDL_Rect Laser_Boss::control_plane(laser_bullet &A){
     {
       cont_shoot = 0; 
       A.env = false;
-      this->~Laser_Boss();
     }
     
     count++;
+    offset.y = pos_y;
+    offset.x = pos_x;
     return this->offset;
 };
 

@@ -166,6 +166,7 @@ int main(){
 
   bool is_laser=false;
   bool is_laser2=false;
+  bool is_boss_laser=false;
 
     //for obstacle
   int o_bound = 480+100;
@@ -342,7 +343,7 @@ int main(){
     if(mini_bullets.blt.size() > 0)
       mini_bullets.control_bullet();
     
-    if(dead != true &&(A.Got_shot(enemy_bullets,boss_bullets,mini_bullets,second_bullets)||A.detect_collision(CB)
+    if(dead != true &&(A.Got_shot(enemy_bullets,boss_bullets,mini_bullets,second_bullets, laser_boss_bullet)||A.detect_collision(CB)
         ||A.check_in_border(Border,border_check))&& A.invisible_mode == 0)      //1 플레이어 피격 판정
     {
       //총알에 맞거나 충돌박스에 부딪치거나 경계밖으로 나갔을 시
@@ -358,7 +359,7 @@ int main(){
       A.pushed_by_obstacle(30);
     }
 
-    if(dead2 != true && mode == 2 &&(A2.Got_shot(enemy_bullets,boss_bullets,mini_bullets,second_bullets)
+    if(dead2 != true && mode == 2 &&(A2.Got_shot(enemy_bullets,boss_bullets,mini_bullets,second_bullets, laser_boss_bullet)
         ||A2.detect_collision(CB)||A2.check_in_border(Border,border_check2))&& A2.invisible_mode == 0)      //2 플레이어 피격 판정
     {
       //총알에 맞거나 충돌박스에 부딪치거나 경계밖으로 나갔을 시
@@ -1078,12 +1079,12 @@ int main(){
     }
         //////////////보스 추가 조건//////////////
 
-    if(laser_boss.amount == 1) {
+    if(laser_boss.amount == 1 && score >= 1000) {
       laser_boss.enemy_apply_surface(buffer,NULL);
       CB.push_back(laser_boss.control_plane(laser_boss_bullet));
     }
 
-    if(mini_boss.amount == 1 && score >=2000){
+    if(mini_boss.amount == 1 && score >= 4000){
       mini_boss.enemy_apply_surface(buffer, NULL);
       CB.push_back(mini_boss.control_plane(mini_bullets));
     } // have to add the condition when the mini boss appear
