@@ -296,7 +296,34 @@ public:
   int life;
   int SA_count;
 };
+class Enemy_standard_3//폭팔형 적
+{
+private:
+   
+    SDL_Surface *enemy;
 
+    int life;
+    int count=0;//루프문 반복할 변수
+    int mode;// 좌,우 나타날 장소를 정하는 변수
+    bool first_exe = true;
+    int pos;
+  public:
+    SDL_Rect offset;
+
+    int pos_x,pos_y;// 비행기 x,y 좌표;
+    Enemy_standard_3(int mode);
+    ~Enemy_standard_3();
+    bool Got_shot(_bullets &A);
+    bool Got_shot(laser_bullet A);
+    bool eliminate ( int y);
+    void enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip);
+    SDL_Rect  control_plane();
+    SDL_Rect Get_plane();
+    void set_offset(int w,int h){offset.w=w,offset.h=h;}
+    void set_pos(int x, int y){pos_x=x;pos_y=y;}
+
+    
+};
 class Enemy_standard_2
 {
 private:
@@ -355,6 +382,7 @@ private:
 
     
 };
+
 /*
 class Obstacle
 {

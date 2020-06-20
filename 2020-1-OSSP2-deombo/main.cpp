@@ -179,6 +179,7 @@ int main(){
   vector<Obstacle>::iterator obs_it;
   vector<Obstacle> Obs;
 
+  vector<Enemy_standard_3>::iterator it3;
   vector<Enemy_standard_2>::iterator it2;
   vector<Enemy_standard>::iterator it;
   vector<BOOM>::iterator B_it;
@@ -191,6 +192,7 @@ int main(){
   vector<BOOM> B;//폭발
   vector<Enemy_standard> E;//기본1형 비행기
   vector<Enemy_standard_2> E2;// 2nd standard enemy
+  vector<Enemy_standard_3> E3;// 3번째 적 공격시 4방향으로 총알 방출
   vector<special> sa_1;
   list<SDL_Rect> CB;//충돌 박스를 저장할 리스트
 
@@ -216,7 +218,8 @@ int main(){
   laser_bullet player_laser_bullet;
   laser_bullet player2_laser_bullet;
 
-
+  player_laser_bullet.env=false;
+  player_laser_bullet.env=false;
   player_laser_bullet.offset.w=player2_laser_bullet.offset.w=5;
   player_laser_bullet.offset.h=player2_laser_bullet.offset.h=(Uint16)SCREEN_HEIGHT;
 
@@ -270,7 +273,7 @@ int main(){
 
     if(count % 5 == 0) shootcnt = 0;
     if(count % 5 == 0) shootcnt2 = 0;
-    if(count % 50 == 0)//100count마다 1기씩 생성
+    if(count % 50 == 0)//50count마다 1기씩 생성
     {
       int i = rand()%2;
       int j = rand()%2;
@@ -279,7 +282,11 @@ int main(){
       E.push_back(tmp);
       E2.push_back(tmp2);
     }
-
+    else if(count % 75==0)
+    {
+      Enemy_standard_3 tmp3(rand()%2);
+      E3.push_back(tmp3);
+    }
     if(count % 500 == 0)
     {
       Obstacle tmp(0);
@@ -373,13 +380,17 @@ int main(){
         Enemy_standard tmp(0);
         if(((*it).Got_shot(player_bullets)||(*it).Got_shot(player_laser_bullet)||(*it).Got_shot(player2_laser_bullet))||(bound < (*it).pos_y+32) && (bound+30 > (*it).pos_y))//비행기가 격추 당하면
         {
-          if(I.itm.size() == 0&&RNG%4==07)//4분의 1확률로 아이템을 생성한다.
+          if(I.itm.size() == 0&&RNG%4==0)//4분의 1확률로 아이템을 생성한다.
           {
             I.add_itm((*it).pos_x, (*it).pos_y, (*it).pos_x, (*it).pos_y + 20);
           }
-          if(I3.itm.size() == 0&&RNG%4==0)//4분의 1확률로 아이템을 생성한다.
+          else if(I3.itm.size() == 0&&(RNG+1)%4==0)//4분의 1확률로 아이템을 생성한다.
           {
             I3.add_itm((*it).pos_x, (*it).pos_y, (*it).pos_x, (*it).pos_y + 20);
+          }
+          else if(I4.itm.size() == 0&&RNG%5==0)//5분의 1확률로 아이템을 생성한다.
+          {
+            I4.add_itm((*it).pos_x, (*it).pos_y, (*it).pos_x, (*it).pos_y + 20);
           }
           BOOM B_tmp((*it).Get_plane());
           B.push_back(B_tmp);
@@ -419,6 +430,36 @@ int main(){
         }
 
         E2=v_tmp;
+    }
+    if(E3.size()>0)
+    {
+        vector<special> t;
+        vector<Enemy_standard_3> v_tmp;
+        it_sa = sa_1.begin();
+        for(it3 = E3.begin(); it3 != E3.end(); it3++)//적 비행기들 피격 판정
+        {
+          Enemy_standard_3 tmp(0);
+          if(((*it3).Got_shot(player_bullets)||(*it3).Got_shot(player_laser_bullet)||(*it3).Got_shot(player2_laser_bullet))|| (bound < (*it3).pos_y+32) && (bound+30 > (*it3).pos_y))
+          {
+            SDL_Rect e_rect=(*it3).Get_plane();
+            BOOM B_tmp(e_rect);
+            B.push_back(B_tmp);
+            enemy_bullets.add_blt(3,3,e_rect.x,e_rect.y);
+            enemy_bullets.add_blt(3,-3,e_rect.x,e_rect.y);
+            enemy_bullets.add_blt(-3,3,e_rect.x,e_rect.y);
+            enemy_bullets.add_blt(-3,-3,e_rect.x,e_rect.y);
+
+            (*it3).~Enemy_standard_3();
+            score += 100;
+          }
+          else
+          {
+            tmp = *it3;
+            v_tmp.push_back(tmp);
+          }
+        }
+
+        E3=v_tmp;
     }
     is_laser=mini_boss.Got_shot(player_laser_bullet,boom_mode,RNG);//레이저 공격에 맞은지 판별
     is_laser2=mini_boss.Got_shot(player2_laser_bullet,boom_mode,RNG);
@@ -538,6 +579,7 @@ int main(){
  
     if(keystates[SDLK_ESCAPE])
       break;
+    /////////적기 이동과 충돌 판정 추가/////////
     if(E.size() > 0)//적 비행기 이동 및 발사
     {
       for(it = E.begin(); it != E.end(); it++)
@@ -547,12 +589,17 @@ int main(){
       }
     }
     if(E2.size() >0){
-      for(it2 = E2.begin(); it2 != E2.end(); it2++)
+      for(it3 = E3.begin(); it3 != E3.end(); it3++)
       {
-         CB.push_back((*it2).control_plane(enemy_bullets));
+         CB.push_back((*it3).control_plane());
       }
     }
-  
+    if(E3.size() >0){
+      for(it3 = E3.begin(); it3 != E3.end(); it3++)
+      {
+         CB.push_back((*it3).control_plane());
+      }
+    }
 
     //////////////////////////////////////////
     if(sa_1.size() >0)
@@ -1056,7 +1103,18 @@ int main(){
         (*it2).enemy_apply_surface(buffer, NULL);
       }
     }
-
+    if( E3.size() > 0)
+    {
+      SDL_Rect tmp;
+      tmp.x=0;
+      tmp.y=4;
+      tmp.w=32;
+      tmp.h=28;
+      for( it3 = E3.begin(); it3 != E3.end(); it3++)
+      {
+        (*it3).enemy_apply_surface(buffer, &tmp);
+      }
+    }
     if(sa_1.size() >0)
     {
         for(it_sa = sa_1.begin(); it_sa != sa_1.end(); it_sa++){
