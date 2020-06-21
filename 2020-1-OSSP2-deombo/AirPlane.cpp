@@ -1035,10 +1035,10 @@ void Second_Boss::loss_life(int& score,Mix_Chunk* sound,float damage)
 ////////////////////////////////////////////////////////////////////////
 
 Boss::Boss(Mix_Chunk* sound){
-    mini_boss = load_image("assets/boss4.png");// 비행기 이미지
+    boss = load_image("assets/boss4.png");// 비행기 이미지
     //Setcolorkey는 네모난 그림에서 비행기로 쓸 그림 빼고 나머지 흰 바탕들만 투명하게 바꾸는거
     pos_x = 280;// 처음 시작 위치 지정
-    SDL_SetColorKey(mini_boss, SDL_SRCCOLORKEY,SDL_MapRGB(mini_boss->format,255,255,255));
+    SDL_SetColorKey(boss, SDL_SRCCOLORKEY,SDL_MapRGB(boss->format,255,255,255));
     pos_y = -MINI_BOSS_HEIGHT;//처음 시작 위치 지정
     life = 60;//has to be changed later (at least 70)
     offset.w =BOSS_WIDTH;
@@ -1048,7 +1048,7 @@ Boss::Boss(Mix_Chunk* sound){
 
 Boss::~Boss(){
     this->amount--;
-    delete this->mini_boss;
+    delete this->boss;
 };
 
 bool Boss::Got_shot(_bullets &A, int& x){
@@ -1133,7 +1133,7 @@ void Boss::enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip){
     //SDL_Rect offset;
     offset.y = pos_y;
     offset.x = pos_x;
-    SDL_BlitSurface(mini_boss, clip, destination, &offset );
+    SDL_BlitSurface(boss, clip, destination, &offset );
 };
 SDL_Rect Boss::control_plane(_bullets &A){
     if(cont_shoot>=1 && cont_shoot <15) {this->cont_shoot ++; if(cont_shoot%3==0)this->shooting(A);}
@@ -1182,10 +1182,10 @@ void Boss::loss_life(int& score,Mix_Chunk* sound,float damage)
 }
 
 Laser_Boss::Laser_Boss(Mix_Chunk* sound){
-    laser_boss = load_image("assets/boss4.png");// 비행기 이미지
+    laser_boss = load_image("assets/boss5.png");// 비행기 이미지
     //Setcolorkey는 네모난 그림에서 비행기로 쓸 그림 빼고 나머지 흰 바탕들만 투명하게 바꾸는거
     pos_x = rand() % (SCREEN_WIDTH-LASER_BOSS_WIDTH);// 처음 시작 위치 지정
-    SDL_SetColorKey(laser_boss, SDL_SRCCOLORKEY,SDL_MapRGB(laser_boss->format,255,255,255));
+    SDL_SetColorKey(laser_boss, SDL_SRCCOLORKEY,SDL_MapRGB(laser_boss->format,255,0,255));
     pos_y = -LASER_BOSS_HEIGHT;//처음 시작 위치 지정
     life = 30;//has to be changed later (at least 70)
     offset.w = LASER_BOSS_WIDTH;

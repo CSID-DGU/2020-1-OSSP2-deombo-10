@@ -498,7 +498,7 @@ public:
 class Boss
 {
 private:
-  SDL_Surface *mini_boss;
+  SDL_Surface *boss;
   
   Mix_Chunk* hit_sound;//피격음
 
