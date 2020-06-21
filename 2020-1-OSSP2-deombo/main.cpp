@@ -1190,7 +1190,7 @@ bool game_start()
     }
         //////////////보스 추가 조건//////////////
 
-    if(laser_boss.amount == 1 && score >= 2000) {
+    if(laser_boss.amount == 1 && score >= 700) {
       laser_boss.enemy_apply_surface(buffer,NULL);
       CB.push_back(laser_boss.control_plane(laser_boss_bullet));
     }
