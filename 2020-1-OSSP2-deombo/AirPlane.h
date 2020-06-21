@@ -552,11 +552,12 @@ public:
   void shooting(laser_bullet &A);
   void enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip);
   SDL_Rect  control_plane(laser_bullet &A);
-  void loss_life(int& score,Mix_Chunk* sound,float damage);
+  void loss_life(int& score,Mix_Chunk* sound,float damage,laser_bullet &A);
   SDL_Rect Get_plane();
 
   void set_offset(int w,int h){offset.w=w,offset.h=h;}
   void set_pos(int x, int y){pos_x=x;pos_y=y;}
 
+  bool is_visible = false;
   int amount = 1;
 };

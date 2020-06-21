@@ -529,11 +529,11 @@ bool game_start()
       tmp.three = boom_mode;
       laser_Boss_B4.push_back(tmp);
       if(is_laser)
-          laser_boss.loss_life(score,explosion_sound2,0.1);
+          laser_boss.loss_life(score,explosion_sound2,0.1,laser_boss_bullet);
       if(is_laser2)
-          laser_boss.loss_life(score,explosion_sound2,0.1);
+          laser_boss.loss_life(score,explosion_sound2,0.1,laser_boss_bullet);
       if(!is_laser&&!is_laser2)
-          laser_boss.loss_life(score,explosion_sound2,1);
+          laser_boss.loss_life(score,explosion_sound2,1,laser_boss_bullet);
       if( laser_boss.life <= 0)
         {
           if(I.itm.size() == 0 )
