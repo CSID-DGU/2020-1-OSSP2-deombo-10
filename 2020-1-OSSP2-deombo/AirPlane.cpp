@@ -1254,6 +1254,7 @@ void Laser_Boss::enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip){
     //SDL_Rect offset;
     offset.y = pos_y;
     offset.x = pos_x;
+    is_visible = true;
     SDL_BlitSurface(laser_boss, clip, destination, &offset );
 };
 
@@ -1309,6 +1310,8 @@ void Laser_Boss::loss_life(int& score,Mix_Chunk* sound,float damage,laser_bullet
     
     if( this->life <= 0) {
       Mix_PlayChannel(-1,sound,0);
+      is_visible= false;
+      A.env = false;
       this->~Laser_Boss();
       score+=3000;
   }
