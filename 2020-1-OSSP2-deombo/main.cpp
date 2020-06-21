@@ -1960,8 +1960,9 @@ bool game_over()  // 사용자 죽었을 시 나타나는 게임오버 창
         }
         case SDLK_SPACE:
         {
-    
+          background = load_image("assets/background.png");
           return true;
+
         }
 				default:{}
 			  }
