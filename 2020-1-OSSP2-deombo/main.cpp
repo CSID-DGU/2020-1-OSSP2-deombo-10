@@ -31,6 +31,7 @@ SDL_Surface *bullet_basic;
 SDL_Surface *bullet_mini;//화면에 그리기 전에 버퍼
 SDL_Surface *bullet_second;
 SDL_Surface *bullet_boss;
+SDL_Surface *bullet_laser;
 SDL_Surface *message;
 SDL_Surface *message2;
 SDL_Surface *message3;
@@ -1389,7 +1390,8 @@ bool game_start()
     else if(laser_boss_bullet.env && laser_boss_bullet.offset.w >= 30)
     {
       is_boss_laser_harmful = true;
-      SDL_FillRect(buffer,&(laser_boss_bullet.offset),SDL_MapRGB(buffer->format,100,0,100));
+      apply_surface(laser_boss_bullet.offset.x,laser_boss_bullet.offset.y,bullet_laser,buffer,NULL);
+      //SDL_FillRect(buffer,&(laser_boss_bullet.offset),SDL_MapRGB(buffer->format,100,0,100));
     }
 
     ostringstream sc;
@@ -1489,7 +1491,7 @@ bool load_files()
   bullet_basic = load_image("assets/bullet.gif");
   bullet_boss = load_image("assets/bossbullet.png");
   bullet_mini = load_image("assets/bossbullet.png");
- // bullet_laser = load_image("assets/MeagaLaser-2.png"); // Laser image
+  bullet_laser = load_image("assets/Mega_laser01.png"); // Laser image
   plane = load_image("assets/p2.gif");// 사용자 비행기 이미지
   plane2 = load_image("assets/aircraft1.png");
   plane3 = load_image("assets/aircraft3.png");
@@ -1543,6 +1545,7 @@ bool load_files()
     boom[i] =load_image(str3);
     SDL_SetColorKey(boom[i], SDL_SRCCOLORKEY,SDL_MapRGB(boom[i]->format,255,255,255));
   }
+  SDL_SetColorKey(bullet_laser, SDL_SRCCOLORKEY,SDL_MapRGB(bullet_laser->format,255,255,255));
   SDL_SetColorKey(shield, SDL_SRCCOLORKEY,SDL_MapRGB(shield->format,0,0,0));
   SDL_SetColorKey(explosion, SDL_SRCCOLORKEY,SDL_MapRGB(explosion->format,0,0,0));
   SDL_SetColorKey(life, SDL_SRCCOLORKEY,SDL_MapRGB(life->format,255,255,255));
