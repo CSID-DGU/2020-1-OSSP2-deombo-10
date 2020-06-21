@@ -794,7 +794,7 @@ Mini_Boss::Mini_Boss(Mix_Chunk* sound){
     SDL_SetColorKey(mini_boss, SDL_SRCCOLORKEY,SDL_MapRGB(mini_boss->format,0,0,0));
     pos_x = 320;// 처음 시작 위치 지정
     pos_y = -MINI_BOSS_HEIGHT;//처음 시작 위치 지정
-    life = 30;//has to be changed later (at least 70)
+    life = 45;//has to be changed later (at least 70)
     count = 0;
     offset.w =MINI_BOSS_WIDTH;
     offset.h=MINI_BOSS_HEIGHT;
@@ -921,7 +921,7 @@ Second_Boss::Second_Boss(Mix_Chunk* sound){
     SDL_SetColorKey(Second_boss, SDL_SRCCOLORKEY,SDL_MapRGB(Second_boss->format,0,0,0));
     pos_x = 320;// 처음 시작 위치 지정
     pos_y = -MINI_BOSS_HEIGHT;//처음 시작 위치 지정
-    life = 40;//has to be changed later (at least 70)
+    life = 35;//has to be changed later (at least 70)
     count = 0;
     offset.w =SECOND_BOSS_WIDTH;
     offset.h=SECOND_BOSS_HEIGHT;
@@ -1194,7 +1194,7 @@ Laser_Boss::Laser_Boss(Mix_Chunk* sound){
     pos_x = rand() % (SCREEN_WIDTH-LASER_BOSS_WIDTH);// 처음 시작 위치 지정
     SDL_SetColorKey(laser_boss, SDL_SRCCOLORKEY,SDL_MapRGB(laser_boss->format,255,0,255));
     pos_y = -30;//처음 시작 위치 지정
-    life = 10;//has to be changed later (at least 70)
+    life = 40;//has to be changed later (at least 70)
     offset.w = LASER_BOSS_WIDTH;
     offset.h = LASER_BOSS_HEIGHT;
     hit_sound = sound;
@@ -1327,7 +1327,7 @@ void Laser_Boss::loss_life(int& score,Mix_Chunk* sound,float damage,laser_bullet
       is_visible= false;
       A.env = false;
       this->~Laser_Boss();
-      score+=3000;
+      score+=1000;
   }
 }
 void mega_laser::show_effect(SDL_Surface* destination, SDL_Rect* clip){

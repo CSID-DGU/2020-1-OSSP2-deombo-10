@@ -23,6 +23,7 @@ SDL_Surface *buffer;//화면에 그리기 전에 버퍼
 SDL_Surface *background;//배경화면
 SDL_Surface *background2;
 SDL_Surface *background3;
+SDL_Surface *intro;
 SDL_Surface *explosion; //보스 몹 맞을 때 폭팔
 SDL_Surface *life;
 SDL_Surface *sapoint;
@@ -1196,22 +1197,22 @@ bool game_start()
     }
         //////////////보스 추가 조건//////////////
 
-    if(laser_boss.amount == 1 && score >= 1500) {
+    if(laser_boss.amount == 1 && score >= 6000) {
       laser_boss.enemy_apply_surface(buffer,NULL);
       CB.push_back(laser_boss.control_plane(laser_boss_bullet.laser));
     }
 
-    if(mini_boss.amount == 1 && score >= 5000){
+    if(mini_boss.amount == 1 && score >= 13000){
       mini_boss.enemy_apply_surface(buffer, NULL);
       CB.push_back(mini_boss.control_plane(mini_bullets));
     } // have to add the condition when the mini boss appear
 
-    if(second_boss.amount == 1 && score >= 14000){
+    if(second_boss.amount == 1 && score >= 1200){
       second_boss.enemy_apply_surface(buffer, NULL);
       CB.push_back(second_boss.control_plane(second_bullets)); 
     }//세컨드 보스 등장 조건
 
-    if(final_boss.amount == 1 && score >= 22000){
+    if(final_boss.amount == 1 && score >= 20000){
       final_boss.enemy_apply_surface(buffer, NULL);
       CB.push_back(final_boss.control_plane(boss_bullets));
     } // have to add the condition when the mini boss appear
@@ -1490,6 +1491,7 @@ bool load_files()
   life = load_image("assets/life.gif");                   //life
   background = load_image("assets/background.png");//배경화면
   background2 = load_image("assets/background2.png");//배경화면
+  intro = load_image("assets/intro.jpg");
   bullet = load_image("assets/BULLET.png");// 총알 이미지
   bullet_basic = load_image("assets/bullet.gif");
   bullet_boss = load_image("assets/bossbullet.png");
@@ -1894,7 +1896,7 @@ bool menu3()   // 비행기 고르는 메뉴
       message = TTF_RenderText_Solid(font, "Choose the game mode", textColor); // space키는 시작 esc키는 종료
       message2 = TTF_RenderText_Solid(font3, "Single play", textColor);
       message3 = TTF_RenderText_Solid(font3, "Multi play", textColor);
-      background = load_image("assets/background.png");  // 배경
+      background = load_image("assets/intro.jpg");  // 배경
 			apply_surface(0, 0, background, buffer, NULL);
       apply_surface((640 - message->w) / 2, 100, message, buffer, NULL);
       apply_surface((640 - message2->w) / 2, 210, message2, buffer, NULL);
@@ -1916,6 +1918,7 @@ bool menu3()   // 비행기 고르는 메뉴
 				case SDLK_o:  // space 키가 눌리면 게임 배경 가져오고 게임 시작
         {
           quit = true;
+          
           if(selecty == 210)
             mode = 1;
           else if(selecty == 300)
@@ -2019,7 +2022,7 @@ bool stage_clear()  // 나중에 bosscounter == 0 되면 stage clear 되도록 �
   Mix_HaltMusic();
   Mix_PlayChannel(-1,stage_clear_sound,0);
   message = TTF_RenderText_Solid(font, "Stage Clear!", textColor);
-  background = load_image("assets/background.png");
+  background = load_image("assets/menu3.png");
   apply_surface(0, 0, background, buffer, NULL);
   apply_surface((640 - message->w) / 2, 480/2 - message->h, message, buffer, NULL);
 	show_screen();
