@@ -55,7 +55,22 @@ typedef struct laser_bullet{
   bool env;
   SDL_Rect offset;
 }laser_bullet;
+class mega_laser{
+public:
+  SDL_Surface *laser_img;
+  laser_bullet laser;
 
+  mega_laser(){
+    laser_img  =load_image("assets/Mega_laser01.png");
+    SDL_SetColorKey(laser_img, SDL_SRCCOLORKEY,SDL_MapRGB(laser_img->format,255,255,255));
+  }
+  ~mega_laser(){
+    SDL_FreeSurface(laser_img);
+  }
+
+  void show_effect(SDL_Surface* destination, SDL_Rect* clip);
+
+};
 typedef struct items
 {
 public:
@@ -533,7 +548,7 @@ class Laser_Boss
 public:
 
   SDL_Surface *laser_boss;
-  
+
   Mix_Chunk* hit_sound;//피격음
 
   int pos_x, pos_y;

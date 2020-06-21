@@ -1182,6 +1182,7 @@ void Boss::loss_life(int& score,Mix_Chunk* sound,float damage)
 }
 
 Laser_Boss::Laser_Boss(Mix_Chunk* sound){
+    
     laser_boss = load_image("assets/boss5.png");// 비행기 이미지
     //Setcolorkey는 네모난 그림에서 비행기로 쓸 그림 빼고 나머지 흰 바탕들만 투명하게 바꾸는거
     pos_x = rand() % (SCREEN_WIDTH-LASER_BOSS_WIDTH);// 처음 시작 위치 지정
@@ -1259,7 +1260,7 @@ void Laser_Boss::enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip){
 };
 
 SDL_Rect Laser_Boss::control_plane(laser_bullet &A){
-    if(cont_shoot>=0 && cont_shoot < 100) 
+    if(cont_shoot>=0 && cont_shoot < 130) 
     {
       this->cont_shoot ++;
 
@@ -1274,13 +1275,16 @@ SDL_Rect Laser_Boss::control_plane(laser_bullet &A){
         this->pos_x -= 1;
       }
 
-      A.offset.w = 5;
-      if(cont_shoot >= 75) A.offset.w = 20;
-      if(cont_shoot >= 90) A.offset.w = 40;
-      this->shooting(A);
+      A.offset.w = 10;
+      if(cont_shoot<=30) A.offset.w=16;
+      else if(cont_shoot<=60) A.offset.w=20;
+      else if(cont_shoot <=90) A.offset.w = 26;
+      else if(cont_shoot <=120) A.offset.w = 30;
+      else A.offset.w = 40;
+     
     }
 
-    if(cont_shoot >= 100) 
+    if(cont_shoot >= 130) 
     {
       cont_shoot = 0; 
       A.env = false;
@@ -1289,6 +1293,10 @@ SDL_Rect Laser_Boss::control_plane(laser_bullet &A){
     count++;
     offset.y = pos_y;
     offset.x = pos_x;
+    A.env=true;
+    A.offset.h = SCREEN_HEIGHT;
+    A.offset.x = pos_x+LASER_BOSS_WIDTH/2-A.offset.w/2; //shoud be middle x value of offset
+    A.offset.y = pos_y+100;
     return this->offset;
 };
 
@@ -1315,4 +1323,15 @@ void Laser_Boss::loss_life(int& score,Mix_Chunk* sound,float damage,laser_bullet
       this->~Laser_Boss();
       score+=3000;
   }
+}
+void mega_laser::show_effect(SDL_Surface* destination, SDL_Rect* clip){
+  SDL_Surface *tmp=rotozoomSurfaceXY(laser_img,0,(double)this->laser.offset.w/28 ,1,SMOOTHING_OFF);
+  if(this->laser.offset.w<=16)
+    SDL_SetAlpha(tmp,SDL_SRCALPHA,20);
+  else if(this->laser.offset.w<=26)
+    SDL_SetAlpha(tmp,SDL_SRCALPHA,40);
+  else if(this->laser.offset.w<40)
+    SDL_SetAlpha(tmp,SDL_SRCALPHA,60);
+  apply_surface(this->laser.offset.x,this->laser.offset.y,tmp,destination,clip);
+  
 }

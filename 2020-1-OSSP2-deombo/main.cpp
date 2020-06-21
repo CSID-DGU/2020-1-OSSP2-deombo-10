@@ -31,7 +31,6 @@ SDL_Surface *bullet_basic;
 SDL_Surface *bullet_mini;//화면에 그리기 전에 버퍼
 SDL_Surface *bullet_second;
 SDL_Surface *bullet_boss;
-SDL_Surface *bullet_laser;
 SDL_Surface *message;
 SDL_Surface *message2;
 SDL_Surface *message3;
@@ -195,9 +194,9 @@ bool game_start()
 
   laser_bullet player_laser_bullet;
   laser_bullet player2_laser_bullet;
-  laser_bullet laser_boss_bullet;
+  mega_laser laser_boss_bullet;
 
-  laser_boss_bullet.env=false;
+  laser_boss_bullet.laser.env=false;
 
   player_laser_bullet.env=false;
   player2_laser_bullet.env=false;
@@ -346,7 +345,7 @@ bool game_start()
     if(mini_bullets.blt.size() > 0)
       mini_bullets.control_bullet();
     
-    if(dead != true &&(A.Got_shot(enemy_bullets,boss_bullets,mini_bullets,second_bullets, laser_boss_bullet, is_boss_laser_harmful)||A.detect_collision(CB)
+    if(dead != true &&(A.Got_shot(enemy_bullets,boss_bullets,mini_bullets,second_bullets, laser_boss_bullet.laser, is_boss_laser_harmful)||A.detect_collision(CB)
         ||A.check_in_border(Border,border_check))&& A.invisible_mode == 0)      //1 플레이어 피격 판정
     {
       //총알에 맞거나 충돌박스에 부딪치거나 경계밖으로 나갔을 시
@@ -362,7 +361,7 @@ bool game_start()
       A.pushed_by_obstacle(30);
     }
 
-    if(dead2 != true && mode == 2 &&(A2.Got_shot(enemy_bullets,boss_bullets,mini_bullets,second_bullets, laser_boss_bullet, is_boss_laser_harmful)
+    if(dead2 != true && mode == 2 &&(A2.Got_shot(enemy_bullets,boss_bullets,mini_bullets,second_bullets, laser_boss_bullet.laser, is_boss_laser_harmful)
         ||A2.detect_collision(CB)||A2.check_in_border(Border,border_check2))&& A2.invisible_mode == 0)      //2 플레이어 피격 판정
     {
       //총알에 맞거나 충돌박스에 부딪치거나 경계밖으로 나갔을 시
@@ -530,16 +529,17 @@ bool game_start()
       tmp.three = boom_mode;
       laser_Boss_B4.push_back(tmp);
       if(is_laser)
-          laser_boss.loss_life(score,explosion_sound2,0.1,laser_boss_bullet);
+          laser_boss.loss_life(score,explosion_sound2,0.1,laser_boss_bullet.laser);
       if(is_laser2)
-          laser_boss.loss_life(score,explosion_sound2,0.1,laser_boss_bullet);
+          laser_boss.loss_life(score,explosion_sound2,0.1,laser_boss_bullet.laser);
       if(!is_laser&&!is_laser2)
-          laser_boss.loss_life(score,explosion_sound2,1,laser_boss_bullet);
+          laser_boss.loss_life(score,explosion_sound2,1,laser_boss_bullet.laser);
       if( laser_boss.life <= 0)
         {
           if(I.itm.size() == 0 )
             I.add_itm(laser_boss.pos_x, laser_boss.pos_y, laser_boss.pos_x, laser_boss .pos_y+ 20);
-    
+          
+          laser_boss_bullet.~mega_laser();
         }
     }
 
@@ -1193,7 +1193,7 @@ bool game_start()
 
     if(laser_boss.amount == 1 && score >= 700) {
       laser_boss.enemy_apply_surface(buffer,NULL);
-      CB.push_back(laser_boss.control_plane(laser_boss_bullet));
+      CB.push_back(laser_boss.control_plane(laser_boss_bullet.laser));
     }
 
     if(mini_boss.amount == 1 && score >= 5000){
@@ -1380,17 +1380,15 @@ bool game_start()
       SDL_FillRect(buffer,&(player_laser_bullet.offset),SDL_MapRGB(buffer->format,200,0,0));/*SDL_MapRGB(buffer->format,200,0,0));*/ //레이저의 범위에 해당하는 부분을 옅은 붉은 색으로 칠함
     if(player2_laser_bullet.env&&A2.bullet_mode==3)
       SDL_FillRect(buffer,&(player2_laser_bullet.offset),SDL_MapRGB(buffer->format,200,0,0));//레이저의 범위에 해당하는 부분을 옅은 붉은 색으로 칠함
-    if(laser_boss_bullet.env && laser_boss_bullet.offset.w <= 30)
+    if(laser_boss_bullet.laser.env && laser_boss_bullet.laser.offset.w <= 30)
     {
       is_boss_laser_harmful = false;
-      if(laser_boss_bullet.offset.w == 10) 
-        SDL_FillRect(buffer,&(laser_boss_bullet.offset),SDL_MapRGB(buffer->format,255,255,255));
-      else SDL_FillRect(buffer,&(laser_boss_bullet.offset),SDL_MapRGB(buffer->format,255,165,0));
+      laser_boss_bullet.show_effect(buffer,NULL);
     }
-    else if(laser_boss_bullet.env && laser_boss_bullet.offset.w >= 30)
+    else if(laser_boss_bullet.laser.env && laser_boss_bullet.laser.offset.w >30)
     {
       is_boss_laser_harmful = true;
-      apply_surface(laser_boss_bullet.offset.x,laser_boss_bullet.offset.y,bullet_laser,buffer,NULL);
+      laser_boss_bullet.show_effect(buffer,NULL);
       //SDL_FillRect(buffer,&(laser_boss_bullet.offset),SDL_MapRGB(buffer->format,100,0,100));
     }
 
@@ -1491,7 +1489,7 @@ bool load_files()
   bullet_basic = load_image("assets/bullet.gif");
   bullet_boss = load_image("assets/bossbullet.png");
   bullet_mini = load_image("assets/bossbullet.png");
-  bullet_laser = load_image("assets/Mega_laser01.png"); // Laser image
+  
   plane = load_image("assets/p2.gif");// 사용자 비행기 이미지
   plane2 = load_image("assets/aircraft1.png");
   plane3 = load_image("assets/aircraft3.png");
@@ -1545,7 +1543,7 @@ bool load_files()
     boom[i] =load_image(str3);
     SDL_SetColorKey(boom[i], SDL_SRCCOLORKEY,SDL_MapRGB(boom[i]->format,255,255,255));
   }
-  SDL_SetColorKey(bullet_laser, SDL_SRCCOLORKEY,SDL_MapRGB(bullet_laser->format,255,255,255));
+  
   SDL_SetColorKey(shield, SDL_SRCCOLORKEY,SDL_MapRGB(shield->format,0,0,0));
   SDL_SetColorKey(explosion, SDL_SRCCOLORKEY,SDL_MapRGB(explosion->format,0,0,0));
   SDL_SetColorKey(life, SDL_SRCCOLORKEY,SDL_MapRGB(life->format,255,255,255));
