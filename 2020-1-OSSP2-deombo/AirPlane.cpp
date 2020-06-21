@@ -1186,8 +1186,8 @@ Laser_Boss::Laser_Boss(Mix_Chunk* sound){
     //Setcolorkey는 네모난 그림에서 비행기로 쓸 그림 빼고 나머지 흰 바탕들만 투명하게 바꾸는거
     pos_x = rand() % (SCREEN_WIDTH-LASER_BOSS_WIDTH);// 처음 시작 위치 지정
     SDL_SetColorKey(laser_boss, SDL_SRCCOLORKEY,SDL_MapRGB(laser_boss->format,255,0,255));
-    pos_y = -LASER_BOSS_HEIGHT;//처음 시작 위치 지정
-    life = 30;//has to be changed later (at least 70)
+    pos_y = -30;//처음 시작 위치 지정
+    life = 10;//has to be changed later (at least 70)
     offset.w = LASER_BOSS_WIDTH;
     offset.h = LASER_BOSS_HEIGHT;
     hit_sound = sound;
@@ -1209,7 +1209,7 @@ bool Laser_Boss::Got_shot(_bullets &A, int& x){
       if((pos_x + 135 < (*iter).offset.x + 9 || pos_y + 85 < (*iter).offset.y + 5) ||
       ((*iter).offset.x + 9 < pos_x + 9 || (*iter).offset.y + 5 < pos_y + 10))//안 맞았을 때
         tmp.push_back(*iter);
-      else//맞았을때
+      else if(is_visible)//맞았을때
       {
         Mix_PlayChannel(-1,hit_sound,0);//사운드 출력
         if((*iter).offset.x <= pos_x + BOSS_WIDTH / 5)
@@ -1234,7 +1234,7 @@ bool Laser_Boss::Got_shot(_bullets &A, int& x){
 bool Laser_Boss::Got_shot(laser_bullet A, int &x,short RNG){//레이저 빔에 맞을 때 판정
 
     bool flag=false;
-    if(A.env){
+    if(A.env && is_visible){
       if(flag=intersects(this->offset,A.offset))//맞았을때
       {
         Mix_PlayChannel(-1,hit_sound,0);//사운드 출력
@@ -1246,7 +1246,7 @@ bool Laser_Boss::Got_shot(laser_bullet A, int &x,short RNG){//레이저 빔에 �
 void Laser_Boss::shooting(laser_bullet &A){
     A.env=true;
     A.offset.h = SCREEN_HEIGHT;
-    A.offset.x = pos_x+75; //shoud be middle x value of offset
+    A.offset.x = pos_x+LASER_BOSS_WIDTH/2-A.offset.w/2; //shoud be middle x value of offset
     A.offset.y = pos_y+100;
 };
 
