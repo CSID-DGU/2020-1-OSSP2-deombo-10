@@ -854,11 +854,11 @@ bool Mini_Boss::Got_shot(laser_bullet A, int &x,short RNG){//레이저 빔에 �
 };
 
 void Mini_Boss::shooting(_bullets &A){
-    A.add_blt( 0, 5,pos_x + 125,pos_y + 82);
-    A.add_blt( 3, 5,pos_x + 125,pos_y + 82);
-    A.add_blt( -3, 5,pos_x + 125,pos_y + 82);
-    A.add_blt( -6, 4,pos_x + 125,pos_y + 82);
-    A.add_blt( 6, 4,pos_x + 125,pos_y + 82);
+    A.add_blt( 0, 5,pos_x + 125,pos_y + 100);
+    A.add_blt( 3, 5,pos_x + 125,pos_y + 100);
+    A.add_blt( -3, 5,pos_x + 125,pos_y + 100);
+    A.add_blt( -6, 4,pos_x + 125,pos_y + 100);
+    A.add_blt( 6, 4,pos_x + 125,pos_y + 100);
 };
 
 void Mini_Boss::enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip){
@@ -903,13 +903,13 @@ void Mini_Boss::loss_life(int& score,Mix_Chunk* sound,float damage)
 {
     this->life-=damage;
     if(damage==1)
-      score += 50;
+      score += 10;
     else
       score+=5;
     if( this->life <= 0) {
       Mix_PlayChannel(-1,sound,0);//보스 사망시 폭팔음 출력
       this->~Mini_Boss();
-      score+=1000;
+      score+=500;
    }
 }
 
@@ -921,7 +921,7 @@ Second_Boss::Second_Boss(Mix_Chunk* sound){
     SDL_SetColorKey(Second_boss, SDL_SRCCOLORKEY,SDL_MapRGB(Second_boss->format,0,0,0));
     pos_x = 320;// 처음 시작 위치 지정
     pos_y = -MINI_BOSS_HEIGHT;//처음 시작 위치 지정
-    life = 35;//has to be changed later (at least 70)
+    life = 40;//has to be changed later (at least 70)
     count = 0;
     offset.w =SECOND_BOSS_WIDTH;
     offset.h=SECOND_BOSS_HEIGHT;
@@ -942,18 +942,22 @@ bool Second_Boss::Got_shot(_bullets &A, int &x){
 
     for(iter = A.blt.begin(); iter != A.blt.end(); iter++)
     {
-      if((pos_x + 240 < (*iter).offset.x + 9 || pos_y + 82 < (*iter).offset.y + 5) ||
+      if((pos_x + 140 < (*iter).offset.x + 9 || pos_y + 100 < (*iter).offset.y + 5) ||
       ((*iter).offset.x + 9 < pos_x + 9 || (*iter).offset.y + 5 < pos_y + 10))//안 맞았을 때
         tmp.push_back(*iter);
       else//맞았을때
       {
         Mix_PlayChannel(-1,hit_sound,0);//사운드 출력
-        if((*iter).offset.x <= pos_x + SECOND_BOSS_WIDTH / 3)
+        if((*iter).offset.x <= pos_x + SECOND_BOSS_WIDTH / 5)
           x = 0;
-        else if((*iter).offset.x <= pos_x + (SECOND_BOSS_WIDTH / 3) * 2)
+        else if((*iter).offset.x <= pos_x + (SECOND_BOSS_WIDTH / 5) * 2)
           x = 1;
-        else
+        else if((*iter).offset.x <= pos_x + (SECOND_BOSS_WIDTH / 5) * 3)
           x = 2;
+        else if((*iter).offset.x <= pos_x + (SECOND_BOSS_WIDTH / 5) * 4)
+          x = 3;
+        else
+          x = 4;
         flag = true;
       }
     }
@@ -970,17 +974,19 @@ bool Second_Boss::Got_shot(laser_bullet A, int &x,short RNG){//레이저 빔에 
       if(flag=intersects(this->offset,A.offset))//맞았을때
       {
         Mix_PlayChannel(-1,hit_sound,0);//사운드 출력
-        x=RNG%3;
+        x=RNG%5;
       }
     }
     return flag;
 };
 void Second_Boss::shooting(_bullets &A){
-    A.add_blt( 0, 5,pos_x + 125,pos_y + 82);
-    A.add_blt( 3, 5,pos_x + 125,pos_y + 82);
-    A.add_blt( -3, 5,pos_x + 125,pos_y + 82);
-    A.add_blt( -6, 4,pos_x + 125,pos_y + 82);
-    A.add_blt( 6, 4,pos_x + 125,pos_y + 82);
+ 
+    A.add_blt( 0, 5,pos_x + 75,pos_y + 82);
+    A.add_blt( 3, 5,pos_x + 75,pos_y + 82);
+    A.add_blt( -3, 5,pos_x + 75,pos_y + 82);
+    A.add_blt( -6, 4,pos_x + 75,pos_y + 82);
+    A.add_blt( 6, 4,pos_x + 75,pos_y + 82);
+    
 };
 
 void Second_Boss::enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip){
@@ -1021,7 +1027,7 @@ SDL_Rect Second_Boss::Get_plane()
 
 void Second_Boss::loss_life(int& score,Mix_Chunk* sound,float damage)
 {
-    this->life-damage;
+    this->life-=damage;
     if(damage==1)
       score += 50;
     else

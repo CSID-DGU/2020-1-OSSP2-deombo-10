@@ -339,11 +339,15 @@ bool game_start()
 
     if(enemy_bullets.blt.size() > 0)//적 총알들 위치 이동
       enemy_bullets.control_bullet();
+
     if(boss_bullets.blt.size()>0)
       boss_bullets.control_bullet();
 
     if(mini_bullets.blt.size() > 0)
       mini_bullets.control_bullet();
+
+    if(second_bullets.blt.size() > 0)
+      second_bullets.control_bullet();
     
     if(dead != true &&(A.Got_shot(enemy_bullets,boss_bullets,mini_bullets,second_bullets, laser_boss_bullet.laser, is_boss_laser_harmful)||A.detect_collision(CB)
         ||A.check_in_border(Border,border_check))&& A.invisible_mode == 0)      //1 플레이어 피격 판정
@@ -603,6 +607,7 @@ bool game_start()
         enemy_bullets.eliminate(*it_sa);
         boss_bullets.eliminate(*it_sa);
         mini_bullets.eliminate(*it_sa);
+        second_bullets.eliminate(*it_sa);
     }
 
     //for obstacle
@@ -1191,7 +1196,7 @@ bool game_start()
     }
         //////////////보스 추가 조건//////////////
 
-    if(laser_boss.amount == 1 && score >= 700) {
+    if(laser_boss.amount == 1 && score >= 1500) {
       laser_boss.enemy_apply_surface(buffer,NULL);
       CB.push_back(laser_boss.control_plane(laser_boss_bullet.laser));
     }
@@ -1201,12 +1206,12 @@ bool game_start()
       CB.push_back(mini_boss.control_plane(mini_bullets));
     } // have to add the condition when the mini boss appear
 
-    if(second_boss.amount == 1 && score >= 10000){
+    if(second_boss.amount == 1 && score >= 14000){
       second_boss.enemy_apply_surface(buffer, NULL);
       CB.push_back(second_boss.control_plane(second_bullets)); 
     }//세컨드 보스 등장 조건
 
-    if(final_boss.amount == 1 && score >= 20000){
+    if(final_boss.amount == 1 && score >= 22000){
       final_boss.enemy_apply_surface(buffer, NULL);
       CB.push_back(final_boss.control_plane(boss_bullets));
     } // have to add the condition when the mini boss appear
@@ -1488,6 +1493,7 @@ bool load_files()
   bullet = load_image("assets/BULLET.png");// 총알 이미지
   bullet_basic = load_image("assets/bullet.gif");
   bullet_boss = load_image("assets/bossbullet.png");
+  bullet_second = load_image("assets/bossbullet.png");
   bullet_mini = load_image("assets/bossbullet.png");
   
   plane = load_image("assets/p2.gif");// 사용자 비행기 이미지
@@ -1562,16 +1568,7 @@ bool load_files()
 
 bool SDL_free_all()
 {//올바르게 free하면 true 반환하게 수정
-  SDL_FreeSurface(shield);
-  SDL_FreeSurface(plane);
-  SDL_FreeSurface(bullet);
-  SDL_FreeSurface(background);
-  SDL_FreeSurface(buffer);
-  for(int i =0 ; i < 4; i++)
-    SDL_FreeSurface(enemy[i]);
-  for(int i = 0; i < 11; i++)
-    SDL_FreeSurface(boom[i]);
-  
+
   Mix_FreeMusic(menu_music);
   Mix_FreeMusic(stage_music);
   Mix_FreeChunk(game_over_sound);
@@ -1585,7 +1582,44 @@ bool SDL_free_all()
   Mix_FreeChunk(item_sound);
   Mix_FreeChunk(stage_clear_sound);
   Mix_CloseAudio();
-  
+
+  SDL_FreeSurface(shield);
+  SDL_FreeSurface(plane);
+  SDL_FreeSurface(bullet);
+  SDL_FreeSurface(background);
+  SDL_FreeSurface(background2);
+  SDL_FreeSurface(background3);
+  SDL_FreeSurface(explosion);
+  SDL_FreeSurface(life);
+  SDL_FreeSurface(sapoint);
+  SDL_FreeSurface(bullet_basic);
+  SDL_FreeSurface(bullet_mini);
+  SDL_FreeSurface(bullet_second);
+  SDL_FreeSurface(bullet_boss);
+  SDL_FreeSurface(message);
+  SDL_FreeSurface(message2);
+  SDL_FreeSurface(message3);
+  SDL_FreeSurface(message4);
+  SDL_FreeSurface(message5);
+  SDL_FreeSurface(title_message);
+  SDL_FreeSurface(arrow);
+  SDL_FreeSurface(pick1);
+  SDL_FreeSurface(pick2);
+  SDL_FreeSurface(frame);
+  SDL_FreeSurface(frame2);
+  SDL_FreeSurface(enemy2);
+  SDL_FreeSurface(buffer);
+  SDL_FreeSurface(plane);
+  SDL_FreeSurface(plane2);
+  SDL_FreeSurface(plane3);
+  SDL_FreeSurface(plane4);
+  SDL_FreeSurface(plane5);
+  for(int i =0 ; i < 4; i++)
+    SDL_FreeSurface(enemy[i]);
+  for(int i = 0; i < 11; i++)
+    SDL_FreeSurface(boom[i]);
+  SDL_FreeSurface(screen);
+
   SDL_Quit();//init한 SDL 변수들 닫아주는겅 일걸,위의 freesurface랑 차이 모름
 
   return true;
