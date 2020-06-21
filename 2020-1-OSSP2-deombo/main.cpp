@@ -199,7 +199,7 @@ bool game_start()
   laser_boss_bullet.env=false;
 
   player_laser_bullet.env=false;
-  player_laser_bullet.env=false;
+  player2_laser_bullet.env=false;
   player_laser_bullet.offset.w=player2_laser_bullet.offset.w=5;
   player_laser_bullet.offset.h=player2_laser_bullet.offset.h=(Uint16)SCREEN_HEIGHT;
 

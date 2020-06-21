@@ -1186,8 +1186,8 @@ Laser_Boss::Laser_Boss(Mix_Chunk* sound){
     //Setcolorkey는 네모난 그림에서 비행기로 쓸 그림 빼고 나머지 흰 바탕들만 투명하게 바꾸는거
     pos_x = rand() % (SCREEN_WIDTH-LASER_BOSS_WIDTH);// 처음 시작 위치 지정
     SDL_SetColorKey(laser_boss, SDL_SRCCOLORKEY,SDL_MapRGB(laser_boss->format,255,255,255));
-    pos_y = 0;//처음 시작 위치 지정
-    life = 2;//has to be changed later (at least 70)
+    pos_y = -LASER_BOSS_HEIGHT;//처음 시작 위치 지정
+    life = 30;//has to be changed later (at least 70)
     offset.w = LASER_BOSS_WIDTH;
     offset.h = LASER_BOSS_HEIGHT;
     hit_sound = sound;
@@ -1254,7 +1254,6 @@ void Laser_Boss::enemy_apply_surface(SDL_Surface* destination, SDL_Rect* clip){
     //SDL_Rect offset;
     offset.y = pos_y;
     offset.x = pos_x;
-    is_visible = true;
     SDL_BlitSurface(laser_boss, clip, destination, &offset );
 };
 
@@ -1300,7 +1299,7 @@ SDL_Rect Laser_Boss::Get_plane()
   return offset;
 }
 
-void Laser_Boss::loss_life(int& score,Mix_Chunk* sound,float damage, laser_bullet &A)
+void Laser_Boss::loss_life(int& score,Mix_Chunk* sound,float damage,laser_bullet &A)
 {
     this->life-=damage;
     if(damage==1)
@@ -1310,8 +1309,6 @@ void Laser_Boss::loss_life(int& score,Mix_Chunk* sound,float damage, laser_bulle
     
     if( this->life <= 0) {
       Mix_PlayChannel(-1,sound,0);
-      is_visible = false;
-      A.env = false; //solve laser keep drawing problem 
       this->~Laser_Boss();
       score+=3000;
   }
