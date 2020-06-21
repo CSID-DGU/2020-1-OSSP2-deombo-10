@@ -4,7 +4,7 @@
 (충돌 판정에는 데미지를 입습니다.)
 ********************************
 
-Starwars
+SPACE 2143
 
 Space Shooting game (Developed by team "deombo")
 
