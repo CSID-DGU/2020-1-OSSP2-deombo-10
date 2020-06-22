@@ -11,7 +11,17 @@ Space Shooting game (Developed by team "deombo")
 
     An enhanced version of the MSG project
     Original Open Source : https://github.com/CSID-DGU/2018-1-OSSP-MSG-7
-    Written in C++
+    Platform : Linux, Ubuntu
+    IDE : visual studio code
+    Tool & Library : SDL1.2, SDL1.2 mixer(오디오 관련 라이브러리), Aseprite(간단한 이미지 편집)
+    Programming Language : C++
+
+* Roles of each member
+
+    Jaeho Jang : writing report, adding audio, adding new damage role(when player character is out of screen), adding new enemies and items
+    Yeonji Lim : writing report, adding new boss and obstacles
+    Yongheon Jeong : making presentation power point, adding enemies, improving graphics
+    All members do : analyzing code and SDL library, fixing bugs, finding assets
     
 * * *
 * How To Run
@@ -26,6 +36,8 @@ sudo apt-get install libsdl-ttf2.0-dev
     
 sudo apt-get install libsdl-mixer1.2-dev
 </code></pre>
+You can try 'apt' instead of 'apt-get'
+
 2. Install g++
 <pre><code>
 sudo apt-get install g++
@@ -48,7 +60,7 @@ g++ -o main main.cpp helpers.h helpers.cpp AirPlane.cpp AirPlane.h define.h -lSD
 * * *
 * using some code from SDL_gfx
 
-scale surface 함수에 대한 레퍼런스
+reference of scale surface function
 http://www.sdltutorials.com/sdl-scale-surface
 
 http://cse.csusb.edu/tongyu/courses/cs420/notes/sdl.php
