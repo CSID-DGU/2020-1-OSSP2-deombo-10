@@ -21,7 +21,7 @@ Space Shooting game (Developed by team "deombo")
     Jaeho Jang : writing report, adding audio, adding new damage role(when player character is out of screen), adding new enemies and items  
     Yeonji Lim : writing report, adding new boss and obstacles  
     Yongheon Jeong : making presentation power point, adding enemies, improving graphics  
-    All members do : analyzing code and SDL library, fixing bugs, finding assets  
+    All members did : analyzing code and SDL library, fixing bugs, finding assets  
     
 * * *
 * How To Run
