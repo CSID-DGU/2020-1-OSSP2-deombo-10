@@ -9,19 +9,19 @@ Space Shooting game (Developed by team "deombo")
 
 * Description
 
-    An enhanced version of the MSG project
-    Original Open Source : https://github.com/CSID-DGU/2018-1-OSSP-MSG-7
-    Platform : Linux, Ubuntu
-    IDE : visual studio code
-    Tool & Library : SDL1.2, SDL1.2 mixer(오디오 관련 라이브러리), Aseprite(간단한 이미지 편집)
-    Programming Language : C++
+    An enhanced version of the MSG project  
+    Original Open Source : https://github.com/CSID-DGU/2018-1-OSSP-MSG-7  
+    Platform : Linux, Ubuntu  
+    IDE : visual studio code  
+    Tool & Library : SDL1.2, SDL1.2 mixer(오디오 관련 라이브러리), Aseprite(간단한 이미지 편집)  
+    Programming Language : C++  
 
 * Roles of each member
 
-    Jaeho Jang : writing report, adding audio, adding new damage role(when player character is out of screen), adding new enemies and items
-    Yeonji Lim : writing report, adding new boss and obstacles
-    Yongheon Jeong : making presentation power point, adding enemies, improving graphics
-    All members do : analyzing code and SDL library, fixing bugs, finding assets
+    Jaeho Jang : writing report, adding audio, adding new damage role(when player character is out of screen), adding new enemies and items  
+    Yeonji Lim : writing report, adding new boss and obstacles  
+    Yongheon Jeong : making presentation power point, adding enemies, improving graphics  
+    All members do : analyzing code and SDL library, fixing bugs, finding assets  
     
 * * *
 * How To Run
