@@ -1,8 +1,6 @@
 # 2020-1-OSSP2-deombo-10
 # SPACE 2143
 
-## SPACE 2143
-
 Space Shooting game (Developed by team "deombo")
 
 ## Description
