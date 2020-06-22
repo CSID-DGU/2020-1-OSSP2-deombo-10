@@ -1,13 +1,11 @@
 # 2020-1-OSSP2-deombo-10
 # SPACE 2143
 
-********************************
-
-SPACE 2143
+##SPACE 2143
 
 Space Shooting game (Developed by team "deombo")
 
-* Description
+##Description
 
     An enhanced version of the MSG project  
     Original Open Source : https://github.com/CSID-DGU/2018-1-OSSP-MSG-7  
@@ -16,7 +14,9 @@ Space Shooting game (Developed by team "deombo")
     Tool & Library : SDL1.2, SDL1.2 mixer(오디오 관련 라이브러리), Aseprite(간단한 이미지 편집)  
     Programming Language : C++  
 
-* Roles of each member
+* * *
+
+##Roles of each member
 
     Jaeho Jang : writing report, adding audio, adding new damage role(when player character is out of screen), adding new enemies and items  
     Yeonji Lim : writing report, adding new boss and obstacles  
@@ -24,7 +24,7 @@ Space Shooting game (Developed by team "deombo")
     All members did : analyzing code and SDL library, fixing bugs, finding assets  
     
 * * *
-* How To Run
+##How To Run
 
 1. Install SDL library
 <pre><code>
@@ -58,9 +58,12 @@ g++ -o main main.cpp helpers.h helpers.cpp AirPlane.cpp AirPlane.h define.h -lSD
 ./main
 </code></pre>
 * * *
-* using some code from SDL_gfx
+##Screen shot of our game
 
-reference of scale surface function
+* * *
+##Used some code from SDL_gfx
+
+Reference of scale surface function
 http://www.sdltutorials.com/sdl-scale-surface
 
 http://cse.csusb.edu/tongyu/courses/cs420/notes/sdl.php
