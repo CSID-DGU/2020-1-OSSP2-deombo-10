@@ -1,11 +1,11 @@
 # 2020-1-OSSP2-deombo-10
 # SPACE 2143
 
-##SPACE 2143
+## SPACE 2143
 
 Space Shooting game (Developed by team "deombo")
 
-##Description
+## Description
 
     An enhanced version of the MSG project  
     Original Open Source : https://github.com/CSID-DGU/2018-1-OSSP-MSG-7  
@@ -16,7 +16,7 @@ Space Shooting game (Developed by team "deombo")
 
 * * *
 
-##Roles of each member
+## Roles of each member
 
     Jaeho Jang : writing report, adding audio, adding new damage role(when player character is out of screen), adding new enemies and items  
     Yeonji Lim : writing report, adding new boss and obstacles  
@@ -24,7 +24,7 @@ Space Shooting game (Developed by team "deombo")
     All members did : analyzing code and SDL library, fixing bugs, finding assets  
     
 * * *
-##How To Run
+## How To Run
 
 1. Install SDL library
 <pre><code>
@@ -36,7 +36,7 @@ sudo apt-get install libsdl-ttf2.0-dev
     
 sudo apt-get install libsdl-mixer1.2-dev
 </code></pre>
-You can try 'apt' instead of 'apt-get'
+You can try 'apt' instead of 'apt-get'  
 
 2. Install g++
 <pre><code>
@@ -58,10 +58,12 @@ g++ -o main main.cpp helpers.h helpers.cpp AirPlane.cpp AirPlane.h define.h -lSD
 ./main
 </code></pre>
 * * *
-##Screen shot of our game
-
+## Screen shot of our game
+![game](./screenshot/game.png)  
+![game1](./screenshot/game1.png)  
+![game2](./screenshot/game2.png)  
 * * *
-##Used some code from SDL_gfx
+## Used some code from SDL_gfx
 
 Reference of scale surface function
 http://www.sdltutorials.com/sdl-scale-surface
